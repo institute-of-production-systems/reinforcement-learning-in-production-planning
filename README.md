@@ -87,7 +87,7 @@ The idea is that separate simulation runs with specified control algorithms or m
 
 A special feature of our tool is the possibility to configure observation space, action space and reward function for RL or other control and planning approaches:
 
-![Graphical interface to configure RL observations, actions and rewards](software_design/Config.png)
+![Graphical interface to configure RL observations, actions and rewards](software_design/config.png)
 
 # License #
 
