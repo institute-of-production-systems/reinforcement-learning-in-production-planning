@@ -1,0 +1,10 @@
+json
+numpy
+matplotlib
+PyQt5
+gymnasium
+torch
+nevergrad
+ray
+seaborn
+tensorboard
