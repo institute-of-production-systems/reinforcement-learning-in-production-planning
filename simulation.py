@@ -133,9 +133,10 @@ class ProductionSystemSimulation(AbstractGame):
 
     def __init__(self, seed=None, production_system=None):
         self.env = load_environment('PrOPPlan-Production-System-v0', production_system, max_episode_steps=10000)
-        if seed is not None:
-            self.env.seed(seed)
-        #MuZeroConfig.observation_shape = 
+        print('simulation.py ProductionSystemSimulation env type', type(self.env))
+        #if seed is not None:
+        #    print('seed', seed)
+        #    self.env.seed(seed)
 
     def step(self, action):
         """

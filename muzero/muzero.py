@@ -9,6 +9,8 @@ import time
 
 import nevergrad
 import numpy
+import os
+os.environ["RAY_PICKLE_VERBOSE_DEBUG"] = "2"
 import ray
 import torch
 from torch.utils.tensorboard import SummaryWriter
@@ -41,17 +43,26 @@ class MuZero:
         >>> muzero.test(render=True)
     """
 
-    def __init__(self, game_name, config=None, split_resources_in=1):
+    def __init__(self, game_name, production_system=None, config=None, split_resources_in=1):
         # Load the game and the config from the module with the game name
         try:
             # Original:
             # game_module = importlib.import_module("games." + game_name)
+
             # PrOPPlan override:
             game_module = simulation
+
             # Original:
             # self.Game = game_module.Game
+
             # PrOPPlan override:
+            #self.Game = game_module.ProductionSystemSimulation(production_system=production_system)
+
+            # GPT-4.1 proposed solution
+            #self.Game = lambda seed=None: game_module.ProductionSystemSimulation(seed=seed, production_system=production_system)
             self.Game = game_module.ProductionSystemSimulation
+            self.production_system = production_system
+
             self.config = game_module.MuZeroConfig()
         except ModuleNotFoundError as err:
             print(
@@ -189,6 +200,7 @@ class MuZero:
             ).remote(
                 self.checkpoint,
                 self.Game,
+                self.production_system,
                 self.config,
                 self.config.seed + seed,
             )
@@ -226,6 +238,7 @@ class MuZero:
         ).remote(
             self.checkpoint,
             self.Game,
+            self.production_system,
             self.config,
             self.config.seed + self.config.num_workers,
         )

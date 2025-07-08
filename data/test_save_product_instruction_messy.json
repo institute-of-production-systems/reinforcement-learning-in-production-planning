@@ -1,0 +1,186 @@
+{
+    "worker_capabilities": [],
+    "workers": {},
+    "worker_pools": {},
+    "tools": {},
+    "tool_pools": {},
+    "machine_capabilities": [],
+    "machines": {},
+    "workstations": {},
+    "product_instructions": {
+        "product_palette": {
+            "Jilly": [
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Stanzen 1",
+                        "display_pos": [
+                            66,
+                            48
+                        ],
+                        "node_uid": 0,
+                        "components": {
+                            "Blech 123": 1
+                        },
+                        "capabilities": [
+                            "Stanzen"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 2.0,
+                        "processing_time_unit": "s",
+                        "output_name": "Gestanzter Blech 1"
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "Geh\u00e4use montieren",
+                        "display_pos": [
+                            235,
+                            90
+                        ],
+                        "node_uid": 2,
+                        "components": {
+                            "Gestanzter Blech 1": 1,
+                            "Gestanzter Blech 2": 1
+                        },
+                        "capabilities": [
+                            "Montieren"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 30.0,
+                        "processing_time_unit": "s",
+                        "output_name": "Geh\u00e4use"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Stanzen 2",
+                        "display_pos": [
+                            69,
+                            145
+                        ],
+                        "node_uid": 1,
+                        "components": {
+                            "Blech 456": 1
+                        },
+                        "capabilities": [
+                            "Stanzen"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 5.0,
+                        "processing_time_unit": "s",
+                        "output_name": "Gestanzter Blech 2"
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "Geh\u00e4use montieren",
+                        "display_pos": [
+                            235,
+                            90
+                        ],
+                        "node_uid": 2,
+                        "components": {
+                            "Gestanzter Blech 1": 1,
+                            "Gestanzter Blech 2": 1
+                        },
+                        "capabilities": [
+                            "Montieren"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 30.0,
+                        "processing_time_unit": "s",
+                        "output_name": "Geh\u00e4use"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "Geh\u00e4use montieren",
+                        "display_pos": [
+                            235,
+                            90
+                        ],
+                        "node_uid": 2,
+                        "components": {
+                            "Gestanzter Blech 1": 1,
+                            "Gestanzter Blech 2": 1
+                        },
+                        "capabilities": [
+                            "Montieren"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 30.0,
+                        "processing_time_unit": "s",
+                        "output_name": "Geh\u00e4use"
+                    },
+                    {
+                        "node_type": "Non-additive",
+                        "operation_name": "Pulvern",
+                        "display_pos": [
+                            394,
+                            94
+                        ],
+                        "node_uid": 3,
+                        "components": {
+                            "Geh\u00e4use": 1
+                        },
+                        "capabilities": [
+                            "Pulvern"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 10.0,
+                        "processing_time_unit": "s",
+                        "output_name": "Gepulvertes Geh\u00e4use"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Non-additive",
+                        "operation_name": "Pulvern",
+                        "display_pos": [
+                            394,
+                            94
+                        ],
+                        "node_uid": 3,
+                        "components": {
+                            "Geh\u00e4use": 1
+                        },
+                        "capabilities": [
+                            "Pulvern"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 10.0,
+                        "processing_time_unit": "s",
+                        "output_name": "Gepulvertes Geh\u00e4use"
+                    },
+                    {
+                        "node_type": "Non-additive",
+                        "operation_name": "Trocknen",
+                        "display_pos": [
+                            556,
+                            92
+                        ],
+                        "node_uid": 5,
+                        "components": {
+                            "Gepulvertes Geh\u00e4use": 1
+                        },
+                        "capabilities": [
+                            "Trocknen"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 24.0,
+                        "processing_time_unit": "h",
+                        "output_name": "Jilly"
+                    }
+                ]
+            ]
+        }
+    },
+    "supply_behaviours": {},
+    "inventories": {},
+    "conveyors": {},
+    "distance_matrix": {},
+    "order_list": {
+        "order_list": {}
+    }
+}

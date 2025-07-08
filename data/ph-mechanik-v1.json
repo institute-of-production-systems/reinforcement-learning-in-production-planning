@@ -1,0 +1,338 @@
+{
+    "worker_capabilities": [
+        "Drehen und Fr\u00e4sen - hoch qualifiziert",
+        "Drehen und Fr\u00e4sen - qualifiziert",
+        "Kommissionieren",
+        "Schleifen (Bedienung)",
+        "Beschichten (Bedienung)",
+        "Montage"
+    ],
+    "workers": {
+        "Dreher und Fr\u00e4ser 1": {
+            "worker_id": "Dreher und Fr\u00e4ser 1",
+            "provided_capabilities": [
+                "Drehen und Fr\u00e4sen - hoch qualifiziert"
+            ]
+        },
+        "Dreher und Fr\u00e4ser 2": {
+            "worker_id": "Dreher und Fr\u00e4ser 2",
+            "provided_capabilities": []
+        },
+        "Kommissionierer": {
+            "worker_id": "Kommissionierer",
+            "provided_capabilities": []
+        },
+        "Schleifer": {
+            "worker_id": "Schleifer",
+            "provided_capabilities": []
+        },
+        "Beschichter": {
+            "worker_id": "Beschichter",
+            "provided_capabilities": []
+        },
+        "Monteur": {
+            "worker_id": "Monteur",
+            "provided_capabilities": []
+        }
+    },
+    "worker_pools": {},
+    "tools": {},
+    "tool_pools": {},
+    "machine_capabilities": [
+        "Drehen mit Gegenspindel",
+        "Drehen mit Reitstock",
+        "5-Achs-Fr\u00e4sen (simultan)",
+        "5-Achs-Fr\u00e4sen (Stellachsen)",
+        "Normale Arbeiten",
+        "Komplexe Arbeiten",
+        "Einzelteile im Dreh- und Fr\u00e4sbereich",
+        "Serienteile mannlos mit Stangenlager",
+        "Serienteile",
+        "CAD/CAM Anbindung",
+        "Genaue Einzel- und Serienteile",
+        "Mittlere bis gro\u00dfe Bauteile",
+        "Zweiseitenbearbeitung"
+    ],
+    "machines": {
+        "CTX 800 beta": {
+            "machine_id": "CTX 800 beta",
+            "accepted_capabilities": [
+                "Drehen und Fr\u00e4sen - hoch qualifiziert"
+            ],
+            "provided_capabilities": [
+                "Drehen mit Gegenspindel",
+                "Normale Arbeiten",
+                "Komplexe Arbeiten",
+                "Einzelteile im Dreh- und Fr\u00e4sbereich",
+                "Serienteile mannlos mit Stangenlager",
+                "Zweiseitenbearbeitung"
+            ],
+            "compatible_tools": [],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {},
+            "hardware_setup_time_unit": "",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {},
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "CLX 450": {
+            "machine_id": "CLX 450",
+            "accepted_capabilities": [],
+            "provided_capabilities": [],
+            "compatible_tools": [],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {},
+            "hardware_setup_time_unit": "",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {},
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "DMU 75": {
+            "machine_id": "DMU 75",
+            "accepted_capabilities": [],
+            "provided_capabilities": [],
+            "compatible_tools": [],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {},
+            "hardware_setup_time_unit": "",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {},
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "DMU 70": {
+            "machine_id": "DMU 70",
+            "accepted_capabilities": [],
+            "provided_capabilities": [],
+            "compatible_tools": [],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {},
+            "hardware_setup_time_unit": "",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {},
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "DMF 260": {
+            "machine_id": "DMF 260",
+            "accepted_capabilities": [],
+            "provided_capabilities": [],
+            "compatible_tools": [],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {},
+            "hardware_setup_time_unit": "",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {},
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        }
+    },
+    "workstations": {},
+    "product_instructions": {
+        "product_palette": {
+            "Produkt 1": [
+                [
+                    {
+                        "node_type": "Non-additive",
+                        "operation_name": "Kommissionieren",
+                        "display_pos": [
+                            31,
+                            17
+                        ],
+                        "node_uid": 1,
+                        "components": {},
+                        "capabilities": [],
+                        "tools": {},
+                        "processing_time_value": 0.0,
+                        "processing_time_unit": "",
+                        "output_name": ""
+                    },
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Fr\u00e4sen",
+                        "display_pos": [
+                            151,
+                            71
+                        ],
+                        "node_uid": 2,
+                        "components": {
+                            "Rohling XYZ": 1
+                        },
+                        "capabilities": [
+                            "Drehen mit Gegenspindel",
+                            "Komplexe Arbeiten"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 0.0,
+                        "processing_time_unit": "s",
+                        "output_name": "Enter output ID"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Fr\u00e4sen",
+                        "display_pos": [
+                            151,
+                            71
+                        ],
+                        "node_uid": 2,
+                        "components": {
+                            "Rohling XYZ": 1
+                        },
+                        "capabilities": [
+                            "Drehen mit Gegenspindel",
+                            "Komplexe Arbeiten"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 0.0,
+                        "processing_time_unit": "s",
+                        "output_name": "Enter output ID"
+                    },
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Schleifen",
+                        "display_pos": [
+                            266,
+                            15
+                        ],
+                        "node_uid": 4,
+                        "components": {},
+                        "capabilities": [],
+                        "tools": {},
+                        "processing_time_value": 0.0,
+                        "processing_time_unit": "",
+                        "output_name": ""
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Schleifen",
+                        "display_pos": [
+                            266,
+                            15
+                        ],
+                        "node_uid": 4,
+                        "components": {},
+                        "capabilities": [],
+                        "tools": {},
+                        "processing_time_value": 0.0,
+                        "processing_time_unit": "",
+                        "output_name": ""
+                    },
+                    {
+                        "node_type": "Non-additive",
+                        "operation_name": "Beschichten",
+                        "display_pos": [
+                            383,
+                            71
+                        ],
+                        "node_uid": 6,
+                        "components": {},
+                        "capabilities": [],
+                        "tools": {},
+                        "processing_time_value": 0.0,
+                        "processing_time_unit": "",
+                        "output_name": ""
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Non-additive",
+                        "operation_name": "Beschichten",
+                        "display_pos": [
+                            383,
+                            71
+                        ],
+                        "node_uid": 6,
+                        "components": {},
+                        "capabilities": [],
+                        "tools": {},
+                        "processing_time_value": 0.0,
+                        "processing_time_unit": "",
+                        "output_name": ""
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "Montage",
+                        "display_pos": [
+                            507,
+                            14
+                        ],
+                        "node_uid": 8,
+                        "components": {},
+                        "capabilities": [],
+                        "tools": {},
+                        "processing_time_value": 0.0,
+                        "processing_time_unit": "",
+                        "output_name": ""
+                    }
+                ]
+            ]
+        }
+    },
+    "supply_behaviours": {},
+    "inventories": {},
+    "conveyors": {},
+    "distance_matrix": {},
+    "order_list": {
+        "order_list": {}
+    },
+    "start_timestamp": 1747387680,
+    "end_timestamp": 1747387680,
+    "walking_speed": 1.4,
+    "energy_costs": 20.0
+}

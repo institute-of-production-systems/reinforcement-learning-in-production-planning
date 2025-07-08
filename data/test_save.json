@@ -1,0 +1,89 @@
+{
+    "worker_capabilities": [],
+    "workers": {},
+    "worker_pools": {},
+    "tools": {},
+    "tool_pools": {},
+    "machine_capabilities": [],
+    "machines": {},
+    "workstations": {},
+    "product_instructions": {
+        "product_palette": {
+            "A": [
+                [
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "A1",
+                        "display_pos": [
+                            43,
+                            78
+                        ],
+                        "node_uid": 0,
+                        "components": {},
+                        "capabilities": [],
+                        "tools": {},
+                        "processing_time_value": 0.0,
+                        "processing_time_unit": "",
+                        "output_name": ""
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "A2",
+                        "display_pos": [
+                            226,
+                            81
+                        ],
+                        "node_uid": 1,
+                        "components": {},
+                        "capabilities": [],
+                        "tools": {},
+                        "processing_time_value": 0.0,
+                        "processing_time_unit": "",
+                        "output_name": ""
+                    }
+                ]
+            ],
+            "B": [
+                [
+                    {
+                        "node_type": "Non-additive",
+                        "operation_name": "B1",
+                        "display_pos": [
+                            81,
+                            110
+                        ],
+                        "node_uid": 2,
+                        "components": {},
+                        "capabilities": [],
+                        "tools": {},
+                        "processing_time_value": 0.0,
+                        "processing_time_unit": "",
+                        "output_name": ""
+                    },
+                    {
+                        "node_type": "Non-additive",
+                        "operation_name": "B2",
+                        "display_pos": [
+                            269,
+                            114
+                        ],
+                        "node_uid": 3,
+                        "components": {},
+                        "capabilities": [],
+                        "tools": {},
+                        "processing_time_value": 0.0,
+                        "processing_time_unit": "",
+                        "output_name": ""
+                    }
+                ]
+            ]
+        }
+    },
+    "supply_behaviours": {},
+    "inventories": {},
+    "conveyors": {},
+    "distance_matrix": {},
+    "order_list": {
+        "order_list": {}
+    }
+}

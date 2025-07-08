@@ -1,0 +1,1088 @@
+{
+    "worker_capabilities": [
+        "Werker - Transport (Hubwagen)",
+        "Werker - Transport (Gabelstapler)",
+        "Werker - Montage"
+    ],
+    "workers": {
+        "Logistikmitarbeiter 1": {
+            "worker_id": "Logistikmitarbeiter 1",
+            "provided_capabilities": []
+        },
+        "Logistikmitarbeiter 2": {
+            "worker_id": "Logistikmitarbeiter 2",
+            "provided_capabilities": []
+        },
+        "Monteurin 1": {
+            "worker_id": "Monteurin 1",
+            "provided_capabilities": []
+        },
+        "Monteurin 2": {
+            "worker_id": "Monteurin 2",
+            "provided_capabilities": []
+        },
+        "Maschinenoperator 1": {
+            "worker_id": "Maschinenoperator 1",
+            "provided_capabilities": []
+        },
+        "Maschinenoperator 2": {
+            "worker_id": "Maschinenoperator 2",
+            "provided_capabilities": []
+        }
+    },
+    "worker_pools": {
+        "Logistik-MA": [
+            "Logistikmitarbeiter 1",
+            "Logistikmitarbeiter 2"
+        ],
+        "Montage-MA": [
+            "Monteurin 1",
+            "Monteurin 2"
+        ],
+        "Maschinenoperatoren": [
+            "Maschinenoperator 1",
+            "Maschinenoperator 2"
+        ]
+    },
+    "tools": {
+        "Schneidform rund D100": {
+            "tool_id": "Schneidform rund D100",
+            "dynamic_properties": {
+                "Verbleibende Lebensdauer": {
+                    "Min": 0.0,
+                    "Max": 100.0,
+                    "Unit": "%",
+                    "Time/unit+": 0.0,
+                    "Energy/unit+": 0.0,
+                    "Cost/unit+": null,
+                    "Time/unit-": 0.0,
+                    "Energy/unit-": 0.0,
+                    "Cost/unit-": null
+                }
+            },
+            "static_properties": {
+                "Durchmesser": {
+                    "Value": 100.0,
+                    "Unit": "mm"
+                }
+            }
+        },
+        "Bohrer D10": {
+            "tool_id": "Bohrer D10",
+            "dynamic_properties": {},
+            "static_properties": {
+                "Durchmesser": {
+                    "Value": 10.0,
+                    "Unit": "mm"
+                }
+            }
+        },
+        "Gussform 20 Linsen D100": {
+            "tool_id": "Gussform 20 Linsen D100",
+            "dynamic_properties": {},
+            "static_properties": {}
+        },
+        "Schraubendreher klein": {
+            "tool_id": "Schraubendreher klein",
+            "dynamic_properties": {},
+            "static_properties": {}
+        }
+    },
+    "tool_pools": {},
+    "machine_capabilities": [
+        "Maschine - Transport (Hubwagen)",
+        "Maschine - Stanzen bis 2x2 m",
+        "Maschine - Bohren",
+        "Maschine - Transport (Gabelstapler)",
+        "Maschine - S\u00e4gen",
+        "Maschine - Schwei\u00dfen (Kreis)",
+        "Maschine - Spritzguss",
+        "Maschine - Trennen",
+        "Maschine - F\u00f6rderband"
+    ],
+    "machines": {
+        "Gabelstapler": {
+            "machine_id": "Gabelstapler",
+            "accepted_capabilities": [],
+            "provided_capabilities": [],
+            "compatible_tools": [],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {},
+            "hardware_setup_time_unit": "",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {},
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "Hubwagen 2": {
+            "machine_id": "Hubwagen 2",
+            "accepted_capabilities": [],
+            "provided_capabilities": [],
+            "compatible_tools": [],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {},
+            "hardware_setup_time_unit": "",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {},
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "Hubwagen 1": {
+            "machine_id": "Hubwagen 1",
+            "accepted_capabilities": [],
+            "provided_capabilities": [],
+            "compatible_tools": [],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {},
+            "hardware_setup_time_unit": "",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {},
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "Stanzmaschine": {
+            "machine_id": "Stanzmaschine",
+            "accepted_capabilities": [],
+            "provided_capabilities": [],
+            "compatible_tools": [],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {},
+            "hardware_setup_time_unit": "",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {},
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "Bohrmaschine": {
+            "machine_id": "Bohrmaschine",
+            "accepted_capabilities": [],
+            "provided_capabilities": [],
+            "compatible_tools": [],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {},
+            "hardware_setup_time_unit": "",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {},
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "S\u00e4gezentrum": {
+            "machine_id": "S\u00e4gezentrum",
+            "accepted_capabilities": [],
+            "provided_capabilities": [],
+            "compatible_tools": [],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {},
+            "hardware_setup_time_unit": "",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {},
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "Schwei\u00dfroboter": {
+            "machine_id": "Schwei\u00dfroboter",
+            "accepted_capabilities": [],
+            "provided_capabilities": [],
+            "compatible_tools": [],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {},
+            "hardware_setup_time_unit": "",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {},
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "Lackierautomat": {
+            "machine_id": "Lackierautomat",
+            "accepted_capabilities": [],
+            "provided_capabilities": [],
+            "compatible_tools": [],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {},
+            "hardware_setup_time_unit": "",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {},
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "Spritzgussmaschine": {
+            "machine_id": "Spritzgussmaschine",
+            "accepted_capabilities": [],
+            "provided_capabilities": [],
+            "compatible_tools": [],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {},
+            "hardware_setup_time_unit": "",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {},
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "Trennzentrum": {
+            "machine_id": "Trennzentrum",
+            "accepted_capabilities": [],
+            "provided_capabilities": [],
+            "compatible_tools": [],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {},
+            "hardware_setup_time_unit": "",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {},
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        }
+    },
+    "workstations": {
+        "Stanzen": {
+            "workstation_id": "Stanzen",
+            "machine": "",
+            "permanent_tools": [],
+            "seized_tools": [],
+            "tools_in_use": [],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {},
+            "physical_output_buffers": {},
+            "wip_components": [],
+            "allowed_worker_pools": [],
+            "seized_worker": "",
+            "permanent_worker_assignment": false
+        },
+        "Bohren": {
+            "workstation_id": "Bohren",
+            "machine": "",
+            "permanent_tools": [],
+            "seized_tools": [],
+            "tools_in_use": [],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {},
+            "physical_output_buffers": {},
+            "wip_components": [],
+            "allowed_worker_pools": [],
+            "seized_worker": "",
+            "permanent_worker_assignment": false
+        },
+        "Rohrprofile schneiden": {
+            "workstation_id": "Rohrprofile schneiden",
+            "machine": "",
+            "permanent_tools": [],
+            "seized_tools": [],
+            "tools_in_use": [],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {},
+            "physical_output_buffers": {},
+            "wip_components": [],
+            "allowed_worker_pools": [],
+            "seized_worker": "",
+            "permanent_worker_assignment": false
+        },
+        "Schwei\u00dfstation": {
+            "workstation_id": "Schwei\u00dfstation",
+            "machine": "",
+            "permanent_tools": [],
+            "seized_tools": [],
+            "tools_in_use": [],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {},
+            "physical_output_buffers": {},
+            "wip_components": [],
+            "allowed_worker_pools": [],
+            "seized_worker": "",
+            "permanent_worker_assignment": false
+        },
+        "Lackierraum": {
+            "workstation_id": "Lackierraum",
+            "machine": "",
+            "permanent_tools": [],
+            "seized_tools": [],
+            "tools_in_use": [],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {},
+            "physical_output_buffers": {},
+            "wip_components": [],
+            "allowed_worker_pools": [],
+            "seized_worker": "",
+            "permanent_worker_assignment": false
+        },
+        "Spritzguss": {
+            "workstation_id": "Spritzguss",
+            "machine": "",
+            "permanent_tools": [],
+            "seized_tools": [],
+            "tools_in_use": [],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {},
+            "physical_output_buffers": {},
+            "wip_components": [],
+            "allowed_worker_pools": [],
+            "seized_worker": "",
+            "permanent_worker_assignment": false
+        },
+        "Spritzguss trennen": {
+            "workstation_id": "Spritzguss trennen",
+            "machine": "",
+            "permanent_tools": [],
+            "seized_tools": [],
+            "tools_in_use": [],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {},
+            "physical_output_buffers": {},
+            "wip_components": [],
+            "allowed_worker_pools": [],
+            "seized_worker": "",
+            "permanent_worker_assignment": false
+        },
+        "Endmontage": {
+            "workstation_id": "Endmontage",
+            "machine": "",
+            "permanent_tools": [],
+            "seized_tools": [],
+            "tools_in_use": [],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {},
+            "physical_output_buffers": {},
+            "wip_components": [],
+            "allowed_worker_pools": [],
+            "seized_worker": "",
+            "permanent_worker_assignment": false
+        }
+    },
+    "product_instructions": {
+        "product_palette": {
+            "Product 1": [
+                [
+                    {
+                        "node_type": "Non-additive",
+                        "operation_name": "Transport 1",
+                        "display_pos": [
+                            20,
+                            35
+                        ],
+                        "node_uid": 0,
+                        "components": {
+                            "Blech 2000x1000": 1
+                        },
+                        "capabilities": [
+                            "Maschine - Transport (Hubwagen)",
+                            "Werker - Transport (Hubwagen)"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 0.0,
+                        "processing_time_unit": "s",
+                        "output_name": "Blech 2000x1000"
+                    },
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Stanzen 1",
+                        "display_pos": [
+                            166,
+                            36
+                        ],
+                        "node_uid": 1,
+                        "components": {
+                            "Blech 2000x1000": 1
+                        },
+                        "capabilities": [
+                            "Maschine - Stanzen bis 2x2 m",
+                            ""
+                        ],
+                        "tools": {
+                            "Schneidform rund D100": {
+                                "Durchmesser": {
+                                    "Min": 100.0,
+                                    "Max": 100.0,
+                                    "Unit": "mm",
+                                    "a": 0.0,
+                                    "b": 0.0,
+                                    "c": 0.0
+                                },
+                                "Verbleibende Lebensdauer": {
+                                    "Min": 10.0,
+                                    "Max": 100.0,
+                                    "Unit": "%",
+                                    "a": 0.0,
+                                    "b": 0.0,
+                                    "c": -0.5
+                                }
+                            }
+                        },
+                        "processing_time_value": 0.5,
+                        "processing_time_unit": "s",
+                        "output_name": "Blechkreis D100"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Stanzen 1",
+                        "display_pos": [
+                            166,
+                            36
+                        ],
+                        "node_uid": 1,
+                        "components": {
+                            "Blech 2000x1000": 1
+                        },
+                        "capabilities": [
+                            "Maschine - Stanzen bis 2x2 m",
+                            ""
+                        ],
+                        "tools": {
+                            "Schneidform rund D100": {
+                                "Durchmesser": {
+                                    "Min": 100.0,
+                                    "Max": 100.0,
+                                    "Unit": "mm",
+                                    "a": 0.0,
+                                    "b": 0.0,
+                                    "c": 0.0
+                                },
+                                "Verbleibende Lebensdauer": {
+                                    "Min": 10.0,
+                                    "Max": 100.0,
+                                    "Unit": "%",
+                                    "a": 0.0,
+                                    "b": 0.0,
+                                    "c": -0.5
+                                }
+                            }
+                        },
+                        "processing_time_value": 0.5,
+                        "processing_time_unit": "s",
+                        "output_name": "Blechkreis D100"
+                    },
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Bohren 1",
+                        "display_pos": [
+                            307,
+                            37
+                        ],
+                        "node_uid": 4,
+                        "components": {
+                            "Blechkreis D100": 1
+                        },
+                        "capabilities": [
+                            "Maschine - Bohren"
+                        ],
+                        "tools": {
+                            "Bohrer D10": {}
+                        },
+                        "processing_time_value": 1.0,
+                        "processing_time_unit": "s",
+                        "output_name": "Boden D100"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Non-additive",
+                        "operation_name": "Transport 2",
+                        "display_pos": [
+                            23,
+                            160
+                        ],
+                        "node_uid": 5,
+                        "components": {
+                            "Rohrprofil D100": 1000
+                        },
+                        "capabilities": [
+                            "Maschine - Transport (Gabelstapler)",
+                            "Werker - Transport (Gabelstapler)"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 0.0,
+                        "processing_time_unit": "s",
+                        "output_name": "Rohrprofil D100"
+                    },
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Schneiden 1",
+                        "display_pos": [
+                            175,
+                            161
+                        ],
+                        "node_uid": 6,
+                        "components": {
+                            "Rohrprofil D100": 1000
+                        },
+                        "capabilities": [
+                            "Maschine - S\u00e4gen"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 5.0,
+                        "processing_time_unit": "s",
+                        "output_name": "Mantelfl\u00e4che D100 H50"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Schneiden 1",
+                        "display_pos": [
+                            175,
+                            161
+                        ],
+                        "node_uid": 6,
+                        "components": {
+                            "Rohrprofil D100": 1000
+                        },
+                        "capabilities": [
+                            "Maschine - S\u00e4gen"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 5.0,
+                        "processing_time_unit": "s",
+                        "output_name": "Mantelfl\u00e4che D100 H50"
+                    },
+                    {
+                        "node_type": "Non-additive",
+                        "operation_name": "Transport 3",
+                        "display_pos": [
+                            330,
+                            162
+                        ],
+                        "node_uid": 7,
+                        "components": {
+                            "Mantelfl\u00e4che D100 H50": 1
+                        },
+                        "capabilities": [
+                            "Maschine - F\u00f6rderband"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 0.0,
+                        "processing_time_unit": "s",
+                        "output_name": "Mantelfl\u00e4che D100 H50"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Bohren 1",
+                        "display_pos": [
+                            307,
+                            37
+                        ],
+                        "node_uid": 4,
+                        "components": {
+                            "Blechkreis D100": 1
+                        },
+                        "capabilities": [
+                            "Maschine - Bohren"
+                        ],
+                        "tools": {
+                            "Bohrer D10": {}
+                        },
+                        "processing_time_value": 1.0,
+                        "processing_time_unit": "s",
+                        "output_name": "Boden D100"
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "Schwei\u00dfen 1",
+                        "display_pos": [
+                            478,
+                            98
+                        ],
+                        "node_uid": 8,
+                        "components": {
+                            "Boden D100": 1,
+                            "Mantelfl\u00e4che D100 H50": 1
+                        },
+                        "capabilities": [
+                            "Maschine - Schwei\u00dfen (Kreis)"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 0.7,
+                        "processing_time_unit": "min",
+                        "output_name": "Geh\u00e4use D100 H50"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Non-additive",
+                        "operation_name": "Transport 3",
+                        "display_pos": [
+                            330,
+                            162
+                        ],
+                        "node_uid": 7,
+                        "components": {
+                            "Mantelfl\u00e4che D100 H50": 1
+                        },
+                        "capabilities": [
+                            "Maschine - F\u00f6rderband"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 0.0,
+                        "processing_time_unit": "s",
+                        "output_name": "Mantelfl\u00e4che D100 H50"
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "Schwei\u00dfen 1",
+                        "display_pos": [
+                            478,
+                            98
+                        ],
+                        "node_uid": 8,
+                        "components": {
+                            "Boden D100": 1,
+                            "Mantelfl\u00e4che D100 H50": 1
+                        },
+                        "capabilities": [
+                            "Maschine - Schwei\u00dfen (Kreis)"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 0.7,
+                        "processing_time_unit": "min",
+                        "output_name": "Geh\u00e4use D100 H50"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "Schwei\u00dfen 1",
+                        "display_pos": [
+                            478,
+                            98
+                        ],
+                        "node_uid": 8,
+                        "components": {
+                            "Boden D100": 1,
+                            "Mantelfl\u00e4che D100 H50": 1
+                        },
+                        "capabilities": [
+                            "Maschine - Schwei\u00dfen (Kreis)"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 0.7,
+                        "processing_time_unit": "min",
+                        "output_name": "Geh\u00e4use D100 H50"
+                    },
+                    {
+                        "node_type": "Non-additive",
+                        "operation_name": "F\u00e4rben 1",
+                        "display_pos": [
+                            632,
+                            98
+                        ],
+                        "node_uid": 10,
+                        "components": {
+                            "Geh\u00e4use D100 H50": 1
+                        },
+                        "capabilities": [
+                            "Maschine - Lackieren"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 0.6,
+                        "processing_time_unit": "min",
+                        "output_name": "Geh\u00e4use D100 H50 lackiert"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Non-additive",
+                        "operation_name": "F\u00e4rben 1",
+                        "display_pos": [
+                            632,
+                            98
+                        ],
+                        "node_uid": 10,
+                        "components": {
+                            "Geh\u00e4use D100 H50": 1
+                        },
+                        "capabilities": [
+                            "Maschine - Lackieren"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 0.6,
+                        "processing_time_unit": "min",
+                        "output_name": "Geh\u00e4use D100 H50 lackiert"
+                    },
+                    {
+                        "node_type": "Non-additive",
+                        "operation_name": "Trocknen 1",
+                        "display_pos": [
+                            778,
+                            98
+                        ],
+                        "node_uid": 11,
+                        "components": {
+                            "Geh\u00e4use D100 H50 lackiert": 1
+                        },
+                        "capabilities": [],
+                        "tools": {},
+                        "processing_time_value": 10.0,
+                        "processing_time_unit": "min",
+                        "output_name": "Geh\u00e4use D100 H50 lackiert"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Non-additive",
+                        "operation_name": "Trocknen 1",
+                        "display_pos": [
+                            778,
+                            98
+                        ],
+                        "node_uid": 11,
+                        "components": {
+                            "Geh\u00e4use D100 H50 lackiert": 1
+                        },
+                        "capabilities": [],
+                        "tools": {},
+                        "processing_time_value": 10.0,
+                        "processing_time_unit": "min",
+                        "output_name": "Geh\u00e4use D100 H50 lackiert"
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "Zusammenbau 1",
+                        "display_pos": [
+                            910,
+                            195
+                        ],
+                        "node_uid": 13,
+                        "components": {
+                            "Geh\u00e4use D100 H50 lackiert": 1,
+                            "Leiterplatte": 1,
+                            "LED": 1,
+                            "Kabel": 1,
+                            "Linse D100": 1,
+                            "Schraube": 4
+                        },
+                        "capabilities": [
+                            "Werker - Montage"
+                        ],
+                        "tools": {
+                            "Schraubendreher klein": {}
+                        },
+                        "processing_time_value": 2.0,
+                        "processing_time_unit": "min",
+                        "output_name": "Leuchte Brutalist"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Non-additive",
+                        "operation_name": "Transport 4",
+                        "display_pos": [
+                            637,
+                            196
+                        ],
+                        "node_uid": 12,
+                        "components": {
+                            "Leiterplatte": 1
+                        },
+                        "capabilities": [
+                            "Maschine - Transport (Hubwagen)",
+                            "Werker - Transport (Hubwagen)"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 0.0,
+                        "processing_time_unit": "s",
+                        "output_name": "Leiterplatte"
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "Zusammenbau 1",
+                        "display_pos": [
+                            910,
+                            195
+                        ],
+                        "node_uid": 13,
+                        "components": {
+                            "Geh\u00e4use D100 H50 lackiert": 1,
+                            "Leiterplatte": 1,
+                            "LED": 1,
+                            "Kabel": 1,
+                            "Linse D100": 1,
+                            "Schraube": 4
+                        },
+                        "capabilities": [
+                            "Werker - Montage"
+                        ],
+                        "tools": {
+                            "Schraubendreher klein": {}
+                        },
+                        "processing_time_value": 2.0,
+                        "processing_time_unit": "min",
+                        "output_name": "Leuchte Brutalist"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Spritzguss 1",
+                        "display_pos": [
+                            474,
+                            302
+                        ],
+                        "node_uid": 14,
+                        "components": {
+                            "Kunststoffgranulat": 5
+                        },
+                        "capabilities": [
+                            "Maschine - Spritzguss"
+                        ],
+                        "tools": {
+                            "Gussform 20 Linsen D100": {}
+                        },
+                        "processing_time_value": 5.0,
+                        "processing_time_unit": "min",
+                        "output_name": "Linse D100 ungetrennt"
+                    },
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Trennen 1",
+                        "display_pos": [
+                            635,
+                            301
+                        ],
+                        "node_uid": 15,
+                        "components": {
+                            "Linse D100 ungetrennt": 1
+                        },
+                        "capabilities": [
+                            "Maschine - Trennen"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 1.5,
+                        "processing_time_unit": "s",
+                        "output_name": "Linse D100"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Trennen 1",
+                        "display_pos": [
+                            635,
+                            301
+                        ],
+                        "node_uid": 15,
+                        "components": {
+                            "Linse D100 ungetrennt": 1
+                        },
+                        "capabilities": [
+                            "Maschine - Trennen"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 1.5,
+                        "processing_time_unit": "s",
+                        "output_name": "Linse D100"
+                    },
+                    {
+                        "node_type": "Non-additive",
+                        "operation_name": "Transport 5",
+                        "display_pos": [
+                            785,
+                            301
+                        ],
+                        "node_uid": 16,
+                        "components": {
+                            "Linse D100": 1
+                        },
+                        "capabilities": [
+                            "Maschine - Transport (Hubwagen)",
+                            "Werker - Transport (Hubwagen)"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 0.0,
+                        "processing_time_unit": "s",
+                        "output_name": "Linse D100"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Non-additive",
+                        "operation_name": "Transport 5",
+                        "display_pos": [
+                            785,
+                            301
+                        ],
+                        "node_uid": 16,
+                        "components": {
+                            "Linse D100": 1
+                        },
+                        "capabilities": [
+                            "Maschine - Transport (Hubwagen)",
+                            "Werker - Transport (Hubwagen)"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 0.0,
+                        "processing_time_unit": "s",
+                        "output_name": "Linse D100"
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "Zusammenbau 1",
+                        "display_pos": [
+                            910,
+                            195
+                        ],
+                        "node_uid": 13,
+                        "components": {
+                            "Geh\u00e4use D100 H50 lackiert": 1,
+                            "Leiterplatte": 1,
+                            "LED": 1,
+                            "Kabel": 1,
+                            "Linse D100": 1,
+                            "Schraube": 4
+                        },
+                        "capabilities": [
+                            "Werker - Montage"
+                        ],
+                        "tools": {
+                            "Schraubendreher klein": {}
+                        },
+                        "processing_time_value": 2.0,
+                        "processing_time_unit": "min",
+                        "output_name": "Leuchte Brutalist"
+                    }
+                ]
+            ]
+        }
+    },
+    "supply_behaviours": {},
+    "inventories": {},
+    "conveyors": {},
+    "distance_matrix": {},
+    "order_list": {
+        "order_list": {
+            "Order 1": {
+                "order_id": "Order 1",
+                "products": {
+                    "Product 1": 1
+                },
+                "release_time": "22.02.2025 15:07",
+                "deadline": "22.02.2025 15:07"
+            }
+        }
+    },
+    "start_timestamp": 1743667047,
+    "end_timestamp": 1743667047
+}

@@ -2,6 +2,7 @@ import os
 from production_system import ProductionSystem
 import gymnasium as gym
 from gymnasium.utils import seeding
+import numpy as np
 
 class PrOPPlanEnv(gym.Env):
     '''
@@ -18,8 +19,12 @@ class PrOPPlanEnv(gym.Env):
         self.production_system : ProductionSystem = production_system
         self._prepare_production_system()
 
-        # TODO Define observation and action space dimensions here
+        # Define observation and action space dimensions here
+        observation_dimension = sum([entry[0] for entry in production_system.observation_config.values() if entry[1]])
+        action_dimension = production_system.action_matrix_n_rows * production_system.action_matrix_n_cols
 
+        self.observation_space = gym.spaces.Box(low=0.0, high=1.0, shape=(observation_dimension,), dtype=np.float32)
+        self.action_space = gym.spaces.Discrete(action_dimension)
 
         # Init logging
 
@@ -91,7 +96,7 @@ class PrOPPlanEnv(gym.Env):
         # TODO See openai/robot_env in SmartAssembly
         pass
 
-    def reset(self):
+    def reset(self, seed=None, options=None):
         """
         Reset the game for a new game.
 

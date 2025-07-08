@@ -1,6 +1,7 @@
 from copy import copy, deepcopy
 from order_list import OrderList, Order
 from product_instructions import ProductPalette
+from time_series_manager import TimeSeriesManager
 import math
 from enum import Enum, IntEnum
 from file_utils import object_to_dict
@@ -287,12 +288,30 @@ class Worker():
         self.destination = ''  # workstation / transport machine
         self.distance_to_destination = 0.0  # in meters
         self.status : WorkerStatus = WorkerStatus.IDLE
+        self.busy_time = 0.0
+        self.setup_time = 0.0
+        self.walking_time = 0.0
+        self.status_history = []  # List of tuples like (timestamp, status)
 
     def to_dict(self):
         return {
             "worker_id": self.worker_id,
             "provided_capabilities": object_to_dict(self.provided_capabilities)
         }
+    
+    def update_timers(self, delta_t):
+        if self.status and self.status == WorkerStatus.BUSY:
+            self.busy_time += delta_t
+        elif self.status and self.status == WorkerStatus.SETTING_UP:
+            self.setup_time += delta_t
+        elif self.status and self.status == WorkerStatus.WALKING:
+            self.walking_time += delta_t
+
+    def log_status_change(self, change_timestamp):
+        if self.status:
+            self.status_history.append((change_timestamp, self.status.name))
+        else:
+            self.status_history.append((change_timestamp, WorkerStatus.IDLE.name))
 
 
 class Tool():
@@ -345,6 +364,9 @@ class Buffer():
         self.sequence_type = sequence_type  # In what sequence can components be taken from this buffer?
         self.comp_specific_sizes = comp_specific_sizes  # How many of each component (type) can this buffer contain?
         self.identical_buffer = identical_buffer  # What input buffer is this one identical to: <workstation_id> : IN/OUT : <idx 1>
+        self.fill_level_history = []  # List of tuples (timestamp, fill_level)
+        # TODO: If InfluxDB is not an overkill for a single Gantt chart, then integrate it. But currently it seems to be an overkill.
+        #self.time_series_manager = TimeSeriesManager()  # For InfluxDB logging
 
         # Simulation trackers
         self.contents = {}  # component_name: quantity
@@ -465,56 +487,6 @@ class Buffer():
                         else:
                             return False
 
-
-                ### Old version ###
-                # Different components are not permitted at the same time in this buffer!
-                # (With the exception of components belonging to the same combination group.)
-                # if not self.material_matches_wildcard(component, allowed_component_pattern):
-                #     if allowed_combination_group != self.comp_specific_sizes[allowed_component_pattern]['Group']:
-                #         # Find all components currently in the buffer that belong to other combination groups
-                #         matching_contents = []
-                #         for comp, qty in self.contents.items():
-                #             if self.material_matches_wildcard(comp, allowed_component_pattern) and qty > 0:
-                #                 matching_contents.append(comp)
-                #         if len(matching_contents) > 0:
-                #             # There are already components from other combination groups in the buffer
-                #             return False
-                #     else:
-                #         # Components currently in the buffer and belonging to the same combination group, but not matching wildcard pattern
-                #         if allowed_combination_group == '':
-                #             matching_contents = []
-                #             for comp, qty in self.contents.items():
-                #                 if self.material_matches_wildcard(comp, allowed_component_pattern) and qty > 0:
-                #                     matching_contents.append(comp)
-                #             if len(matching_contents) > 0:
-                #                 return False
-                #         occupied_relative_capacity = 0.0
-                #         for comp, qty in self.contents.items():
-                #             for acp in self.comp_specific_sizes.keys():
-                #                 if self.material_matches_wildcard(comp, acp) and allowed_combination_group == self.comp_specific_sizes[acp]['Group']:
-                #                     occupied_relative_capacity += qty / self.comp_specific_sizes[acp]['Max. quantity']
-                #         available_relative_capacity = 1 - occupied_relative_capacity
-                #         checked_component_max_qty = 0
-                #         for acp in self.comp_specific_sizes.keys():
-                #             if self.material_matches_wildcard(component, acp):
-                #                 checked_component_max_qty = self.comp_specific_sizes[acp]['Max. quantity']
-                #                 break
-                #         if available_relative_capacity > quantity / checked_component_max_qty:
-                #             if self.contents[component] + quantity % self.comp_specific_sizes[allowed_component_pattern]['Quantity step'] != 0:
-                #                 return False
-                #             else:
-                #                 return True
-                #         else:
-                #             return False
-                # elif self.material_matches_wildcard(component, allowed_component_pattern):
-                #     # Hit a size specification with a matching wildcard
-                #     # Check whether the maximum buffer capacity has been reached and whether the quantization is respected
-                #     if allowed_combination_group == self.comp_specific_sizes[allowed_component_pattern]['Group']:
-                    
-                #     else:
-                        # Same component appears more than once in the buffer size specification table with different combination groups
-                        # The group contraint has priority
-
             if self.diff_comp_comb:
                 occupied_relative_capacity = 0.0
                 for comp, qty in self.contents.items():
@@ -542,6 +514,65 @@ class Buffer():
                 else:
                     return False
         return True                    
+
+    def get_fill_level(self):
+        '''
+        Returns current occupied relative capacity of the Buffer.
+        '''
+        occupied_relative_capacity = 0.0
+        for comp, qty in self.contents.items():
+            for acp in self.comp_specific_sizes.keys():
+                if self.material_matches_wildcard(comp, acp):
+                    occupied_relative_capacity += qty / self.comp_specific_sizes[acp]['Max. quantity']
+        return occupied_relative_capacity
+    
+    def log_fill_level_change(self, change_timestamp):
+        '''
+        Adds buffer fill level to fill_level_history with the simulation timestamp.
+        The responsibility of doing this at the right time in simulation lies on the main simulation loop
+        (run_until_decision_point).
+        '''
+        current_fill_level = self.get_fill_level()
+        # Low-level table update
+        self.fill_level_history.append((change_timestamp, current_fill_level))
+        # TODO: Integrate if necessary
+        # InfluxDB
+        # self.time_series_manager.log_buffer_state(
+        #     workstation_id + " : " + self.buffer_location.name + " : " + str(self.idx1),
+        #     current_fill_level,
+        #     change_timestamp
+        # )
+
+    def get_average_fill_level(self):
+        if not self.fill_level_history:
+            return 0.0
+            
+        weighted_sum = 0.0
+        total_duration = 0.0
+        
+        for i in range(len(self.fill_level_history) - 1):
+            duration = self.fill_level_history[i+1][0] - self.fill_level_history[i][0]
+            fill_level = self.fill_level_history[i][1]
+            weighted_sum += duration * fill_level
+            total_duration += duration
+            
+        return weighted_sum / total_duration if total_duration > 0 else 0.0
+
+    def get_fill_level_variability(self):
+        if len(self.fill_level_history) < 2:
+            return 0.0
+            
+        avg = self.get_average_fill_level()
+        weighted_variance = 0.0
+        total_duration = 0.0
+        
+        for i in range(len(self.fill_level_history) - 1):
+            duration = self.fill_level_history[i+1][0] - self.fill_level_history[i][0]
+            fill_level = self.fill_level_history[i][1]
+            weighted_variance += duration * (fill_level - avg) ** 2
+            total_duration += duration
+            
+        return math.sqrt(weighted_variance / total_duration) if total_duration > 0 else 0.0
 
 
 class Inventory():
@@ -898,6 +929,8 @@ class Workstation():
         self.remaining_repair_time = 0
         self.busy_time = 0.0  # cumulative time in status BUSY
         self.setup_time = 0.0  # cumulative time in status SETUP
+        self.status_history = []  # List of tuples like (timestamp, new status list)
+        self.utilization_history = []  # List of tuples like (timestamp, utilization float 0-1)
 
         # Simulation helper variables - populated when make_simulatable() of the production system is called
         # Helper lists of workstations' possible provided capabilities, tools and materials
@@ -910,6 +943,25 @@ class Workstation():
             self.busy_time += delta_t
         elif self.status and self.status[-1] == WorkstationStatus.SETUP:
             self.setup_time += delta_t
+
+    def log_status_change(self, change_timestamp, op_quadruple=None):
+        if self.status:
+            if self.status[-1] == WorkstationStatus.BUSY and op_quadruple is not None:
+                display_op_name = op_quadruple[0]+' | '+op_quadruple[1]+' | '+op_quadruple[2]+' | '+str(op_quadruple[3])
+                self.status_history.append((change_timestamp, [display_op_name]))
+            else:
+                self.status_history.append((change_timestamp, [s.name for s in self.status]))
+        else:
+            self.status_history.append((change_timestamp, [WorkstationStatus.IDLE.name]))
+
+    def log_utilization_change(self, change_timestamp, elapsed):
+        if elapsed <= 0:
+            elapsed = 1
+        # Compute ratios
+        prod_ratio = self.busy_time / elapsed if hasattr(self, "busy_time") else 0.0
+        setup_ratio = self.setup_time / elapsed if hasattr(self, "setup_time") else 0.0
+        # Add values to time series
+        self.utilization_history.append((change_timestamp, prod_ratio))
 
     def move_objects_to_physical_output_buffer(self, objects_to_move : list, production_system):
         '''
@@ -957,13 +1009,14 @@ class Workstation():
                             buffer.contents[component] += quantity
                         else:
                             buffer.contents.update({component: quantity})
+                        buffer.log_fill_level_change(production_system.timestamp)
                         return True, buffer.idx1, objects_to_move
                     elif buffer is None:
                         return False, None, [{'Component': component, 'Quantity': 0}]
                     
         return success, output_idx1, moved_objects
     
-    def take_objects_into_physical_input_buffers(self, objects : list):
+    def take_objects_into_physical_input_buffers(self, objects : list, timestamp=0):
         '''
         Places the objects into compatible physical input buffers of the workstation with enough capacity.
         Returns True if successful, False otherwise.
@@ -977,6 +1030,8 @@ class Workstation():
                         buffer.contents[move_tuple[0]] += move_tuple[1]
                     else:
                         buffer.contents.update({move_tuple[0]: move_tuple[1]})
+                    if timestamp > 0:
+                        buffer.log_fill_level_change(timestamp)
                     success_count += 1
                     break
         if success_count == len(objects):
@@ -1021,7 +1076,7 @@ class Workstation():
         return None
     
 
-    def remove_objects_from_output_buffers(self, objects : list):
+    def remove_objects_from_output_buffers(self, objects : list, timestamp=0):
         '''
         Removes specified objects from physical output buffers of the workstation.
         Returns True if successful, False otherwise.
@@ -1039,6 +1094,8 @@ class Workstation():
                     else:
                         already_removed_qty += buffer.contents[component]
                         buffer.contents[component] = 0
+                    if timestamp > 0:
+                        buffer.log_fill_level_change(timestamp)
             if already_removed_qty != quantity_to_remove:
                 success = False
         
@@ -1511,6 +1568,7 @@ class ProductionSystem():
         self.action_config = {}  # key: decision type (str), value: tuple(direct action? (boolean), indirect heuristic name (str))
         self.reward_config = {}  # key: KPI name (str), value: tuple('Ignore'/'Reward'/'Punish' (str), 1-point scale value (float), unit (str))
 
+        self.is_prepared = False  # To track whether make_simulatable() has been calledon this production system object
 
     def get_int_seconds(self, time_value, time_unit):
         '''Converts any duration represented as combination of time value and unit into integer seconds, ceiling rounding.'''
@@ -1667,11 +1725,8 @@ class ProductionSystem():
 
         return source_inventory, material_available
 
-        
-    def make_simulatable(self):
-        '''Prepares all transformations from input configuration into a simulatable object'''
-        # TODO If available, load a starting system state for realistic simulation usage
 
+    def sort_machines_transport_stationary(self):
         # Sort Machines into transport or stationary
         for mid, machine in self.machines.items():
             if machine.is_transport:
@@ -1679,8 +1734,24 @@ class ProductionSystem():
             else:
                 self.stationary_machines.update({mid: machine})
 
-        # Prepare product operations
-        self.product_operations = self.product_instructions.get_product_operations()
+
+    def remove_pyqt_signals_from_ops(self):
+        # To bypass serialization issues with Ray, erase all pyqtSignals of OperationNodes
+        for op_node_objs in self.product_operations.values():
+            for op_node in op_node_objs:
+                try:
+                    delattr(op_node.__class__, 'connect_to_signal')
+                    delattr(op_node.__class__, 'clicked_signal')
+                    delattr(op_node.__class__, 'disconnect_from_signal')
+                    delattr(op_node.__class__, 'moved_signal')
+                except AttributeError:
+                    # pyqtSignals must have been deleted from the class definition of OperationNode already
+                    break
+                break
+            break
+
+
+    def processing_time_to_seconds(self):
         # Convert every processing time into seconds once and for all
         for product_id, operation_list in self.product_operations.items():
             for operation_node in operation_list:
@@ -1689,9 +1760,8 @@ class ProductionSystem():
                     operation_node.processing_time_unit = 's'
                     operation_node.processing_time_value = processing_time_secs
 
-        # Prepare raw material names
-        self.raw_material_names = self.product_instructions.get_raw_material_names()
 
+    def set_identical_inventory_sizes(self):
         # Inventory size specifications in case of being identical with buffers
         for inventory_id, inventory in self.inventories.items():
             if inventory.identical_buffer:
@@ -1708,15 +1778,8 @@ class ProductionSystem():
                 inventory.sequence_type = buff_obj.sequence_type
                 inventory.comp_specific_sizes = buff_obj.comp_specific_sizes
 
-        # Prepare helper lists of workstations' possible provided capabilities, tools and materials
-        for workstation in self.workstations.values():
-            self.find_potential_capabilities(workstation)
-            self.find_potential_tools(workstation)
-            self.find_potential_materials(workstation)
 
-        # Prepare tool pools, worker pools and tool state tracker variables
-        self.worker_pool_tracker = deepcopy(self.worker_pools)
-        self.tool_pool_tracker = deepcopy(self.tool_pools)
+    def prepare_tool_state_tracker(self):
         self.tool_state_tracker = dict()
         for tool_id, tool in self.tools.items():
             prop_val_dict = {}
@@ -1726,6 +1789,8 @@ class ProductionSystem():
                 prop_val_dict.update({dyn_prop: (dyn_prop_val['Min'] + dyn_prop_val['Max']) / 2})
             self.tool_state_tracker.update({tool_id: prop_val_dict})
 
+
+    def prepare_order_tracker(self):
         # Fill order tracker variables with data
         for order_id, order in self.order_list.order_list.items():
             single_order_data = {}
@@ -1756,6 +1821,8 @@ class ProductionSystem():
                         single_operation_data.update({'location': None})
                         single_operation_data.update({'status': OperationStatus.IN_BACKLOG})
                         single_operation_data.update({'remaining_work': id_durations[operation.operation_name]})
+                        single_operation_data.update({'start_time': None})
+                        single_operation_data.update({'finish_time': None})
                         operation_progress.update({operation.operation_name: single_operation_data})
                     single_instance_data.update({'operation_progress': operation_progress})
                     single_instance_data.update({'production_end_time': None})
@@ -1767,6 +1834,8 @@ class ProductionSystem():
             single_order_data.update({'deadline': int(datetime.strptime(order.deadline, "%d.%m.%Y %H:%M").timestamp())})
             self.order_progress.update({order_id: single_order_data})
 
+
+    def calculate_action_matrix_dimensions(self):
         # Reserve rows for transport machines and 1 row for decision skipping
         for transport_machine in self.transport_machines.keys():
             self.action_matrix_row_dict.update({transport_machine: self.action_matrix_n_rows})
@@ -1791,9 +1860,8 @@ class ProductionSystem():
         self.action_matrix_reverse_row_dict = {v: k for k, v in self.action_matrix_row_dict.items()}
         self.action_matrix_reverse_col_dict = {v: k for k, v in self.action_matrix_col_dict.items()}
 
-        # Set the dimensions of action matrix
-        self.action_matrix = numpy.zeros((self.action_matrix_n_rows, self.action_matrix_n_cols), dtype="int32")
 
+    def prepare_observation_space_dimensions(self):
         # Calculate how many vector entries will each observed attribute contribute to the observation space size
         N_ord = len(self.order_list.order_list)
         N_P = len(self.product_instructions.product_palette)
@@ -1845,6 +1913,55 @@ class ProductionSystem():
         self.agg_observation_vector_sizes.update({'Transport machines: material flow time ratio': N_tm})  # from simulation start onwards: how much time status = EXECUTING_TRANSPORT
         # Next KPI tells how short is the product's critical path compared to the time spent from the first operation till product is made
         self.agg_observation_vector_sizes.update({'Products: critical path duration / flow time': N_P})  # from simulation start onwards: 1.0 if prod. time < CPD, afterwards CPD/PT
+
+
+    def make_simulatable(self):
+        '''
+        Prepares all transformations from input configuration into a simulatable object.
+        Use functions from within to recalculate specific parameters.
+        '''
+
+        # TODO If available, load a starting system state for realistic simulation usage
+
+        self.sort_machines_transport_stationary()
+
+        # Prepare product operations
+        self.product_operations = self.product_instructions.get_product_operations()
+
+        # Prepare product palette to be serializable (get rid of QLabel subclass OperationNodes)
+        self.product_instructions.clean_from_qt()
+
+        self.remove_pyqt_signals_from_ops()
+        
+        self.processing_time_to_seconds()
+
+        # Prepare raw material names
+        self.raw_material_names = self.product_instructions.get_raw_material_names()
+
+        self.set_identical_inventory_sizes()
+
+        # Prepare helper lists of workstations' possible provided capabilities, tools and materials
+        for workstation in self.workstations.values():
+            self.find_potential_capabilities(workstation)
+            self.find_potential_tools(workstation)
+            self.find_potential_materials(workstation)
+
+        # Prepare tool pools, worker pools and tool state tracker variables
+        self.worker_pool_tracker = deepcopy(self.worker_pools)
+        self.tool_pool_tracker = deepcopy(self.tool_pools)
+
+        self.prepare_tool_state_tracker()
+
+        self.prepare_order_tracker()
+
+        self.calculate_action_matrix_dimensions()
+
+        # Set the dimensions of action matrix
+        self.action_matrix = numpy.zeros((self.action_matrix_n_rows, self.action_matrix_n_cols), dtype="int32")
+
+        self.prepare_observation_space_dimensions()
+
+        self.is_prepared = True
 
 
     def eligible_workstations_for_operation(self, operation):
@@ -2366,6 +2483,7 @@ class ProductionSystem():
             if WorkstationStatus.WAITING_FOR_MATERIAL not in workstation.status:
                 workstation.status.append(WorkstationStatus.WAITING_FOR_MATERIAL)
                 print('    Added WAITING_FOR_MATERIAL to the workstation status list.')
+                workstation.log_status_change(self.timestamp)
             # Note: MaterialsRequests should be generated already when an operation has been routed to a workstation,
             # not when it's sequenced (that would be very inefficient)!
             # for k,v in missing_components.items():
@@ -2409,12 +2527,14 @@ class ProductionSystem():
                         if mq - already_moved_qty > phib.contents[mc]:
                             already_moved_qty += phib.contents[mc]
                             phib.contents.pop(mc)
+                            phib.log_fill_level_change(self.timestamp)
                             for d in workstation.wip_components:
                                 if d['Component'] == mc:
                                     d['Quantity'] += already_moved_qty
                                     break
                         else:
                             phib.contents[mc] -= mq - already_moved_qty
+                            phib.log_fill_level_change(self.timestamp)
                             already_moved_qty = mq
                             for d in workstation.wip_components:
                                 if d['Component'] == mc:
@@ -2456,6 +2576,7 @@ class ProductionSystem():
                 # Remove "waiting for material" status
                 workstation.status.remove(WorkstationStatus.WAITING_FOR_MATERIAL)
                 print(f'    Removed WAITING_FOR_MATERIAL from the status list of workstation {workstation.workstation_id}.')
+                workstation.log_status_change(self.timestamp)
 
         # Handle tool, worker, setup and output capacity requirements
 
@@ -2474,6 +2595,7 @@ class ProductionSystem():
                 self.event_queue.append(ToolsRequest(timestamp=self.timestamp, tools=missing_tools, target_workstation=workstation))
                 workstation.status.append(WorkstationStatus.WAITING_FOR_TOOLS)
                 print('    Added WAITING_FOR_TOOLS to workstation status list.')
+                workstation.log_status_change(self.timestamp)
 
         # Request worker capabilities
         #if all([operation_is_fully_manual, not worker_at_workstation]) or all([not operation_is_fully_manual, all_tools_in_use, not worker_at_workstation]):
@@ -2499,6 +2621,7 @@ class ProductionSystem():
                                                                               target=workstation))
                             workstation.status.append(WorkstationStatus.WAITING_FOR_WORKER)
                             print('    Added WAITING_FOR_WORKER to workstation status list.')
+                            workstation.log_status_change(self.timestamp)
                         else:
                             print('    This station does not have access to any worker pools - assuming automated setup capabilities.')
                 else:
@@ -2506,6 +2629,7 @@ class ProductionSystem():
                     self.event_queue.append(WorkerCapabilitiesRequest(timestamp=self.timestamp, capability_list=all_required_worker_capabilities, target=workstation))
                     workstation.status.append(WorkstationStatus.WAITING_FOR_WORKER)
                     print('    Added WAITING_FOR_WORKER to workstation status list.')
+                    workstation.log_status_change(self.timestamp)
 
         # Execute any necessary and possible setup operations
         if all([all_tools_at_workstation,
@@ -2517,6 +2641,7 @@ class ProductionSystem():
             if WorkstationStatus.WAITING_FOR_TOOLS in workstation.status:
                 workstation.status.remove(WorkstationStatus.WAITING_FOR_TOOLS)
                 print(f'    Removed WAITING_FOR_TOOLS from the status list of workstation {workstation.workstation_id}.')
+                workstation.log_status_change(self.timestamp)
 
             # Calculate total setup duration for putting the tools "in use" and also adjusting their dynamic properties if they have such.
             total_setup_duration = 0
@@ -2619,8 +2744,10 @@ class ProductionSystem():
                 if workstation.seized_worker != '':
                     print(f'    {workstation.seized_worker} is at the workstation to execute setup, setting their status to SETTING_UP.')
                     self.workers[workstation.seized_worker].status = WorkerStatus.SETTING_UP
+                    self.workers[workstation.seized_worker].log_status_change(self.timestamp)
                     workstation.status.append(WorkstationStatus.SETUP)
                     print('    Added SETUP to workstation status list.')
+                    workstation.log_status_change(self.timestamp)
                     self.event_queue.append(SetupFinishedEvent(timestamp=self.timestamp + total_setup_duration, workstation=workstation))
 
         # Generate pickup requests for blocking physical output buffers if needed
@@ -2629,11 +2756,13 @@ class ProductionSystem():
             if WorkstationStatus.BLOCKED not in workstation.status and batch_complete:
                 workstation.status.append(WorkstationStatus.BLOCKED)
                 print('    Added BLOCKED to workstation status list.')
+                workstation.log_status_change(self.timestamp)
         elif product_fits_into_output:
             print('    Operation products will fit into output buffers.')
             if WorkstationStatus.BLOCKED in workstation.status:
                 workstation.status.remove(WorkstationStatus.BLOCKED)
                 print('    Removed BLOCKED from workstation status list.')
+                workstation.log_status_change(self.timestamp)
             
         # Execute the operation if all requirements are fulfilled
         if all([WorkstationStatus.WAITING_FOR_MATERIAL not in workstation.status,
@@ -2647,11 +2776,18 @@ class ProductionSystem():
             print('    Emptied workstation status list.')
             workstation.status.append(WorkstationStatus.BUSY)
             print('    Added BUSY to workstation status list.')
+            workstation.log_status_change(self.timestamp, (operation_id, product_id, order_id, product_instance))
+            if len(all_required_worker_capabilities) > 0:
+                self.workers[workstation.seized_worker].status = WorkerStatus.BUSY
+                print('    Set worker status to BUSY.')
+                self.workers[workstation.seized_worker].log_status_change(self.timestamp)
             operation_progress[operation_id]['status'] = OperationStatus.PROCESSING
             print('    Set operation status to PROCESSING.')
+            operation_progress[operation_id]['start_time'] = self.timestamp
             self.event_queue.appendleft(OperationFinishedEvent(timestamp=self.timestamp + operation_progress[operation_id]['remaining_work'],
                                                             workstation=workstation,
                                                             operation_id=(operation_id, product_id, order_id, product_instance)))
+            operation_progress[operation_id]['finish_time'] = self.timestamp + operation_progress[operation_id]['remaining_work']
             # Transform required WIP components into an instance of the operation product
             for rc, rq in required_components.items():
                 already_removed_qty = 0
@@ -3483,16 +3619,20 @@ class ProductionSystem():
                     if event.timestamp <= earliest_timestamp:
                         earliest_timestamp = event.timestamp
 
-                # Simulation end time reached
                 if earliest_timestamp >= self.end_timestamp:
+                    # Simulation end time reached
                     self.timestamp = self.end_timestamp
                     break
                 else:
+                    # Simulation end time not reached yet
                     # Calculate time delta to call update_timers() of objects
                     delta_t = earliest_timestamp - self.timestamp
                     if delta_t > 0:
                         for ws in self.workstations.values():
                             ws.update_timers(delta_t)
+                            ws.log_utilization_change(earliest_timestamp, earliest_timestamp - self.start_timestamp)
+                        for wrkr in self.workers.values():
+                            wrkr.update_timers(delta_t)
 
                 # Pick the first event at the earliest timestamp
                 earliest_event = None
@@ -3586,6 +3726,7 @@ class ProductionSystem():
                             # TODO: This seems to be the right approach for finished batch operations
                             workstation.status.remove(WorkstationStatus.BUSY)
                             print('    Removed BUSY from the workstation status list.')
+                            workstation.log_status_change(self.timestamp)
                         
                         # Retrigger postponed workstation sequencing
                         for wsp_event in self.event_queue:
@@ -3786,10 +3927,12 @@ class ProductionSystem():
                     if WorkstationStatus.SETUP in workstation.status:
                         print('    Removed SETUP from workstation status list.')
                         workstation.status.remove(WorkstationStatus.SETUP)
+                        workstation.log_status_change(self.timestamp)
                     if workstation.seized_worker != '':
                         print(f'    Seized worker: {workstation.seized_worker}')
                         self.workers[workstation.seized_worker].status = WorkerStatus.IDLE
                         print('    Set worker status to IDLE.')
+                        self.workers[workstation.seized_worker].log_status_change(self.timestamp)
                         self.event_queue.append(WorkerReleaseEvent(timestamp=self.timestamp,
                                                        workstation=workstation,
                                                        worker=self.workers[workstation.seized_worker]))
@@ -3817,6 +3960,7 @@ class ProductionSystem():
                         worker.location = workstation.workstation_id
                         worker.destination = ''
                         self.workers[workstation.seized_worker].status = WorkerStatus.IDLE
+                        self.workers[workstation.seized_worker].log_status_change(self.timestamp)
                     if WorkstationStatus.WAITING_FOR_WORKER in workstation.status:
                         workstation.status.remove(WorkstationStatus.WAITING_FOR_WORKER)
                     handled = False
@@ -3895,7 +4039,7 @@ class ProductionSystem():
                     
                     if material_put_in_buffer:
                         print('    Finally moving a fitting quantity into physical input buffers...')
-                        workstation.take_objects_into_physical_input_buffers([{'Component': c, 'Quantity': q * req_num} for c, q in earliest_event.component_dict.items()])
+                        workstation.take_objects_into_physical_input_buffers([{'Component': c, 'Quantity': q * req_num} for c, q in earliest_event.component_dict.items()], self.timestamp)
                         handled = False
                         # Get operation(s) with status COMMITTED in the workstation's O-WIP
                         for operation in workstation.wip_operations:
@@ -4259,7 +4403,7 @@ class ProductionSystem():
                     earliest_event.transport_machine.status.append(TransportMachineStatus.READY)
                     # Remove the objects from the workstation's output buffers or the inventory
                     if isinstance(earliest_event.location, Workstation):
-                        earliest_event.location.remove_objects_from_output_buffers(earliest_event.objects)
+                        earliest_event.location.remove_objects_from_output_buffers(earliest_event.objects, self.timestamp)
                         # ...while creating a WorkstationPickupEvent - to signal that maybe blocking was resolved;
                         self.event_queue.append(WorkstationPickupEvent(timestamp=self.timestamp,
                                                                         workstation=earliest_event.location))
@@ -4565,6 +4709,7 @@ class ProductionSystem():
     def get_obs(self):
         '''Returns the observation of the production system at its current state.
         '''
+        raise NotImplementedError()
 
     def is_done(self):
         '''Returns a boolean whether the current timestamp of the production system has reached the end timestamp as specified in the GUI.
@@ -4577,6 +4722,7 @@ class ProductionSystem():
     def reset(self):
         '''Returns the production system object into its initial state.
         '''
+        raise NotImplementedError()
 
     def to_dict(self):
         return {

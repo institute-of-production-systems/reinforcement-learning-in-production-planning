@@ -1,0 +1,269 @@
+{
+    "worker_capabilities": [
+        "Kommissionieren"
+    ],
+    "workers": {
+        "Worker 1": {
+            "worker_id": "Worker 1",
+            "provided_capabilities": [
+                "Kommissionieren"
+            ]
+        }
+    },
+    "worker_pools": {},
+    "tools": {},
+    "tool_pools": {},
+    "machine_capabilities": [],
+    "machines": {},
+    "workstations": {
+        "Kommissionierung": {
+            "workstation_id": "Kommissionierung",
+            "machine": "",
+            "permanent_tools": [],
+            "seized_tools": [],
+            "tools_in_use": [],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {
+                "1": {
+                    "buffer_location": 1,
+                    "idx1": 1,
+                    "diff_comp_comb": false,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "*": {
+                            "Max. quantity": 3060,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "physical_output_buffers": {
+                "1": {
+                    "buffer_location": 2,
+                    "idx1": 1,
+                    "diff_comp_comb": false,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "Power PCB": {
+                            "Max. quantity": 37200,
+                            "Quantity step": 300,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "wip_components": [],
+            "allowed_worker_pools": [],
+            "seized_worker": "",
+            "permanent_worker_assignment": false
+        }
+    },
+    "product_instructions": {
+        "product_palette": {
+            "G115D": [
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "",
+                        "display_pos": [
+                            152,
+                            354
+                        ],
+                        "node_uid": 7,
+                        "components": {},
+                        "capabilities": [],
+                        "tools": {},
+                        "processing_time_value": 0.0,
+                        "processing_time_unit": "",
+                        "output_name": ""
+                    },
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "",
+                        "display_pos": [
+                            388,
+                            348
+                        ],
+                        "node_uid": 8,
+                        "components": {},
+                        "capabilities": [],
+                        "tools": {},
+                        "processing_time_value": 0.0,
+                        "processing_time_unit": "",
+                        "output_name": ""
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "",
+                        "display_pos": [
+                            388,
+                            348
+                        ],
+                        "node_uid": 8,
+                        "components": {},
+                        "capabilities": [],
+                        "tools": {},
+                        "processing_time_value": 0.0,
+                        "processing_time_unit": "",
+                        "output_name": ""
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "",
+                        "display_pos": [
+                            706,
+                            268
+                        ],
+                        "node_uid": 6,
+                        "components": {
+                            "power": 1,
+                            "cu": 1
+                        },
+                        "capabilities": [
+                            "Enter capability"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 0.0,
+                        "processing_time_unit": "s",
+                        "output_name": "Enter output ID"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Kommissionierung Wareneingang",
+                        "display_pos": [
+                            168,
+                            149
+                        ],
+                        "node_uid": 3,
+                        "components": {
+                            "Power PCB": 1
+                        },
+                        "capabilities": [
+                            "Kommissionieren"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 2.0,
+                        "processing_time_unit": "s",
+                        "output_name": "Power PCB"
+                    },
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "",
+                        "display_pos": [
+                            409,
+                            156
+                        ],
+                        "node_uid": 5,
+                        "components": {},
+                        "capabilities": [],
+                        "tools": {},
+                        "processing_time_value": 0.0,
+                        "processing_time_unit": "",
+                        "output_name": ""
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "",
+                        "display_pos": [
+                            409,
+                            156
+                        ],
+                        "node_uid": 5,
+                        "components": {},
+                        "capabilities": [],
+                        "tools": {},
+                        "processing_time_value": 0.0,
+                        "processing_time_unit": "",
+                        "output_name": ""
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "",
+                        "display_pos": [
+                            706,
+                            268
+                        ],
+                        "node_uid": 6,
+                        "components": {
+                            "power": 1,
+                            "cu": 1
+                        },
+                        "capabilities": [
+                            "Enter capability"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 0.0,
+                        "processing_time_unit": "s",
+                        "output_name": "Enter output ID"
+                    }
+                ]
+            ]
+        }
+    },
+    "supply_behaviours": {},
+    "inventories": {},
+    "conveyors": {},
+    "distance_matrix": {},
+    "order_list": {
+        "order_list": {
+            "Order 1": {
+                "order_id": "Order 1",
+                "products": {
+                    "Product 1": 300
+                },
+                "release_time": "04.04.2025 10:19",
+                "deadline": "05.04.2025 10:19"
+            },
+            "Order 2": {
+                "order_id": "Order 2",
+                "products": null,
+                "release_time": "04.04.2025 10:54",
+                "deadline": "04.04.2025 10:54"
+            },
+            "Order 3": {
+                "order_id": "Order 3",
+                "products": null,
+                "release_time": "04.04.2025 10:54",
+                "deadline": "04.04.2025 10:54"
+            },
+            "Order 4": {
+                "order_id": "Order 4",
+                "products": null,
+                "release_time": "04.04.2025 10:54",
+                "deadline": "04.04.2025 10:54"
+            },
+            "Order 5": {
+                "order_id": "Order 5",
+                "products": null,
+                "release_time": "04.04.2025 10:54",
+                "deadline": "04.04.2025 10:54"
+            },
+            "Order 6": {
+                "order_id": "Order 6",
+                "products": null,
+                "release_time": "04.04.2025 10:54",
+                "deadline": "04.04.2025 10:54"
+            },
+            "Order 7": {
+                "order_id": "Order 7",
+                "products": null,
+                "release_time": "04.04.2025 10:54",
+                "deadline": "04.04.2025 10:54"
+            }
+        }
+    },
+    "start_timestamp": 1743753032,
+    "end_timestamp": 1743753032
+}

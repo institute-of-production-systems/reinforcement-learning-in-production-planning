@@ -17,13 +17,20 @@ from PyQt5.QtWidgets import QPushButton, QLineEdit, QTableWidget, QTableWidgetIt
 from PyQt5.QtWidgets import QInputDialog, QMenu, QMessageBox, QListWidgetItem, QGridLayout, QDateTimeEdit
 from PyQt5.QtWidgets import QStyledItemDelegate, QHeaderView, QCheckBox, QFrame, QScrollArea, QSlider, QGroupBox, QSizePolicy
 from PyQt5.QtWidgets import QWizard, QWizardPage, QTabWidget, QApplication, QMainWindow, QFileDialog, QStyle, QToolBar, QAction
-from PyQt5.QtWidgets import QStackedWidget, QFormLayout, QTreeView
+from PyQt5.QtWidgets import QStackedWidget, QFormLayout, QTreeView, QStackedLayout
+from PyQt5.QtCore import QUrl
+from PyQt5.QtWebEngineWidgets import QWebEngineView
 from product_instructions import ProductPalette
 from order_list import OrderList, Order
 from production_system import *
 from simulation import ProductionSystemSimulation
+from plan_visualizer import SchedulePlotter, TimeSeriesPlotter
 from muzero.muzero import MuZero, CPUActor
 from file_utils import object_to_dict
+
+import ray
+import pickle
+import cloudpickle
 
 class OperationDialog(QDialog):
     def __init__(self, operation):
@@ -330,6 +337,7 @@ class OperationNode(QLabel):
     clicked_signal = QtCore.pyqtSignal(object)  # Signal emitted on node click
     disconnect_from_signal = QtCore.pyqtSignal(object)  # Signal to destroy a connection
     moved_signal = QtCore.pyqtSignal(object)  # Signal emitted on node move
+
     """Custom QLabel that supports drag-and-drop functionality with precise cursor positioning."""
     def __init__(self, text, node_type, operation_name='', display_pos=None, node_uid=None, components={}, capabilities=[], tools={},
                  processing_time_value=0.0, processing_time_unit='', output_name=''):
@@ -352,6 +360,50 @@ class OperationNode(QLabel):
         self.processing_time_value = processing_time_value  # how long the operation takes
         self.processing_time_unit = processing_time_unit
         self.output_name = output_name  # name of the part or subassembly that leaves the operation after processing
+
+    def __getstate__(self):
+        # Only include serializable attributes
+        #try:
+        #    self.__delattr__("show_node_menu")
+        #except AttributeError:
+        #    pass
+        state = {
+            'node_type': self.node_type,
+            'operation_name': self.operation_name,
+            'display_pos': (self.display_pos.x(), self.display_pos.y()) if self.display_pos else None,
+            'node_uid': self.node_uid,
+            'components': self.components,
+            'capabilities': self.capabilities,
+            'tools': self.tools,
+            'processing_time_value': self.processing_time_value,
+            'processing_time_unit': self.processing_time_unit,
+            'output_name': self.output_name,
+        }
+        return state
+
+    def __setstate__(self, state):
+        # Re-initialize the object with the saved state
+        super().__init__()
+        self.node_type = state['node_type']
+        self.operation_name = state['operation_name']
+        if state['display_pos']:
+            self.display_pos = QtCore.QPoint(*state['display_pos'])
+        else:
+            self.display_pos = None
+        self.node_uid = state['node_uid']
+        self.components = state['components']
+        self.capabilities = state['capabilities']
+        self.tools = state['tools']
+        self.processing_time_value = state['processing_time_value']
+        self.processing_time_unit = state['processing_time_unit']
+        self.output_name = state['output_name']
+        self.setStyle()
+        self.setFixedSize(100, 50)
+        self.setAlignment(QtCore.Qt.AlignCenter)
+        self.offset = QtCore.QPoint(0, 0)
+        self.dropped = False
+        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.show_node_menu)
 
     def to_dict(self):
         return {
@@ -4091,10 +4143,8 @@ class ManualPlanningDialog(QDialog):
         self.obs_group.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.main_layout.addWidget(self.obs_group, stretch=60)
 
-        # Create lower part layout with action group taking 25% width
+        # Create lower part layout
         self.lower_part_layout = QHBoxLayout()
-        #self.lower_part_layout.setStretch(0, 25)  # Actions group 
-        #self.lower_part_layout.setStretch(1, 75)  # Schedule group
         self.main_layout.addLayout(self.lower_part_layout, stretch=40)
 
         # Actions group
@@ -4103,34 +4153,73 @@ class ManualPlanningDialog(QDialog):
         self.actions_layout = QVBoxLayout()
         self.actions_group.setLayout(self.actions_layout)
 
-        # Schedule group
-        self.schedule_group = QGroupBox("Schedule")
-        self.schedule_group.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.schedule_layout = QVBoxLayout()
-        self.schedule_group.setLayout(self.schedule_layout)
+        # Results group
+        self.results_group = QGroupBox("Results")
+        self.results_group.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.results_layout = QVBoxLayout()
+        self.results_group.setLayout(self.results_layout)
+
+        # Buttons to switch between result diagrams
+        self.results_buttons_layout = QHBoxLayout()
+        self.schedule_btn = QPushButton("Schedule")
+        self.utilization_btn = QPushButton("Utilization")
+        self.buffers_btn = QPushButton("Buffers")
+        self.results_buttons_layout.addWidget(self.schedule_btn)
+        self.results_buttons_layout.addWidget(self.utilization_btn)
+        self.results_buttons_layout.addWidget(self.buffers_btn)
+        self.results_layout.addLayout(self.results_buttons_layout)
+
+        # Stack layout
+        self.results_figures_stack = QStackedLayout()
+
+
+        # Schedule (Gantt) figure (matplotlib)
+        #self.schedule_figure = plt.figure(figsize=(16, 8))
+        #self.schedule_canvas = FigureCanvas(self.schedule_figure)
+        #self.schedule_canvas.setMinimumHeight(400)
+        #self.schedule_canvas.setMinimumWidth(800)
+        ##self.results_layout.addWidget(self.schedule_canvas)
+        #self.results_figures_stack.addWidget(self.schedule_canvas)
+
+        self.schedule_view = QWebEngineView()
+        self.results_figures_stack.addWidget(self.schedule_view)
+
+        # Utilization figure (matplotlib)
+        #self.utilization_figure = plt.figure(figsize=(16, 8))
+        #self.utilization_canvas = FigureCanvas(self.utilization_figure)
+        #self.results_figures_stack.addWidget(self.utilization_canvas)
+
+        # Utilization figure (Plotly)
+        self.utilization_view = QWebEngineView()
+        self.results_figures_stack.addWidget(self.utilization_view)
+
+        # Buffers figure (placeholder)
+        #self.buffers_figure = plt.figure(figsize=(16, 8))
+        #self.buffers_canvas = FigureCanvas(self.buffers_figure)
+        #self.results_figures_stack.addWidget(self.buffers_canvas)
+
+        # Buffers figure (Plotly)
+        self.buffers_view = QWebEngineView()
+        self.results_figures_stack.addWidget(self.buffers_view)
+
+        self.results_layout.addLayout(self.results_figures_stack)
+
+        self.schedule_btn.clicked.connect(lambda: self.results_figures_stack.setCurrentIndex(0))
+        self.utilization_btn.clicked.connect(lambda: self.results_figures_stack.setCurrentIndex(1))
+        self.buffers_btn.clicked.connect(lambda: self.results_figures_stack.setCurrentIndex(2))
 
         # Add groups to lower layout
         self.lower_part_layout.addWidget(self.actions_group, stretch=25)
-        self.lower_part_layout.addWidget(self.schedule_group, stretch=75)
+        self.lower_part_layout.addWidget(self.results_group, stretch=75)
         
         # Observations group
-        #self.obs_group = QGroupBox("Observations")
-        #self.obs_group.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        #self.main_layout.addWidget(self.obs_group, stretch=60)
         obs_scroll = QScrollArea()
         obs_scroll.setWidgetResizable(True)
         obs_widget = QWidget()
         obs_layout = QVBoxLayout(obs_widget)
-
-        # Create lower part layout with action group taking 25% width
-        #self.lower_part_layout = QHBoxLayout()
-        #self.lower_part_layout.setStretch(0, 25)  # Actions group 
-        #self.lower_part_layout.setStretch(1, 75)  # Schedule group
-        #self.main_layout.addLayout(self.lower_part_layout, stretch=40)
         
         # Workstations section
         ws_section = QCollapsibleWidget("Workstations")
-        #ws_section.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
         self.ws_table = QTableWidget()
         self.ws_table.setColumnCount(9)
         self.ws_table.setHorizontalHeaderLabels([
@@ -4156,115 +4245,94 @@ class ManualPlanningDialog(QDialog):
         
         # Physical buffers section
         buf_section = QCollapsibleWidget("Physical buffers")
-        #buf_section.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
-        buf_table = QTableWidget()
-        buf_table.setColumnCount(4)
-        buf_table.setHorizontalHeaderLabels([
+        self.buf_table = QTableWidget()
+        self.buf_table.setColumnCount(4)
+        self.buf_table.setHorizontalHeaderLabels([
             "Buffer", "Fill level", "Avg. fill level", "Fill level variability"
         ])
         buf_count = sum(len(ws.physical_input_buffers) + len(ws.physical_output_buffers) 
                        for ws in production_system.workstations.values())
-        buf_table.setRowCount(buf_count)
+        self.buf_table.setRowCount(buf_count)
         row = 0
         for ws_id, ws in production_system.workstations.items():
             for buf_idx, buf in ws.physical_input_buffers.items():
-                buf_table.setItem(row, 0, QTableWidgetItem(f"{ws_id} : IN : {buf_idx}"))
+                self.buf_table.setItem(row, 0, QTableWidgetItem(f"{ws_id} : IN : {buf_idx}"))
                 row += 1
             for buf_idx, buf in ws.physical_output_buffers.items():
-                buf_table.setItem(row, 0, QTableWidgetItem(f"{ws_id} : OUT : {buf_idx}"))
+                self.buf_table.setItem(row, 0, QTableWidgetItem(f"{ws_id} : OUT : {buf_idx}"))
                 row += 1
         # Set column widths
-        buf_table.setColumnWidth(0, 300)  # Buffer
-        buf_table.setColumnWidth(1, 100)  # Fill level
-        buf_table.setColumnWidth(2, 100)  # Avg. fill level
-        buf_table.setColumnWidth(3, 120)  # Fill level variability
-        buf_section.addWidget(buf_table)
+        self.buf_table.setColumnWidth(0, 300)  # Buffer
+        self.buf_table.setColumnWidth(1, 100)  # Fill level
+        self.buf_table.setColumnWidth(2, 100)  # Avg. fill level
+        self.buf_table.setColumnWidth(3, 120)  # Fill level variability
+        buf_section.addWidget(self.buf_table)
         obs_layout.addWidget(buf_section)
         
         # Workers section
         workers_section = QCollapsibleWidget("Workers")
-        #workers_section.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
-        workers_table = QTableWidget()
-        workers_table.setColumnCount(7)
-        workers_table.setHorizontalHeaderLabels([
+        self.workers_table = QTableWidget()
+        self.workers_table.setColumnCount(7)
+        self.workers_table.setHorizontalHeaderLabels([
             "Worker", "Location", "Destination", "Status",
             "Prod. time ratio", "Setup time ratio", "Walking time ratio"
         ])
-        workers_table.setRowCount(len(production_system.workers))
+        self.workers_table.setRowCount(len(production_system.workers))
         for row, (worker_id, worker) in enumerate(production_system.workers.items()):
-            workers_table.setItem(row, 0, QTableWidgetItem(worker_id))
+            self.workers_table.setItem(row, 0, QTableWidgetItem(worker_id))
         # Set column width
-        workers_table.setColumnWidth(0, 300)  # Worker
-        workers_table.setColumnWidth(1, 300)  # Location
-        workers_table.setColumnWidth(2, 300)  # Destination
-        workers_table.setColumnWidth(3, 300)  # Status
-        workers_table.setColumnWidth(4, 100)  # Prod. time ratio
-        workers_table.setColumnWidth(5, 100)  # Setup time ratio
-        workers_table.setColumnWidth(6, 120)  # Walking time ratio
-        workers_section.addWidget(workers_table)
+        self.workers_table.setColumnWidth(0, 300)  # Worker
+        self.workers_table.setColumnWidth(1, 300)  # Location
+        self.workers_table.setColumnWidth(2, 300)  # Destination
+        self.workers_table.setColumnWidth(3, 300)  # Status
+        self.workers_table.setColumnWidth(4, 100)  # Prod. time ratio
+        self.workers_table.setColumnWidth(5, 100)  # Setup time ratio
+        self.workers_table.setColumnWidth(6, 120)  # Walking time ratio
+        workers_section.addWidget(self.workers_table)
         obs_layout.addWidget(workers_section)
         
         # Tools section
         tools_section = QCollapsibleWidget("Tools")
-        #tools_section.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
-        tools_table = QTableWidget()
-        tools_table.setColumnCount(3)
-        tools_table.setHorizontalHeaderLabels([
-            "Tool", "Location", "Status"
+        self.tools_table = QTableWidget()
+        self.tools_table.setColumnCount(2)
+        self.tools_table.setHorizontalHeaderLabels([
+            "Tool", "Properties"
         ])
-        tools_table.setRowCount(len(production_system.tools))
+        self.tools_table.setRowCount(len(production_system.tools))
         for row, (tool_id, tool) in enumerate(production_system.tools.items()):
-            tools_table.setItem(row, 0, QTableWidgetItem(tool_id))
-        tools_table.setColumnWidth(0, 300)  # Tool
-        tools_table.setColumnWidth(1, 300)  # Location
-        tools_table.setColumnWidth(2, 300)  # Status
-        tools_section.addWidget(tools_table)
+            self.tools_table.setItem(row, 0, QTableWidgetItem(tool_id))
+        self.tools_table.setColumnWidth(0, 300)  # Tool
+        self.tools_table.setColumnWidth(1, 300)  # Properties
+        tools_section.addWidget(self.tools_table)
         obs_layout.addWidget(tools_section)
         
         # Operation timeliness section
         ops_section = QCollapsibleWidget("Operation timeliness")
-        #ops_section.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
-        ops_table = QTableWidget()
-        ops_table.setColumnCount(4)
-        ops_table.setHorizontalHeaderLabels([
-            "Operation", "Start time", "Order deadline in", "Order deadline"
+        self.ops_table = QTableWidget()
+        self.ops_table.setColumnCount(4)
+        self.ops_table.setHorizontalHeaderLabels([
+            "Operation", "Remaining work", "Order deadline in", "Order deadline"
         ])
         op_count = sum(len(order_data['product_progress']) 
                       for order_data in production_system.order_progress.values())
-        ops_table.setRowCount(op_count)
+        self.ops_table.setRowCount(op_count)
         row = 0
         for order_id, order_data in production_system.order_progress.items():
             for prod_progress in order_data['product_progress']:
                 for op_id, op_data in prod_progress['operation_progress'].items():
                     op_name = f"{op_id} | {prod_progress['product_id']} | {order_id} | {prod_progress['product_instance']}"
-                    ops_table.setItem(row, 0, QTableWidgetItem(op_name))
+                    self.ops_table.setItem(row, 0, QTableWidgetItem(op_name))
                     row += 1
-        ops_table.setColumnWidth(0, 300)  # Operation
-        ops_table.setColumnWidth(1, 200)  # Start time
-        ops_table.setColumnWidth(2, 100)  # Order deadline in
-        ops_table.setColumnWidth(3, 300)  # Order deadline
-        ops_section.addWidget(ops_table)
+        self.ops_table.setColumnWidth(0, 300)  # Operation
+        self.ops_table.setColumnWidth(1, 100)  # Remaining work
+        self.ops_table.setColumnWidth(2, 100)  # Order deadline in
+        self.ops_table.setColumnWidth(3, 300)  # Order deadline
+        ops_section.addWidget(self.ops_table)
         obs_layout.addWidget(ops_section)
         
         obs_scroll.setWidget(obs_widget)
         self.obs_group.setLayout(QVBoxLayout())
         self.obs_group.layout().addWidget(obs_scroll)
-        
-        #self.main_layout.addWidget(self.obs_group)
-
-        # Lower part of the ManualPlanningDialog:
-        # Action selection on the left (about 600 px wide), dynamic Gantt chart on the right
-        #self.lower_part_layout = QHBoxLayout()
-
-        # Actions group – initial creation; its content is built by update_actions()
-        #self.actions_group = QGroupBox("Actions")
-        #self.actions_group.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-        #self.actions_group.setMaximumWidth(int(self.width() * 0.25))
-        #self.actions_layout = QVBoxLayout()
-        #self.actions_group.setLayout(self.actions_layout)
-        # Add action group to the layout
-        #self.main_layout.addWidget(self.actions_group)
-        #self.lower_part_layout.addWidget(self.actions_group)
 
         # Legal action vector display and and required action type display
         self.legal_label = QLabel()
@@ -4279,15 +4347,10 @@ class ManualPlanningDialog(QDialog):
         self.actions_layout.addWidget(self.action_table)
 
         # Schedule group
-        self.schedule_group = QGroupBox("Schedule")
-        self.schedule_group.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.schedule_layout = QVBoxLayout()
-        self.schedule_group.setLayout(self.schedule_layout)
-
-        #self.lower_part_layout.addWidget(self.schedule_group)
-
-        # Pack layouts
-        #self.main_layout.addLayout(self.lower_part_layout)
+        self.results_group = QGroupBox("Schedule")
+        self.results_group.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.results_layout = QVBoxLayout()
+        self.results_group.setLayout(self.results_layout)
         
         self.setLayout(self.main_layout)
 
@@ -4331,6 +4394,13 @@ class ManualPlanningDialog(QDialog):
         # Update the header (e.g. step count, timestamp) and legal actions.
         self.update_dialog()
         self.update_workstations_table()
+        self.update_physical_buffer_table()
+        self.update_workers_table()
+        self.update_tools_table()
+        self.update_ops_table()
+        self.update_schedule()
+        self.update_utilization_plot()
+        self.update_buffer_plot()
 
     def update_dialog(self):
         """
@@ -4419,8 +4489,11 @@ class ManualPlanningDialog(QDialog):
                     rem_work += op_state['remaining_work']
 
             # Compute ratios
-            prod_ratio = ws.busy_time / elapsed if hasattr(ws, "busy_time") else 0
-            setup_ratio = ws.setup_time / elapsed if hasattr(ws, "setup_time") else 0
+            prod_ratio = ws.busy_time / elapsed if hasattr(ws, "busy_time") else 0.0
+            setup_ratio = ws.setup_time / elapsed if hasattr(ws, "setup_time") else 0.0
+
+            # Add values to time series
+            # ws.utilization_history.append((self.production_system.timestamp, prod_ratio))
 
             # Update table
             self.ws_table.setItem(row, 1, QTableWidgetItem(status))
@@ -4431,6 +4504,120 @@ class ManualPlanningDialog(QDialog):
             self.ws_table.setItem(row, 6, QTableWidgetItem(str(rem_work)))
             self.ws_table.setItem(row, 7, QTableWidgetItem(f"{prod_ratio:.2f}"))
             self.ws_table.setItem(row, 8, QTableWidgetItem(f"{setup_ratio:.2f}"))
+
+    def update_physical_buffer_table(self):
+        """
+        Updates the physical buffers table with current data.
+        - "Fill level": float value from 0.0 to 1.0 claculated based on buffer size specifications
+        - "Avg. fill level": average fill level from simulation start
+        - "Fill level variability": variability factor of fill level from simulation start
+        """
+        row = 0
+        for ws_id, ws in self.production_system.workstations.items():
+            for buf_idx, buf in list(ws.physical_input_buffers.items()) + list(ws.physical_output_buffers.items()):
+                # Fill level
+                self.buf_table.setItem(row, 1, QTableWidgetItem(f"{buf.get_fill_level():.2f}"))
+                # Avg. fill level
+                self.buf_table.setItem(row, 2, QTableWidgetItem(f"{buf.get_average_fill_level():.2f}"))
+                # Fill level variability
+                self.buf_table.setItem(row, 3, QTableWidgetItem(f"{buf.get_fill_level_variability():.2f}"))
+                row += 1
+
+    def update_workers_table(self):
+        '''
+        Updates the workers table with current data.
+        - "Location"
+        - "Destination"
+        - "Status"
+        - "Prod. time ratio"
+        - "Setup time ratio"
+        - "Walking time ratio"
+        '''
+        elapsed = self.production_system.timestamp - self.production_system.start_timestamp
+        if elapsed <= 0:
+            elapsed = 1
+
+        for row, (worker_id, worker) in enumerate(self.production_system.workers.items()):
+            location = worker.location
+            destination = worker.destination
+            status = worker.status.name if worker.status else ""
+            prod_ratio = worker.busy_time / elapsed if hasattr(worker, "busy_time") else 0
+            setup_ratio = worker.setup_time / elapsed if hasattr(worker, "setup_time") else 0
+            walk_ratio = worker.walking_time / elapsed if hasattr(worker, "walking_time") else 0
+
+            # Update table
+            self.workers_table.setItem(row, 1, QTableWidgetItem(location))
+            self.workers_table.setItem(row, 2, QTableWidgetItem(destination))
+            self.workers_table.setItem(row, 3, QTableWidgetItem(status))
+            self.workers_table.setItem(row, 4, QTableWidgetItem(f"{prod_ratio:.2f}"))
+            self.workers_table.setItem(row, 5, QTableWidgetItem(f"{setup_ratio:.2f}"))
+            self.workers_table.setItem(row, 6, QTableWidgetItem(f"{walk_ratio:.2f}"))
+
+    def update_tools_table(self):
+        for row, (tool_id, tool) in enumerate(self.production_system.tool_state_tracker.items()):
+            self.tools_table.setItem(row, 1, QTableWidgetItem(str(tool)))
+
+    def update_ops_table(self):
+        row = 0
+        for order_id, order_data in self.production_system.order_progress.items():
+            for prod_progress in order_data['product_progress']:
+                for op_id, op_data in prod_progress['operation_progress'].items():
+                    self.ops_table.setItem(row, 1, QTableWidgetItem(str(op_data['remaining_work'])))
+                    self.ops_table.setItem(row, 2, QTableWidgetItem(str(order_data['deadline'] - self.production_system.timestamp)))
+                    readable_deadline = datetime.fromtimestamp(order_data['deadline']).strftime(f'%d.%m.%Y %H:%M:%S')
+                    self.ops_table.setItem(row, 3, QTableWidgetItem(readable_deadline))
+                    row += 1
+
+    def update_schedule(self):
+        """
+        Updates the Gantt chart in the Schedule group using the current production_system state.
+        """
+
+        html = SchedulePlotter.make_gantt_chart(
+            production_system=self.production_system
+        )
+        self.schedule_view.setHtml(html)
+
+        '''
+        # Clear the existing figure
+        self.schedule_figure.clear()
+
+        # Draw the Gantt chart on the existing figure
+        SchedulePlotter.make_gantt_chart(self.production_system, fig=self.schedule_figure)
+
+        # Redraw the canvas
+        self.schedule_canvas.draw()
+        '''
+
+    def update_utilization_plot(self):
+        html = TimeSeriesPlotter.plot_time_series(
+            series_dict={ws.workstation_id: ws.utilization_history for ws in self.production_system.workstations.values()},
+            ylabel="Utilization",
+            title="Workstation Utilization"
+        )
+        self.utilization_view.setHtml(html)
+
+        '''
+        self.utilization_figure.clear()
+        TimeSeriesPlotter.plot_time_series(series_dict={ws.workstation_id: ws.utilization_history for ws in self.production_system.workstations.values()},
+                                           ylabel="",
+                                           title="Utilization",
+                                           fig=self.utilization_figure)
+        self.utilization_canvas.draw()
+        '''
+
+    def update_buffer_plot(self):
+        series_dict = {}
+        for ws in self.production_system.workstations.values():
+            for buf_idx, buf in {**ws.physical_input_buffers, **ws.physical_output_buffers}.items():
+                label = f"{ws.workstation_id} : {'IN' if buf.buffer_location==1 else 'OUT'} : {buf.idx1}"
+                series_dict[label] = buf.fill_level_history
+        html = TimeSeriesPlotter.plot_time_series(
+            series_dict=series_dict,
+            ylabel="Relative Fill Level",
+            title="Buffer Fill Levels"
+        )
+        self.buffers_view.setHtml(html)
 
     def get_action_explanation(self, production_system, action):
         '''
@@ -4704,7 +4891,7 @@ class AIOptimizationTab(QWidget):
             for i in range(root.rowCount()):
                 var_name = root.child(i, 0).text()
                 expose_item = root.child(i, 2)
-                if var_name in stored_obs and stored_obs[var_name]:
+                if var_name in stored_obs and stored_obs[var_name[1]]:
                     expose_item.setCheckState(Qt.Checked)
                 else:
                     expose_item.setCheckState(Qt.Unchecked)
@@ -4865,12 +5052,107 @@ class AIOptimizationTab(QWidget):
         except ValueError:
             print("Invalid input. Please enter a number.")
 
+    def get_unpicklable(self, instance, exception=None, string='', first_only=True):
+        """
+        Recursively go through all attributes of instance and return a list of whatever
+        can't be pickled.
+
+        Set first_only to only print the first problematic element in a list, tuple or
+        dict (otherwise there could be lots of duplication).
+        """
+        problems = []
+        if isinstance(instance, tuple) or isinstance(instance, list):
+            for k, v in enumerate(instance):
+                try:
+                    cloudpickle.dumps(v)
+                except BaseException as e:
+                    problems.extend(self.get_unpicklable(v, e, string + f'[{k}]'))
+                    if first_only:
+                        break
+        elif isinstance(instance, dict):
+            for k in instance:
+                try:
+                    cloudpickle.dumps(k)
+                except BaseException as e:
+                    problems.extend(self.get_unpicklable(
+                        k, e, string + f'[key type={type(k).__name__}]'
+                    ))
+                    if first_only:
+                        break
+            for v in instance.values():
+                try:
+                    cloudpickle.dumps(v)
+                except BaseException as e:
+                    problems.extend(self.get_unpicklable(
+                        v, e, string + f'[val type={type(v).__name__}]'
+                    ))
+                    if first_only:
+                        break
+        else:
+            for k, v in instance.__dict__.items():
+                try:
+                    cloudpickle.dumps(v)
+                except BaseException as e:
+                    problems.extend(self.get_unpicklable(v, e, string + '.' + k))
+
+        # if we get here, it means pickling instance caused an exception (string is not
+        # empty), yet no member was a problem (problems is empty), thus instance itself
+        # is the problem.
+        if string != '' and not problems:
+            problems.append(
+                string + f" (Type '{type(instance).__name__}' caused: {exception})"
+            )
+
+        return problems
+
     def run_optimization(self, row):
         '''Executes an optimization run according to the provided row of the configuration table'''
         run_id = self.runs_table.item(row, 0).text()
         print(f'\n++++++++ Executing optimization/planning run {run_id} ++++++++\n')
 
         production_system = main_window.production_resources_tab.production_system
+
+        # Important to call this because OperationNodes
+        # in ProductPalette of the ProductionSystem
+        # inherit from PyQT QLabels, which aren't
+        # serializable by Ray or cloudpickle
+        #production_system.make_simulatable()
+
+        # TODO: remove the debug section below if not needed in the future
+        # Debug Ray serialization issue
+
+        print(self.get_unpicklable(production_system))
+        #import pickle
+        #pickle.dumps(production_system)
+
+        #print(production_system.__dict__)
+        #print(production_system.__weakref__)
+        #print(production_system.__repr__())
+        #print(production_system.__str__())
+
+        print(production_system.__class__)
+
+        ray.util.inspect_serializability(production_system)
+
+        import dill
+        #dill.detect.trace(True)
+        #dill.detect.errors(production_system)
+        print(dill.detect.baditems(production_system))
+        print(dill.detect.badobjects(production_system))
+        print(dill.detect.nestedglobals(production_system.apply_transport_routing_heuristic))
+        print(dill.detect.children(production_system, MainWindow))
+        print(dill.detect.freevars(production_system))
+        print(dill.detect.errors(production_system))
+        print(dill.detect.getmodule(production_system))
+        print(dill.detect.parents(production_system, MainWindow))
+
+        #with dill.detect.trace("ray_debug.txt", mode="w") as log:
+        #    log(dill.detect.errors(production_system))
+
+        # The serialization with Ray essentially fails because of this:
+        #cloudpickle.dumps(production_system)
+
+        # End debug Ray serialization issue
         
         # Get optimization run configuration
         algorithm = self.optimization_runs[run_id]['algorithm']
@@ -4892,61 +5174,27 @@ class AIOptimizationTab(QWidget):
             dialog = ManualPlanningDialog(run_id, production_system, step_count)
             dialog.exec_()
 
-            # QCoreApplication and python input() have a conflict and can't run at the same time!
-            # Well, even better - we will directly implement a nice interface for the user
+        # Calculate observation shape (flattened)
+        observation_dimension = sum([entry[0] for entry in observation_space_config.values() if entry[1]])
 
-            # print('\n-------- Manual planning --------')
-            # step_count = 0
-            
-            # #production_system.make_simulatable() --> already done when opening ObservationSpaceConfigurationPage
-            # while not production_system.is_done():
-            #     print(f'\n>>>> Step {step_count} <<<<\n')
-            #     print(f'Timestamp: {QtCore.QDateTime.fromSecsSinceEpoch(production_system.timestamp).toString("dd.MM.yyyy hh:mm:ss")}')
-            #     legal_actions = production_system.get_legal_actions()
-            #     print(f'Legal action vector: {legal_actions}')
-            #     displayed_action_type = ActionType(production_system.required_action_type).name if production_system.required_action_type is not None else None
-            #     print(f'Required action type: {displayed_action_type}')
-            #     # If there are no decisions/actions required:
-            #     if len(legal_actions) == 1 and legal_actions[0] == -1:
-            #         print('No action required, running production system according to logic')
-            #         production_system.set_action(-1)
-            #         #continue
-            #     # If a decision point has been reached:
-            #     else:
-            #         # Display the integer code of the action and its decoded, human-readable version
-            #         print('Option\tAction code\tAction explanation')
-            #         option = 1
-            #         for action in legal_actions:
-            #             j = action % production_system.action_matrix_n_cols
-            #             i = int((action - j) / production_system.action_matrix_n_cols)
-            #             explanation = ''
-            #             if production_system.required_action_type == ActionType.WORKSTATION_SEQUENCING:
-            #                 # workstation --> operation triple or 'skip'
-            #                 explanation = production_system.action_matrix_reverse_col_dict[j] + ' --> ' + production_system.action_matrix_reverse_row_dict[i]
-            #             if production_system.required_action_type == ActionType.WORKSTATION_ROUTING:
-            #                 # operation triple --> workstation
-            #                 explanation = production_system.action_matrix_reverse_row_dict[i] + ' --> ' + production_system.action_matrix_reverse_col_dict[j]
-            #             if production_system.required_action_type == ActionType.TRANSPORT_ROUTING:
-            #                 # workstation --> transport machine
-            #                 explanation = production_system.action_matrix_reverse_col_dict[j] + ' --> ' + production_system.action_matrix_reverse_row_dict[i]
-            #             if production_system.required_action_type == ActionType.TRANSPORT_SEQUENCING:
-            #                 # transport machine --> workstation/inventory or 'skip'
-            #                 explanation = production_system.action_matrix_reverse_row_dict[i] + ' --> ' + production_system.action_matrix_reverse_col_dict[j]
-            #             print(f'[{option}]\t\t{action}\t\t{explanation}')
-            #             option += 1
-            #         choice = self.get_user_choice("Select an option", range(1, option))
-            #         production_system.set_action(legal_actions[choice - 1])
-            #     step_count += 1
+        # Calculate action shape (flattened)
+
+        # TODO: Selecting heuristics as actions will require a different action matrix form
+        # (additional columns and rows...).
+        # Also, if both sequencing and routing at workstations are done using fixed heuristics,
+        # big parts of the action matrix become unnecessary.
+
+        action_dimension = production_system.action_matrix_n_rows * production_system.action_matrix_n_cols
 
         if algorithm == 'RL-MuZero':
             # Prepare MuZeroConfig to override the default config
             # Info can be taken from production system object
             muzero_config = {
-                'observation_shape': (1, 1, 8),
-                'action_space': list(range(4))
+                'observation_shape': (1, 1, observation_dimension),
+                'action_space': list(range(action_dimension))
             }
             # Call muzero.py train() method, don't forget to hack the __init__ of MuZero class to look for the "game" in simulation.py
-            muzero = MuZero(game_name='PrOPPlan', config=muzero_config)
+            muzero = MuZero(game_name='PrOPPlan', production_system=production_system, config=muzero_config)
             muzero.train() 
 
         if algorithm == 'Only heuristics':
@@ -4999,8 +5247,9 @@ class OptimizationWizard(QWizard):
             for i in range(root.rowCount()):
                 # Column 0 is the variable name, column 2 is the checkable observable
                 var_name = root.child(i, 0).text()
+                size_item = int(root.child(i, 1).text())
                 is_checked = root.child(i, 2).checkState() == Qt.Checked
-                obs_dict[var_name] = is_checked
+                obs_dict[var_name] = (size_item, is_checked)
 
         # Get the action config page (third page)
         action_page = self.page(2)
@@ -5149,13 +5398,13 @@ class AlgorithmConfigPage(QWizardPage):
 class ObservationSpaceConfigPage(QWizardPage):
     def __init__(self, production_system, parent=None):
         super().__init__(parent)
-        self.production_system = production_system
+        self.production_system : ProductionSystem = production_system
         self.setTitle(" Observation Space Configuration")
         self.setSubTitle("Configure the observation space parameters")
 
         # Call make_simulatable of the production system object to prepare correct observation space configuration
-
-        production_system.make_simulatable()
+        if not self.production_system.is_prepared:
+            self.production_system.make_simulatable()
         
         # Main scroll area container
         scroll_area = QScrollArea()
@@ -5493,6 +5742,7 @@ class MainWindow(QMainWindow):
            current_product = current_product_item.text()
         try:
             self.product_instructions_tab.product_palette.product_palette[current_product] = self.product_instructions_tab.graph_panel.connections
+            self.product_instructions_tab.product_palette.clean_from_qt()
         except UnboundLocalError:
             print('No products have been selected or input yet.')
 

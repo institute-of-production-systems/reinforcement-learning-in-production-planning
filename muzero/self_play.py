@@ -7,6 +7,7 @@ import torch
 
 from . import models
 
+from PyQt5 import sip
 
 @ray.remote
 class SelfPlay:
@@ -14,9 +15,9 @@ class SelfPlay:
     Class which run in a dedicated thread to play games and save them to the replay-buffer.
     """
 
-    def __init__(self, initial_checkpoint, Game, config, seed):
+    def __init__(self, initial_checkpoint, Game, production_system, config, seed):
         self.config = config
-        self.game = Game(seed)
+        self.game = Game(seed, production_system=production_system)
 
         # Fix random generator seed
         numpy.random.seed(seed)

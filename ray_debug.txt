@@ -1,0 +1,2769 @@
++- T4: <class 'production_system.ProductionSystem'>
+`- # T4 [41 B]
++- D2: <dict object at 0x1e4a9a91c80>
+|+- T4: <class 'order_list.OrderList'>
+|`- # T4 [16 B]
+|+- D2: <dict object at 0x1e4a9a91e00>
+||+- D2: <dict object at 0x1e4a9aa9fc0>
+|||+- T4: <class 'order_list.Order'>
+|||`- # T4 [12 B]
+|||+- D2: <dict object at 0x1e4a9b17940>
+||||+- D2: <dict object at 0x1e4a9ad4b00>
+||||`- # D2 [37 B]
+|||`- # D2 [129 B]
+|||+- D2: <dict object at 0x1e4a9b178c0>
+||||+- D2: <dict object at 0x1e4a9ad4c80>
+||||`- # D2 [23 B]
+|||`- # D2 [75 B]
+|||+- D2: <dict object at 0x1e4a9b17840>
+||||+- D2: <dict object at 0x1e4a9ad4d80>
+||||`- # D2 [16 B]
+|||`- # D2 [68 B]
+|||+- D2: <dict object at 0x1e4a9b177c0>
+||||+- D2: <dict object at 0x1e4a9ad4e80>
+||||`- # D2 [20 B]
+|||`- # D2 [72 B]
+||`- # D2 [410 B]
+|`- # D2 [415 B]
+|+- D2: <dict object at 0x1e496b07080>
+||+- T4: <class 'production_system.Workstation'>
+||`- # T4 [18 B]
+||+- D2: <dict object at 0x1e4a9b17680>
+|||+- D2: <dict object at 0x1e4a9ad68c0>
+||||+- T4: <class 'production_system.Buffer'>
+||||`- # T4 [13 B]
+||||+- D2: <dict object at 0x1e4a9b176c0>
+|||||+- D2: <dict object at 0x1e4a9aafc00>
+||||||+- D2: <dict object at 0x1e4a9aafc40>
+||||||`- # D2 [51 B]
+|||||`- # D2 [64 B]
+|||||+- D2: <dict object at 0x1e4a9ad6980>
+|||||`- # D2 [2 B]
+||||`- # D2 [212 B]
+|||`- # D2 [236 B]
+|||+- D2: <dict object at 0x1e4a9ad6940>
+||||+- D2: <dict object at 0x1e4a9b16dc0>
+|||||+- D2: <dict object at 0x1e4a9aafe00>
+||||||+- D2: <dict object at 0x1e4a9aafe40>
+||||||`- # D2 [16 B]
+|||||`- # D2 [31 B]
+|||||+- D2: <dict object at 0x1e4a9ad6a40>
+|||||`- # D2 [2 B]
+||||`- # D2 [64 B]
+|||`- # D2 [75 B]
+|||+- D2: <dict object at 0x1e4b631e840>
+|||`- # D2 [7 B]
+||`- # D2 [1 MiB]
+||+- D2: <dict object at 0x1e4a9b14b00>
+|||+- D2: <dict object at 0x1e4a9ad6d80>
+||||+- D2: <dict object at 0x1e4a9b17e40>
+|||||+- D2: <dict object at 0x1e4a9abc480>
+||||||+- D2: <dict object at 0x1e4a9abc4c0>
+||||||`- # D2 [16 B]
+|||||`- # D2 [21 B]
+|||||+- D2: <dict object at 0x1e4a9ad6e40>
+|||||`- # D2 [2 B]
+||||`- # D2 [54 B]
+|||`- # D2 [65 B]
+|||+- D2: <dict object at 0x1e4a9ad6e00>
+||||+- D2: <dict object at 0x1e4a9b17dc0>
+|||||+- D2: <dict object at 0x1e4a9abc580>
+||||||+- D2: <dict object at 0x1e4a9abc5c0>
+||||||`- # D2 [16 B]
+|||||`- # D2 [21 B]
+|||||+- D2: <dict object at 0x1e4a9ad6f00>
+|||||`- # D2 [2 B]
+||||`- # D2 [54 B]
+|||`- # D2 [65 B]
+|||+- D2: <dict object at 0x1e4a9ac2140>
+|||`- # D2 [7 B]
+||`- # D2 [401 B]
+||+- D2: <dict object at 0x1e4a9b17d40>
+|||+- D2: <dict object at 0x1e4a9ad7240>
+||||+- D2: <dict object at 0x1e4a9b17c00>
+|||||+- D2: <dict object at 0x1e4a9abcb00>
+||||||+- D2: <dict object at 0x1e4a9abcb40>
+||||||`- # D2 [16 B]
+|||||`- # D2 [21 B]
+|||||+- D2: <dict object at 0x1e4a9ad7300>
+|||||`- # D2 [2 B]
+||||`- # D2 [54 B]
+|||`- # D2 [65 B]
+|||+- D2: <dict object at 0x1e4a9ad72c0>
+||||+- D2: <dict object at 0x1e4a9b17c80>
+|||||+- D2: <dict object at 0x1e4a9abcc00>
+||||||+- D2: <dict object at 0x1e4a9abcc40>
+||||||`- # D2 [16 B]
+|||||`- # D2 [21 B]
+|||||+- D2: <dict object at 0x1e4a9ad73c0>
+|||||`- # D2 [2 B]
+||||`- # D2 [54 B]
+|||`- # D2 [65 B]
+|||+- D2: <dict object at 0x1e4a9ad6d00>
+|||`- # D2 [7 B]
+||`- # D2 [401 B]
+||+- D2: <dict object at 0x1e4a9b17cc0>
+|||+- D2: <dict object at 0x1e4a9ad7700>
+||||+- D2: <dict object at 0x1e4a9b17ec0>
+|||||+- D2: <dict object at 0x1e4a9abd180>
+||||||+- D2: <dict object at 0x1e4a9abd1c0>
+||||||`- # D2 [16 B]
+|||||`- # D2 [21 B]
+|||||+- D2: <dict object at 0x1e4a9ad77c0>
+|||||`- # D2 [2 B]
+||||`- # D2 [54 B]
+|||`- # D2 [65 B]
+|||+- D2: <dict object at 0x1e4a9ad7780>
+||||+- D2: <dict object at 0x1e4a9b17f00>
+|||||+- D2: <dict object at 0x1e4a9abd280>
+||||||+- D2: <dict object at 0x1e4a9abd2c0>
+||||||`- # D2 [16 B]
+|||||`- # D2 [30 B]
+|||||+- D2: <dict object at 0x1e4a9ad7880>
+|||||`- # D2 [2 B]
+||||`- # D2 [63 B]
+|||`- # D2 [74 B]
+|||+- D2: <dict object at 0x1e4a9ad71c0>
+|||`- # D2 [7 B]
+||`- # D2 [416 B]
+||+- D2: <dict object at 0x1e4b6310200>
+|||+- D2: <dict object at 0x1e4a9ad7bc0>
+||||+- D2: <dict object at 0x1e4b6310180>
+|||||+- D2: <dict object at 0x1e4a9abd7c0>
+||||||+- D2: <dict object at 0x1e4a9abd800>
+||||||`- # D2 [16 B]
+|||||`- # D2 [21 B]
+|||||+- D2: <dict object at 0x1e4a9ad7c80>
+|||||`- # D2 [2 B]
+||||`- # D2 [54 B]
+|||`- # D2 [65 B]
+|||+- D2: <dict object at 0x1e4a9ad7c40>
+||||+- D2: <dict object at 0x1e4b6310100>
+|||||+- D2: <dict object at 0x1e4a9abd8c0>
+||||||+- D2: <dict object at 0x1e4a9abd900>
+||||||`- # D2 [16 B]
+|||||`- # D2 [21 B]
+|||||+- D2: <dict object at 0x1e4a9ad7d40>
+|||||`- # D2 [2 B]
+||||`- # D2 [54 B]
+|||`- # D2 [65 B]
+|||+- D2: <dict object at 0x1e4a9ad7680>
+|||`- # D2 [7 B]
+||`- # D2 [378 B]
+||+- D2: <dict object at 0x1e4b6310080>
+|||+- D2: <dict object at 0x1e4a9ae00c0>
+||||+- D2: <dict object at 0x1e4a9b17fc0>
+|||||+- D2: <dict object at 0x1e4a9abde40>
+||||||+- D2: <dict object at 0x1e4a9abde80>
+||||||`- # D2 [16 B]
+|||||`- # D2 [21 B]
+|||||+- D2: <dict object at 0x1e4a9ae0180>
+|||||`- # D2 [2 B]
+||||`- # D2 [54 B]
+|||`- # D2 [65 B]
+|||+- D2: <dict object at 0x1e4a9ae0140>
+||||+- D2: <dict object at 0x1e4a9b17f40>
+|||||+- D2: <dict object at 0x1e4a9abdf40>
+||||||+- D2: <dict object at 0x1e4a9abdf80>
+||||||`- # D2 [16 B]
+|||||`- # D2 [30 B]
+|||||+- D2: <dict object at 0x1e4a9ae0240>
+|||||`- # D2 [2 B]
+||||`- # D2 [63 B]
+|||`- # D2 [74 B]
+|||+- D2: <dict object at 0x1e4a9ad7b40>
+|||`- # D2 [7 B]
+||`- # D2 [443 B]
+||+- D2: <dict object at 0x1e4b6310280>
+|||+- D2: <dict object at 0x1e4a9ae0580>
+||||+- D2: <dict object at 0x1e4b63102c0>
+|||||+- D2: <dict object at 0x1e4a9abe480>
+||||||+- D2: <dict object at 0x1e4a9abe4c0>
+||||||`- # D2 [16 B]
+|||||`- # D2 [21 B]
+|||||+- D2: <dict object at 0x1e4a9ae0640>
+|||||`- # D2 [2 B]
+||||`- # D2 [54 B]
+|||`- # D2 [65 B]
+|||+- D2: <dict object at 0x1e4a9ae0600>
+||||+- D2: <dict object at 0x1e4b6310580>
+|||||+- D2: <dict object at 0x1e4a9abe580>
+||||||+- D2: <dict object at 0x1e4a9abe5c0>
+||||||`- # D2 [16 B]
+|||||`- # D2 [24 B]
+|||||+- D2: <dict object at 0x1e4a9ae0700>
+|||||`- # D2 [2 B]
+||||`- # D2 [57 B]
+|||`- # D2 [68 B]
+|||+- D2: <dict object at 0x1e4a9ae0040>
+|||`- # D2 [7 B]
+||`- # D2 [400 B]
+||+- D2: <dict object at 0x1e4b6310500>
+|||+- D2: <dict object at 0x1e4a9ae0a40>
+||||+- D2: <dict object at 0x1e4b6310480>
+|||||+- D2: <dict object at 0x1e4a9abeac0>
+||||||+- D2: <dict object at 0x1e4a9abeb00>
+||||||`- # D2 [16 B]
+|||||`- # D2 [21 B]
+|||||+- D2: <dict object at 0x1e4a9ae0b00>
+|||||`- # D2 [2 B]
+||||`- # D2 [54 B]
+|||`- # D2 [65 B]
+|||+- D2: <dict object at 0x1e4a9ae0ac0>
+||||+- D2: <dict object at 0x1e4b6310400>
+|||||+- D2: <dict object at 0x1e4a9abebc0>
+||||||+- D2: <dict object at 0x1e4a9abec00>
+||||||`- # D2 [16 B]
+|||||`- # D2 [24 B]
+|||||+- D2: <dict object at 0x1e4a9ae0bc0>
+|||||`- # D2 [2 B]
+||||`- # D2 [57 B]
+|||`- # D2 [68 B]
+|||+- D2: <dict object at 0x1e4a9ae0500>
+|||`- # D2 [7 B]
+||`- # D2 [400 B]
+||+- D2: <dict object at 0x1e4b6310380>
+|||+- D2: <dict object at 0x1e4a9ae0f00>
+||||+- D2: <dict object at 0x1e4b6310300>
+|||||+- D2: <dict object at 0x1e4a9abf140>
+||||||+- D2: <dict object at 0x1e4a9abf180>
+||||||`- # D2 [16 B]
+|||||`- # D2 [24 B]
+|||||+- D2: <dict object at 0x1e4a9ae0fc0>
+|||||`- # D2 [2 B]
+||||`- # D2 [57 B]
+|||`- # D2 [68 B]
+|||+- D2: <dict object at 0x1e4a9ae0f80>
+||||+- D2: <dict object at 0x1e4b6310600>
+|||||+- D2: <dict object at 0x1e4a9abf240>
+||||||+- D2: <dict object at 0x1e4a9abf280>
+||||||`- # D2 [16 B]
+|||||`- # D2 [30 B]
+|||||+- D2: <dict object at 0x1e4a9ae1080>
+|||||`- # D2 [2 B]
+||||`- # D2 [63 B]
+|||`- # D2 [74 B]
+|||+- D2: <dict object at 0x1e4a9ae09c0>
+|||`- # D2 [10 B]
+||`- # D2 [447 B]
+||+- D2: <dict object at 0x1e4b6310640>
+|||+- D2: <dict object at 0x1e4a9ae13c0>
+||||+- D2: <dict object at 0x1e4b6310900>
+|||||+- D2: <dict object at 0x1e4a9abf780>
+||||||+- D2: <dict object at 0x1e4a9abf7c0>
+||||||`- # D2 [16 B]
+|||||`- # D2 [24 B]
+|||||+- D2: <dict object at 0x1e4a9ae1480>
+|||||`- # D2 [2 B]
+||||`- # D2 [57 B]
+|||`- # D2 [68 B]
+|||+- D2: <dict object at 0x1e4a9ae1440>
+||||+- D2: <dict object at 0x1e4b6310880>
+|||||+- D2: <dict object at 0x1e4a9abf880>
+||||||+- D2: <dict object at 0x1e4a9abf8c0>
+||||||`- # D2 [16 B]
+|||||`- # D2 [24 B]
+|||||+- D2: <dict object at 0x1e4a9ae1540>
+|||||`- # D2 [2 B]
+||||`- # D2 [57 B]
+|||`- # D2 [68 B]
+|||+- D2: <dict object at 0x1e4a9ae0e80>
+|||`- # D2 [10 B]
+||`- # D2 [404 B]
+||+- D2: <dict object at 0x1e4b6310800>
+|||+- D2: <dict object at 0x1e4a9ae1880>
+||||+- D2: <dict object at 0x1e4b6310780>
+|||||+- D2: <dict object at 0x1e4a9abfe00>
+||||||+- D2: <dict object at 0x1e4a9abfe40>
+||||||`- # D2 [16 B]
+|||||`- # D2 [24 B]
+|||||+- D2: <dict object at 0x1e4a9ae1940>
+|||||`- # D2 [2 B]
+||||`- # D2 [57 B]
+|||`- # D2 [68 B]
+|||+- D2: <dict object at 0x1e4a9ae1900>
+||||+- D2: <dict object at 0x1e4b6310700>
+|||||+- D2: <dict object at 0x1e4a9abff00>
+||||||+- D2: <dict object at 0x1e4a9abff40>
+||||||`- # D2 [16 B]
+|||||`- # D2 [24 B]
+|||||+- D2: <dict object at 0x1e4a9ae1a00>
+|||||`- # D2 [2 B]
+||||`- # D2 [57 B]
+|||`- # D2 [68 B]
+|||+- D2: <dict object at 0x1e4a9ae1340>
+|||`- # D2 [10 B]
+||`- # D2 [441 B]
+||+- D2: <dict object at 0x1e4b6310680>
+|||+- D2: <dict object at 0x1e4a9ae1d40>
+||||+- D2: <dict object at 0x1e4b6310980>
+|||||+- D2: <dict object at 0x1e4a9ac0480>
+||||||+- D2: <dict object at 0x1e4a9ac04c0>
+||||||`- # D2 [16 B]
+|||||`- # D2 [24 B]
+|||||+- D2: <dict object at 0x1e4a9ae1e00>
+|||||`- # D2 [2 B]
+||||`- # D2 [57 B]
+|||`- # D2 [68 B]
+|||+- D2: <dict object at 0x1e4a9ae1dc0>
+||||+- D2: <dict object at 0x1e4b63109c0>
+|||||+- D2: <dict object at 0x1e4a9ac0580>
+||||||+- D2: <dict object at 0x1e4a9ac05c0>
+||||||`- # D2 [16 B]
+|||||`- # D2 [24 B]
+|||||+- D2: <dict object at 0x1e4a9ae1ec0>
+|||||`- # D2 [2 B]
+||||`- # D2 [57 B]
+|||`- # D2 [68 B]
+|||+- D2: <dict object at 0x1e4a9ae1800>
+|||`- # D2 [10 B]
+||`- # D2 [404 B]
+||+- D2: <dict object at 0x1e4b6310c80>
+|||+- D2: <dict object at 0x1e4a9ae2200>
+||||+- D2: <dict object at 0x1e4b6310c00>
+|||||+- D2: <dict object at 0x1e4a9ac0b00>
+||||||+- D2: <dict object at 0x1e4a9ac0b40>
+||||||`- # D2 [16 B]
+|||||`- # D2 [24 B]
+|||||+- D2: <dict object at 0x1e4a9ae22c0>
+|||||`- # D2 [2 B]
+||||`- # D2 [57 B]
+|||`- # D2 [68 B]
+|||+- D2: <dict object at 0x1e4a9ae2280>
+||||+- D2: <dict object at 0x1e4b6310b80>
+|||||+- D2: <dict object at 0x1e4a9ac0c00>
+||||||+- D2: <dict object at 0x1e4a9ac0c40>
+||||||`- # D2 [16 B]
+|||||`- # D2 [24 B]
+|||||+- D2: <dict object at 0x1e4a9ae2380>
+|||||`- # D2 [2 B]
+||||`- # D2 [57 B]
+|||`- # D2 [68 B]
+|||+- D2: <dict object at 0x1e4a9ae1cc0>
+|||`- # D2 [10 B]
+||`- # D2 [441 B]
+||+- D2: <dict object at 0x1e4b6310b00>
+|||+- D2: <dict object at 0x1e4a9ae26c0>
+||||+- D2: <dict object at 0x1e4b6310a80>
+|||||+- D2: <dict object at 0x1e4a9ac1180>
+||||||+- D2: <dict object at 0x1e4a9ac11c0>
+||||||`- # D2 [16 B]
+|||||`- # D2 [24 B]
+|||||+- D2: <dict object at 0x1e4a9ae2780>
+|||||`- # D2 [2 B]
+||||`- # D2 [57 B]
+|||`- # D2 [68 B]
+|||+- D2: <dict object at 0x1e4a9ae2740>
+||||+- D2: <dict object at 0x1e4b6310a00>
+|||||+- D2: <dict object at 0x1e4a9ac1280>
+||||||+- D2: <dict object at 0x1e4a9ac12c0>
+||||||`- # D2 [16 B]
+|||||`- # D2 [31 B]
+|||||+- D2: <dict object at 0x1e4a9ae2840>
+|||||`- # D2 [2 B]
+||||`- # D2 [64 B]
+|||`- # D2 [75 B]
+|||+- D2: <dict object at 0x1e4a9ae2180>
+|||`- # D2 [10 B]
+||`- # D2 [430 B]
+||+- D2: <dict object at 0x1e4b6310d00>
+|||+- D2: <dict object at 0x1e4a9ae2b80>
+||||+- D2: <dict object at 0x1e4b6310d40>
+|||||+- D2: <dict object at 0x1e4a9ac1800>
+||||||+- D2: <dict object at 0x1e4a9ac1840>
+||||||`- # D2 [16 B]
+|||||`- # D2 [23 B]
+|||||+- D2: <dict object at 0x1e4a9ae2c40>
+|||||`- # D2 [2 B]
+||||`- # D2 [56 B]
+|||`- # D2 [67 B]
+|||+- D2: <dict object at 0x1e4a9ae2c00>
+||||+- D2: <dict object at 0x1e4b6311000>
+|||||+- D2: <dict object at 0x1e4a9ac1900>
+||||||+- D2: <dict object at 0x1e4a9ac1940>
+||||||`- # D2 [16 B]
+|||||`- # D2 [24 B]
+|||||+- D2: <dict object at 0x1e4a9ae2d00>
+|||||`- # D2 [2 B]
+||||`- # D2 [57 B]
+|||`- # D2 [68 B]
+|||+- D2: <dict object at 0x1e4a9ae2640>
+|||`- # D2 [10 B]
+||`- # D2 [422 B]
+||+- D2: <dict object at 0x1e4b6310f80>
+|||+- D2: <dict object at 0x1e4a9ae3040>
+||||+- D2: <dict object at 0x1e4b6310f00>
+|||||+- D2: <dict object at 0x1e4a9ac1e40>
+||||||+- D2: <dict object at 0x1e4a9ac1e80>
+||||||`- # D2 [16 B]
+|||||`- # D2 [24 B]
+|||||+- D2: <dict object at 0x1e4a9ae3100>
+|||||`- # D2 [2 B]
+||||`- # D2 [57 B]
+|||`- # D2 [68 B]
+|||+- D2: <dict object at 0x1e4a9ae30c0>
+||||+- D2: <dict object at 0x1e4b6310e80>
+|||||+- D2: <dict object at 0x1e4a9ac1f40>
+||||||+- D2: <dict object at 0x1e4a9ac1f80>
+||||||`- # D2 [16 B]
+|||||`- # D2 [24 B]
+|||||+- D2: <dict object at 0x1e4a9ae31c0>
+|||||`- # D2 [2 B]
+||||`- # D2 [57 B]
+|||`- # D2 [68 B]
+|||+- D2: <dict object at 0x1e4a9ae2b00>
+|||`- # D2 [10 B]
+||`- # D2 [383 B]
+|`- # D2 [7 MiB]
+|+- D2: <dict object at 0x1e49aa1a1c0>
+|`- # D2 [370 B]
+|+- D2: <dict object at 0x1e49aa1b4c0>
+|`- # D2 [2 B]
+|+- D2: <dict object at 0x1e49aa52080>
+||+- T4: <class 'production_system.Worker'>
+||`- # T4 [13 B]
+||+- D2: <dict object at 0x1e4a9b17740>
+|||+- T4: <enum 'WorkerStatus'>
+|||`- # T4 [19 B]
+||`- # D2 [188 B]
+||+- D2: <dict object at 0x1e4b6310d80>
+||`- # D2 [96 B]
+||+- D2: <dict object at 0x1e4b6311080>
+||`- # D2 [96 B]
+||+- D2: <dict object at 0x1e4b63110c0>
+||`- # D2 [96 B]
+||+- D2: <dict object at 0x1e4b6311380>
+||`- # D2 [96 B]
+||+- D2: <dict object at 0x1e4b6311300>
+||`- # D2 [96 B]
+||+- D2: <dict object at 0x1e4b6311280>
+||`- # D2 [96 B]
+||+- D2: <dict object at 0x1e4b6311200>
+||`- # D2 [96 B]
+||+- D2: <dict object at 0x1e4b6311180>
+||`- # D2 [96 B]
+||+- D2: <dict object at 0x1e4b6311100>
+||`- # D2 [96 B]
+||+- D2: <dict object at 0x1e4a9b179c0>
+||`- # D2 [96 B]
+|`- # D2 [1 MiB]
+|+- D2: <dict object at 0x1e49aa52100>
+||+- T4: <class 'production_system.Machine'>
+||`- # T4 [14 B]
+||+- D2: <dict object at 0x1e4b6310e00>
+|||+- D2: <dict object at 0x1e4a9aaa6c0>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aaa440>
+||||+- D2: <dict object at 0x1e4a9aaa480>
+||||`- # D2 [94 B]
+||||+- D2: <dict object at 0x1e4a9aaa4c0>
+||||`- # D2 [46 B]
+||||+- D2: <dict object at 0x1e4a9aaa500>
+||||`- # D2 [46 B]
+||||+- D2: <dict object at 0x1e4a9aaa540>
+||||`- # D2 [46 B]
+||||+- D2: <dict object at 0x1e4a9aaa580>
+||||`- # D2 [2 B]
+|||`- # D2 [284 B]
+|||+- D2: <dict object at 0x1e4a9aaa600>
+|||`- # D2 [32 B]
+||`- # D2 [883 B]
+||+- D2: <dict object at 0x1e4b6311780>
+|||+- D2: <dict object at 0x1e4a9aaacc0>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aaab00>
+||||+- D2: <dict object at 0x1e4a9aaab40>
+||||`- # D2 [46 B]
+||||+- D2: <dict object at 0x1e4a9aaab80>
+||||`- # D2 [46 B]
+||||+- D2: <dict object at 0x1e4a9aaabc0>
+||||`- # D2 [46 B]
+||||+- D2: <dict object at 0x1e4a9aaac00>
+||||`- # D2 [46 B]
+||||+- D2: <dict object at 0x1e4a9aaac40>
+||||`- # D2 [2 B]
+|||`- # D2 [215 B]
+|||+- D2: <dict object at 0x1e4a9aaac80>
+|||`- # D2 [32 B]
+||`- # D2 [520 B]
+||+- D2: <dict object at 0x1e4b6311700>
+|||+- D2: <dict object at 0x1e4a9aab0c0>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aaaf00>
+||||+- D2: <dict object at 0x1e4a9aaaf40>
+||||`- # D2 [46 B]
+||||+- D2: <dict object at 0x1e4a9aaaf80>
+||||`- # D2 [46 B]
+||||+- D2: <dict object at 0x1e4a9aaafc0>
+||||`- # D2 [46 B]
+||||+- D2: <dict object at 0x1e4a9aab000>
+||||`- # D2 [46 B]
+||||+- D2: <dict object at 0x1e4a9aab040>
+||||`- # D2 [2 B]
+|||`- # D2 [215 B]
+|||+- D2: <dict object at 0x1e4a9aab080>
+|||`- # D2 [32 B]
+||`- # D2 [520 B]
+||+- D2: <dict object at 0x1e4b6311440>
+|||+- D2: <dict object at 0x1e4a9aab4c0>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aab300>
+||||+- D2: <dict object at 0x1e4a9aab340>
+||||`- # D2 [91 B]
+||||+- D2: <dict object at 0x1e4a9aab380>
+||||`- # D2 [46 B]
+||||+- D2: <dict object at 0x1e4a9aab3c0>
+||||`- # D2 [46 B]
+||||+- D2: <dict object at 0x1e4a9aab400>
+||||`- # D2 [46 B]
+||||+- D2: <dict object at 0x1e4a9aab440>
+||||`- # D2 [2 B]
+|||`- # D2 [275 B]
+|||+- D2: <dict object at 0x1e4a9aab480>
+|||`- # D2 [32 B]
+||`- # D2 [579 B]
+||+- D2: <dict object at 0x1e4b6311600>
+|||+- D2: <dict object at 0x1e4a9aab800>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aab680>
+||||+- D2: <dict object at 0x1e4a9aab6c0>
+||||`- # D2 [32 B]
+||||+- D2: <dict object at 0x1e4a9aab700>
+||||`- # D2 [32 B]
+||||+- D2: <dict object at 0x1e4a9aab740>
+||||`- # D2 [32 B]
+||||+- D2: <dict object at 0x1e4a9aab780>
+||||`- # D2 [2 B]
+|||`- # D2 [122 B]
+|||+- D2: <dict object at 0x1e4a9aab7c0>
+|||`- # D2 [25 B]
+||`- # D2 [399 B]
+||+- D2: <dict object at 0x1e4b6311640>
+|||+- D2: <dict object at 0x1e4a9aabc40>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aaba80>
+||||+- D2: <dict object at 0x1e4a9aabac0>
+||||`- # D2 [91 B]
+||||+- D2: <dict object at 0x1e4a9aabb00>
+||||`- # D2 [46 B]
+||||+- D2: <dict object at 0x1e4a9aabb40>
+||||`- # D2 [46 B]
+||||+- D2: <dict object at 0x1e4a9aabb80>
+||||`- # D2 [46 B]
+||||+- D2: <dict object at 0x1e4a9aabbc0>
+||||`- # D2 [2 B]
+|||`- # D2 [275 B]
+|||+- D2: <dict object at 0x1e4a9aabc00>
+|||`- # D2 [32 B]
+||`- # D2 [590 B]
+||+- D2: <dict object at 0x1e4b6311800>
+|||+- D2: <dict object at 0x1e4a9aabfc0>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aabe40>
+||||+- D2: <dict object at 0x1e4a9aabe80>
+||||`- # D2 [32 B]
+||||+- D2: <dict object at 0x1e4a9aabec0>
+||||`- # D2 [32 B]
+||||+- D2: <dict object at 0x1e4a9aabf00>
+||||`- # D2 [32 B]
+||||+- D2: <dict object at 0x1e4a9aabf40>
+||||`- # D2 [2 B]
+|||`- # D2 [122 B]
+|||+- D2: <dict object at 0x1e4a9aabf80>
+|||`- # D2 [25 B]
+||`- # D2 [405 B]
+||+- D2: <dict object at 0x1e4b6311840>
+|||+- D2: <dict object at 0x1e4a9aac380>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aac200>
+||||+- D2: <dict object at 0x1e4a9aac240>
+||||`- # D2 [32 B]
+||||+- D2: <dict object at 0x1e4a9aac280>
+||||`- # D2 [32 B]
+||||+- D2: <dict object at 0x1e4a9aac2c0>
+||||`- # D2 [32 B]
+||||+- D2: <dict object at 0x1e4a9aac300>
+||||`- # D2 [2 B]
+|||`- # D2 [122 B]
+|||+- D2: <dict object at 0x1e4a9aac340>
+|||`- # D2 [25 B]
+||`- # D2 [405 B]
+||+- D2: <dict object at 0x1e4b6311a80>
+|||+- D2: <dict object at 0x1e4a9aac7c0>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aac600>
+||||+- D2: <dict object at 0x1e4a9aac640>
+||||`- # D2 [91 B]
+||||+- D2: <dict object at 0x1e4a9aac680>
+||||`- # D2 [46 B]
+||||+- D2: <dict object at 0x1e4a9aac6c0>
+||||`- # D2 [46 B]
+||||+- D2: <dict object at 0x1e4a9aac700>
+||||`- # D2 [46 B]
+||||+- D2: <dict object at 0x1e4a9aac740>
+||||`- # D2 [2 B]
+|||`- # D2 [275 B]
+|||+- D2: <dict object at 0x1e4a9aac780>
+|||`- # D2 [32 B]
+||`- # D2 [590 B]
+||+- D2: <dict object at 0x1e4b6311a00>
+|||+- D2: <dict object at 0x1e4a9aacb40>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aac9c0>
+||||+- D2: <dict object at 0x1e4a9aaca00>
+||||`- # D2 [32 B]
+||||+- D2: <dict object at 0x1e4a9aaca40>
+||||`- # D2 [32 B]
+||||+- D2: <dict object at 0x1e4a9aaca80>
+||||`- # D2 [32 B]
+||||+- D2: <dict object at 0x1e4a9aacac0>
+||||`- # D2 [2 B]
+|||`- # D2 [122 B]
+|||+- D2: <dict object at 0x1e4a9aacb00>
+|||`- # D2 [25 B]
+||`- # D2 [405 B]
+||+- D2: <dict object at 0x1e4b6311980>
+|||+- D2: <dict object at 0x1e4a9aacf80>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aacdc0>
+||||+- D2: <dict object at 0x1e4a9aace00>
+||||`- # D2 [46 B]
+||||+- D2: <dict object at 0x1e4a9aace40>
+||||`- # D2 [46 B]
+||||+- D2: <dict object at 0x1e4a9aace80>
+||||`- # D2 [46 B]
+||||+- D2: <dict object at 0x1e4a9aacec0>
+||||`- # D2 [46 B]
+||||+- D2: <dict object at 0x1e4a9aacf00>
+||||`- # D2 [2 B]
+|||`- # D2 [215 B]
+|||+- D2: <dict object at 0x1e4a9aacf40>
+|||`- # D2 [32 B]
+||`- # D2 [530 B]
+||+- D2: <dict object at 0x1e4b6311900>
+|||+- D2: <dict object at 0x1e4a9aad300>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aad180>
+||||+- D2: <dict object at 0x1e4a9aad1c0>
+||||`- # D2 [32 B]
+||||+- D2: <dict object at 0x1e4a9aad200>
+||||`- # D2 [32 B]
+||||+- D2: <dict object at 0x1e4a9aad240>
+||||`- # D2 [32 B]
+||||+- D2: <dict object at 0x1e4a9aad280>
+||||`- # D2 [2 B]
+|||`- # D2 [122 B]
+|||+- D2: <dict object at 0x1e4a9aad2c0>
+|||`- # D2 [25 B]
+||`- # D2 [405 B]
+||+- D2: <dict object at 0x1e4b6311880>
+|||+- D2: <dict object at 0x1e4a9aad800>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aad640>
+||||+- D2: <dict object at 0x1e4a9aad680>
+||||`- # D2 [46 B]
+||||+- D2: <dict object at 0x1e4a9aad6c0>
+||||`- # D2 [46 B]
+||||+- D2: <dict object at 0x1e4a9aad700>
+||||`- # D2 [46 B]
+||||+- D2: <dict object at 0x1e4a9aad740>
+||||`- # D2 [46 B]
+||||+- D2: <dict object at 0x1e4a9aad780>
+||||`- # D2 [2 B]
+|||`- # D2 [215 B]
+|||+- D2: <dict object at 0x1e4a9aad7c0>
+|||`- # D2 [32 B]
+||`- # D2 [530 B]
+||+- D2: <dict object at 0x1e4a9af3d40>
+|||+- D2: <dict object at 0x1e4a9aadcc0>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aadb00>
+||||+- D2: <dict object at 0x1e4a9aadb40>
+||||`- # D2 [94 B]
+||||+- D2: <dict object at 0x1e4a9aadb80>
+||||`- # D2 [46 B]
+||||+- D2: <dict object at 0x1e4a9aadbc0>
+||||`- # D2 [46 B]
+||||+- D2: <dict object at 0x1e4a9aadc00>
+||||`- # D2 [46 B]
+||||+- D2: <dict object at 0x1e4a9aadc40>
+||||`- # D2 [2 B]
+|||`- # D2 [279 B]
+|||+- D2: <dict object at 0x1e4a9aadc80>
+|||`- # D2 [32 B]
+||`- # D2 [587 B]
+||+- D2: <dict object at 0x1e4a9b084c0>
+|||+- D2: <dict object at 0x1e4a9aae1c0>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aae000>
+||||+- D2: <dict object at 0x1e4a9aae040>
+||||`- # D2 [94 B]
+||||+- D2: <dict object at 0x1e4a9aae080>
+||||`- # D2 [46 B]
+||||+- D2: <dict object at 0x1e4a9aae0c0>
+||||`- # D2 [46 B]
+||||+- D2: <dict object at 0x1e4a9aae100>
+||||`- # D2 [46 B]
+||||+- D2: <dict object at 0x1e4a9aae140>
+||||`- # D2 [2 B]
+|||`- # D2 [279 B]
+|||+- D2: <dict object at 0x1e4a9aae180>
+|||`- # D2 [32 B]
+||`- # D2 [593 B]
+||+- D2: <dict object at 0x1e4a9b09840>
+|||+- D2: <dict object at 0x1e4a9aae600>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aae480>
+||||+- D2: <dict object at 0x1e4a9aae4c0>
+||||`- # D2 [32 B]
+||||+- D2: <dict object at 0x1e4a9aae500>
+||||`- # D2 [32 B]
+||||+- D2: <dict object at 0x1e4a9aae540>
+||||`- # D2 [32 B]
+||||+- D2: <dict object at 0x1e4a9aae580>
+||||`- # D2 [2 B]
+|||`- # D2 [122 B]
+|||+- D2: <dict object at 0x1e4a9aae5c0>
+|||`- # D2 [25 B]
+||`- # D2 [402 B]
+||+- D2: <dict object at 0x1e4a9b08640>
+|||+- D2: <dict object at 0x1e4a9aae840>
+|||`- # D2 [17 B]
+|||+- D2: <dict object at 0x1e4a9aae7c0>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aae800>
+|||`- # D2 [2 B]
+||`- # D2 [199 B]
+||+- D2: <dict object at 0x1e4a9b0b540>
+|||+- D2: <dict object at 0x1e4a9aaea40>
+|||`- # D2 [17 B]
+|||+- D2: <dict object at 0x1e4a9aae9c0>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aaea00>
+|||`- # D2 [2 B]
+||`- # D2 [199 B]
+||+- D2: <dict object at 0x1e4a9b14dc0>
+|||+- D2: <dict object at 0x1e4a9aaec80>
+|||`- # D2 [17 B]
+|||+- D2: <dict object at 0x1e4a9aaec00>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aaec40>
+|||`- # D2 [2 B]
+||`- # D2 [199 B]
+||+- D2: <dict object at 0x1e4a9b14e00>
+|||+- D2: <dict object at 0x1e4a9aaeec0>
+|||`- # D2 [20 B]
+|||+- D2: <dict object at 0x1e4a9aaee40>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aaee80>
+|||`- # D2 [2 B]
+||`- # D2 [202 B]
+||+- D2: <dict object at 0x1e4a9b14d40>
+|||+- D2: <dict object at 0x1e4a9aaf100>
+|||`- # D2 [20 B]
+|||+- D2: <dict object at 0x1e4a9aaf080>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aaf0c0>
+|||`- # D2 [2 B]
+||`- # D2 [202 B]
+||+- D2: <dict object at 0x1e4a9b14d80>
+|||+- D2: <dict object at 0x1e4a9aaf340>
+|||`- # D2 [20 B]
+|||+- D2: <dict object at 0x1e4a9aaf2c0>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aaf300>
+|||`- # D2 [2 B]
+||`- # D2 [202 B]
+|`- # D2 [10 MiB]
+|+- D2: <dict object at 0x1e49aa52140>
+||+- T4: <class 'production_system.Tool'>
+||`- # T4 [11 B]
+||+- D2: <dict object at 0x1e4a9b14940>
+|||+- D2: <dict object at 0x1e4a9aa8040>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aa80c0>
+|||`- # D2 [2 B]
+||`- # D2 [64 B]
+||+- D2: <dict object at 0x1e4a9b14cc0>
+|||+- D2: <dict object at 0x1e4a9aa81c0>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aa8200>
+|||`- # D2 [2 B]
+||`- # D2 [28 B]
+||+- D2: <dict object at 0x1e4a9b14b40>
+|||+- D2: <dict object at 0x1e4a9aa8300>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aa8340>
+|||`- # D2 [2 B]
+||`- # D2 [28 B]
+||+- D2: <dict object at 0x1e4a9b14c80>
+|||+- D2: <dict object at 0x1e4a9aa8440>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aa8480>
+|||`- # D2 [2 B]
+||`- # D2 [28 B]
+||+- D2: <dict object at 0x1e4a9b14bc0>
+|||+- D2: <dict object at 0x1e4a9aa8580>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aa85c0>
+|||`- # D2 [2 B]
+||`- # D2 [28 B]
+||+- D2: <dict object at 0x1e4a9b14b80>
+|||+- D2: <dict object at 0x1e4a9aa86c0>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aa8700>
+|||`- # D2 [2 B]
+||`- # D2 [28 B]
+||+- D2: <dict object at 0x1e4a9b14c00>
+|||+- D2: <dict object at 0x1e4a9aa8800>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aa8840>
+|||`- # D2 [2 B]
+||`- # D2 [28 B]
+||+- D2: <dict object at 0x1e4a9b14c40>
+|||+- D2: <dict object at 0x1e4a9aa8940>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aa8980>
+|||`- # D2 [2 B]
+||`- # D2 [28 B]
+||+- D2: <dict object at 0x1e4a9b14e40>
+|||+- D2: <dict object at 0x1e4a9aa8a80>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aa8ac0>
+|||`- # D2 [2 B]
+||`- # D2 [28 B]
+||+- D2: <dict object at 0x1e4a9b14e80>
+|||+- D2: <dict object at 0x1e4a9aa8bc0>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aa8c00>
+|||`- # D2 [2 B]
+||`- # D2 [28 B]
+||+- D2: <dict object at 0x1e4a9b15140>
+|||+- D2: <dict object at 0x1e4a9aa8d00>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aa8d40>
+|||`- # D2 [2 B]
+||`- # D2 [28 B]
+||+- D2: <dict object at 0x1e4a9b15180>
+|||+- D2: <dict object at 0x1e4a9aa8e40>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aa8e80>
+|||`- # D2 [2 B]
+||`- # D2 [28 B]
+||+- D2: <dict object at 0x1e4a9b150c0>
+|||+- D2: <dict object at 0x1e4a9aa8f80>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aa8fc0>
+|||`- # D2 [2 B]
+||`- # D2 [28 B]
+||+- D2: <dict object at 0x1e4a9b15100>
+|||+- D2: <dict object at 0x1e4a9aa90c0>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aa9100>
+|||`- # D2 [2 B]
+||`- # D2 [28 B]
+||+- D2: <dict object at 0x1e4a9b15040>
+|||+- D2: <dict object at 0x1e4a9aa9200>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aa9240>
+|||`- # D2 [2 B]
+||`- # D2 [28 B]
+||+- D2: <dict object at 0x1e4a9b15080>
+|||+- D2: <dict object at 0x1e4a9aa9340>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aa9380>
+|||`- # D2 [2 B]
+||`- # D2 [28 B]
+||+- D2: <dict object at 0x1e4a9b14fc0>
+|||+- D2: <dict object at 0x1e4a9aa9480>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aa94c0>
+|||`- # D2 [2 B]
+||`- # D2 [28 B]
+||+- D2: <dict object at 0x1e4a9b15000>
+|||+- D2: <dict object at 0x1e4a9aa95c0>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aa9600>
+|||`- # D2 [2 B]
+||`- # D2 [28 B]
+||+- D2: <dict object at 0x1e4a9b14f40>
+|||+- D2: <dict object at 0x1e4a9aa9700>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aa9740>
+|||`- # D2 [2 B]
+||`- # D2 [28 B]
+||+- D2: <dict object at 0x1e4a9b14f80>
+|||+- D2: <dict object at 0x1e4a9aa9840>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aa9880>
+|||`- # D2 [2 B]
+||`- # D2 [28 B]
+||+- D2: <dict object at 0x1e4a9b14ec0>
+|||+- D2: <dict object at 0x1e4a9aa9980>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aa99c0>
+|||`- # D2 [2 B]
+||`- # D2 [28 B]
+||+- D2: <dict object at 0x1e4a9b14f00>
+|||+- D2: <dict object at 0x1e4a9aa9ac0>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aa9b00>
+|||`- # D2 [2 B]
+||`- # D2 [28 B]
+||+- D2: <dict object at 0x1e4a9b151c0>
+|||+- D2: <dict object at 0x1e4a9aa9c00>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aa9c40>
+|||`- # D2 [2 B]
+||`- # D2 [28 B]
+||+- D2: <dict object at 0x1e4a9b15200>
+|||+- D2: <dict object at 0x1e4a9aa9d40>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aa9d80>
+|||`- # D2 [2 B]
+||`- # D2 [28 B]
+|`- # D2 [1 MiB]
+|+- D2: <dict object at 0x1e49aa52180>
+|`- # D2 [2 B]
+|+- D2: <dict object at 0x1e4a9ad2280>
+||+- T4: <class 'production_system.Inventory'>
+||`- # T4 [16 B]
+||+- D2: <dict object at 0x1e4a9b14880>
+|||+- T4: <enum 'InventoryGenerationType'>
+|||`- # T4 [30 B]
+|||+- T4: <enum 'BufferSequenceType'>
+|||`- # T4 [25 B]
+|||+- D2: <dict object at 0x1e4a9ad4800>
+||||+- D2: <dict object at 0x1e4a9ad4840>
+||||`- # D2 [17 B]
+|||`- # D2 [22 B]
+|||+- D2: <dict object at 0x1e4a9ad1340>
+|||`- # D2 [2 B]
+||`- # D2 [146 B]
+|`- # D2 [183 B]
+|+- D2: <dict object at 0x1e4a9ad2180>
+||+- T4: <class 'production_system.SupplyBehaviour'>
+||`- # T4 [22 B]
+||+- D2: <dict object at 0x1e4a9b093c0>
+|||+- T4: <enum 'SupplyAllocationType'>
+|||`- # T4 [27 B]
+||`- # D2 [158 B]
+||+- D2: <dict object at 0x1e4a9b15480>
+||`- # D2 [76 B]
+||+- D2: <dict object at 0x1e4a9b154c0>
+||`- # D2 [76 B]
+||+- D2: <dict object at 0x1e4a9b153c0>
+||`- # D2 [76 B]
+|`- # D2 [483 B]
+|+- D2: <dict object at 0x1e4a9ad4940>
+|`- # D2 [2 B]
+|+- T4: <class 'product_instructions.ProductPalette'>
+|`- # T4 [24 B]
+|+- D2: <dict object at 0x1e4a9b15440>
+||+- D2: <dict object at 0x1e4a9aae240>
+|||+- T4: <class 'product_instructions.OperationNodeClean'>
+|||`- # T4 [28 B]
+|||+- D2: <dict object at 0x1e4a9b15400>
+||||+- D2: <dict object at 0x1e4a9ac2440>
+||||`- # D2 [10 B]
+||||+- D2: <dict object at 0x1e4a9ac2540>
+|||||+- D2: <dict object at 0x1e4a9ac2580>
+|||||`- # D2 [2 B]
+||||`- # D2 [10 B]
+|||`- # D2 [299 B]
+|||+- D2: <dict object at 0x1e4a9b152c0>
+||||+- D2: <dict object at 0x1e4a9ac2780>
+||||`- # D2 [17 B]
+||||+- D2: <dict object at 0x1e4a9ac2840>
+|||||+- D2: <dict object at 0x1e4a9ac2880>
+|||||`- # D2 [2 B]
+||||`- # D2 [10 B]
+|||`- # D2 [175 B]
+|||+- D2: <dict object at 0x1e4a9b15240>
+|||`- # D2 [105 B]
+|||+- D2: <dict object at 0x1e4a9b15280>
+||||+- D2: <dict object at 0x1e4a9ac2c00>
+||||`- # D2 [16 B]
+||||+- D2: <dict object at 0x1e4a9ac2d00>
+|||||+- D2: <dict object at 0x1e4a9ac2d40>
+|||||`- # D2 [2 B]
+||||`- # D2 [10 B]
+|||`- # D2 [177 B]
+|||+- D2: <dict object at 0x1e4a9b15580>
+|||`- # D2 [105 B]
+|||+- D2: <dict object at 0x1e4a9b15840>
+||||+- D2: <dict object at 0x1e4a9ac3100>
+||||`- # D2 [16 B]
+||||+- D2: <dict object at 0x1e4a9ac31c0>
+|||||+- D2: <dict object at 0x1e4a9ac3200>
+|||||`- # D2 [2 B]
+||||`- # D2 [10 B]
+|||`- # D2 [175 B]
+|||+- D2: <dict object at 0x1e4a9b157c0>
+|||`- # D2 [105 B]
+|||+- D2: <dict object at 0x1e4a9b15800>
+||||+- D2: <dict object at 0x1e4a9ac35c0>
+||||`- # D2 [16 B]
+||||+- D2: <dict object at 0x1e4a9ac36c0>
+|||||+- D2: <dict object at 0x1e4a9ac3700>
+|||||`- # D2 [2 B]
+||||`- # D2 [10 B]
+|||`- # D2 [178 B]
+|||+- D2: <dict object at 0x1e4a9b15780>
+|||`- # D2 [105 B]
+|||+- D2: <dict object at 0x1e4a9b156c0>
+||||+- D2: <dict object at 0x1e4a9ac3b40>
+||||`- # D2 [17 B]
+||||+- D2: <dict object at 0x1e4a9ac3c40>
+|||||+- D2: <dict object at 0x1e4a9ac3c80>
+|||||`- # D2 [2 B]
+||||`- # D2 [10 B]
+|||`- # D2 [173 B]
+|||+- D2: <dict object at 0x1e4a9b15640>
+||||+- D2: <dict object at 0x1e4a9ac3e80>
+||||`- # D2 [10 B]
+||||+- D2: <dict object at 0x1e4a9ac3f40>
+|||||+- D2: <dict object at 0x1e4a9ac3f80>
+|||||`- # D2 [2 B]
+||||`- # D2 [10 B]
+|||`- # D2 [171 B]
+|||+- D2: <dict object at 0x1e4a9b155c0>
+||||+- D2: <dict object at 0x1e4a9ad0100>
+||||`- # D2 [17 B]
+||||+- D2: <dict object at 0x1e4a9ad0200>
+|||||+- D2: <dict object at 0x1e4a9ad0240>
+|||||`- # D2 [2 B]
+||||`- # D2 [10 B]
+|||`- # D2 [177 B]
+|||+- D2: <dict object at 0x1e4a9b158c0>
+|||`- # D2 [105 B]
+|||+- D2: <dict object at 0x1e4a9b15900>
+||||+- D2: <dict object at 0x1e4a9ad0600>
+||||`- # D2 [16 B]
+||||+- D2: <dict object at 0x1e4a9ad06c0>
+|||||+- D2: <dict object at 0x1e4a9ad0700>
+|||||`- # D2 [2 B]
+||||`- # D2 [10 B]
+|||`- # D2 [175 B]
+|||+- D2: <dict object at 0x1e4a9b15c00>
+|||`- # D2 [105 B]
+|||+- D2: <dict object at 0x1e4a9b15b40>
+||||+- D2: <dict object at 0x1e4a9ad0a80>
+||||`- # D2 [16 B]
+||||+- D2: <dict object at 0x1e4a9ad0b80>
+|||||+- D2: <dict object at 0x1e4a9ad0bc0>
+|||||`- # D2 [2 B]
+||||`- # D2 [10 B]
+|||`- # D2 [177 B]
+|||+- D2: <dict object at 0x1e4a9b15ac0>
+|||`- # D2 [105 B]
+|||+- D2: <dict object at 0x1e4a9b15b00>
+||||+- D2: <dict object at 0x1e4a9ad0fc0>
+||||`- # D2 [16 B]
+||||+- D2: <dict object at 0x1e4a9ad10c0>
+|||||+- D2: <dict object at 0x1e4a9ad1100>
+|||||`- # D2 [2 B]
+||||`- # D2 [10 B]
+|||`- # D2 [178 B]
+|||+- D2: <dict object at 0x1e4a9b15a80>
+|||`- # D2 [105 B]
+|||+- D2: <dict object at 0x1e4a9b159c0>
+||||+- D2: <dict object at 0x1e4a9ad1540>
+||||`- # D2 [17 B]
+||||+- D2: <dict object at 0x1e4a9ad1640>
+|||||+- D2: <dict object at 0x1e4a9ad1680>
+|||||`- # D2 [2 B]
+||||`- # D2 [10 B]
+|||`- # D2 [173 B]
+|||+- D2: <dict object at 0x1e4a9b15940>
+||||+- D2: <dict object at 0x1e4a9ad1880>
+||||`- # D2 [10 B]
+||||+- D2: <dict object at 0x1e4a9ad1940>
+|||||+- D2: <dict object at 0x1e4a9ad1980>
+|||||`- # D2 [2 B]
+||||`- # D2 [10 B]
+|||`- # D2 [171 B]
+|||+- D2: <dict object at 0x1e4a9b15c40>
+||||+- D2: <dict object at 0x1e4a9ad1ac0>
+||||`- # D2 [17 B]
+||||+- D2: <dict object at 0x1e4a9ad1b80>
+|||||+- D2: <dict object at 0x1e4a9ad1bc0>
+|||||`- # D2 [2 B]
+||||`- # D2 [10 B]
+|||`- # D2 [175 B]
+|||+- D2: <dict object at 0x1e4a9b15f80>
+|||`- # D2 [105 B]
+|||+- D2: <dict object at 0x1e4a9b15fc0>
+||||+- D2: <dict object at 0x1e4a9ad1f40>
+||||`- # D2 [16 B]
+||||+- D2: <dict object at 0x1e4a9ad2040>
+|||||+- D2: <dict object at 0x1e4a9ad2080>
+|||||`- # D2 [2 B]
+||||`- # D2 [10 B]
+|||`- # D2 [177 B]
+|||+- D2: <dict object at 0x1e4a9b15f40>
+|||`- # D2 [105 B]
+|||+- D2: <dict object at 0x1e4a9b15e80>
+||||+- D2: <dict object at 0x1e4a9ad2440>
+||||`- # D2 [16 B]
+||||+- D2: <dict object at 0x1e4a9ad2500>
+|||||+- D2: <dict object at 0x1e4a9ad2540>
+|||||`- # D2 [2 B]
+||||`- # D2 [10 B]
+|||`- # D2 [175 B]
+|||+- D2: <dict object at 0x1e4a9b15e00>
+|||`- # D2 [105 B]
+|||+- D2: <dict object at 0x1e4a9b15e40>
+||||+- D2: <dict object at 0x1e4a9ad2900>
+||||`- # D2 [16 B]
+||||+- D2: <dict object at 0x1e4a9ad2a00>
+|||||+- D2: <dict object at 0x1e4a9ad2a40>
+|||||`- # D2 [2 B]
+||||`- # D2 [10 B]
+|||`- # D2 [178 B]
+|||+- D2: <dict object at 0x1e4a9b15dc0>
+|||`- # D2 [105 B]
+|||+- D2: <dict object at 0x1e4a9b15d00>
+||||+- D2: <dict object at 0x1e4a9ad2e80>
+||||`- # D2 [17 B]
+||||+- D2: <dict object at 0x1e4a9ad2f80>
+||||`- # D2 [2 B]
+|||`- # D2 [165 B]
+|||+- D2: <dict object at 0x1e4a9b16000>
+||||+- D2: <dict object at 0x1e4a9ad3180>
+||||`- # D2 [10 B]
+||||+- D2: <dict object at 0x1e4a9ad3240>
+|||||+- D2: <dict object at 0x1e4a9ad3280>
+|||||`- # D2 [2 B]
+||||`- # D2 [10 B]
+|||`- # D2 [171 B]
+|||+- D2: <dict object at 0x1e4a9b16300>
+||||+- D2: <dict object at 0x1e4a9ad33c0>
+||||`- # D2 [17 B]
+||||+- D2: <dict object at 0x1e4a9ad3480>
+|||||+- D2: <dict object at 0x1e4a9ad34c0>
+|||||`- # D2 [2 B]
+||||`- # D2 [10 B]
+|||`- # D2 [175 B]
+|||+- D2: <dict object at 0x1e4a9b16280>
+|||`- # D2 [105 B]
+|||+- D2: <dict object at 0x1e4a9b162c0>
+||||+- D2: <dict object at 0x1e4a9ad3840>
+||||`- # D2 [16 B]
+||||+- D2: <dict object at 0x1e4a9ad3900>
+|||||+- D2: <dict object at 0x1e4a9ad3940>
+|||||`- # D2 [2 B]
+||||`- # D2 [10 B]
+|||`- # D2 [175 B]
+|||+- D2: <dict object at 0x1e4a9b16240>
+|||`- # D2 [105 B]
+|||+- D2: <dict object at 0x1e4a9b16180>
+||||+- D2: <dict object at 0x1e4a9ad3cc0>
+||||`- # D2 [16 B]
+||||+- D2: <dict object at 0x1e4a9ad3dc0>
+|||||+- D2: <dict object at 0x1e4a9ad3e00>
+|||||`- # D2 [2 B]
+||||`- # D2 [10 B]
+|||`- # D2 [177 B]
+|||+- D2: <dict object at 0x1e4a9b16100>
+|||`- # D2 [105 B]
+|||+- D2: <dict object at 0x1e4a9b16140>
+||||+- D2: <dict object at 0x1e4a9ad4240>
+||||`- # D2 [16 B]
+||||+- D2: <dict object at 0x1e4a9ad4340>
+|||||+- D2: <dict object at 0x1e4a9ad4380>
+|||||`- # D2 [2 B]
+||||`- # D2 [10 B]
+|||`- # D2 [175 B]
+||`- # D2 [6 MiB]
+|`- # D2 [6 MiB]
+|+- D2: <dict object at 0x1e4a9a91780>
+|`- # D2 [164 B]
+|+- D2: <dict object at 0x1e4a9a917c0>
+||+- T4: <class 'production_system.TransportMachine'>
+||`- # T4 [23 B]
+||+- D2: <dict object at 0x1e4b6313e40>
+|||+- D2: <dict object at 0x1e4b6313f00>
+|||`- # D2 [10 B]
+|||+- D2: <dict object at 0x1e4b6313ec0>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4b6313e80>
+|||`- # D2 [2 B]
+||`- # D2 [348 B]
+||+- D2: <dict object at 0x1e4a9aadd40>
+|||+- D2: <dict object at 0x1e4a9aad000>
+|||`- # D2 [10 B]
+|||+- D2: <dict object at 0x1e4a9aad380>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aad880>
+|||`- # D2 [2 B]
+||`- # D2 [256 B]
+||+- D2: <dict object at 0x1e4a9aacbc0>
+|||+- D2: <dict object at 0x1e4a9aac080>
+|||`- # D2 [10 B]
+|||+- D2: <dict object at 0x1e4a9aac400>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aac840>
+|||`- # D2 [2 B]
+||`- # D2 [256 B]
+||+- D2: <dict object at 0x1e4a9aabcc0>
+|||+- D2: <dict object at 0x1e4a9aab140>
+|||`- # D2 [13 B]
+|||+- D2: <dict object at 0x1e4a9aab540>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aab880>
+|||`- # D2 [2 B]
+||`- # D2 [259 B]
+||+- D2: <dict object at 0x1e4a9aaad40>
+|||+- D2: <dict object at 0x1e4a9aa9e00>
+|||`- # D2 [13 B]
+|||+- D2: <dict object at 0x1e4a9aaa180>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aaa940>
+|||`- # D2 [2 B]
+||`- # D2 [259 B]
+||+- D2: <dict object at 0x1e4a9a9fec0>
+|||+- D2: <dict object at 0x1e4a9aa9a40>
+|||`- # D2 [13 B]
+|||+- D2: <dict object at 0x1e4a9aa9b80>
+|||`- # D2 [2 B]
+|||+- D2: <dict object at 0x1e4a9aa9cc0>
+|||`- # D2 [2 B]
+||`- # D2 [259 B]
+|`- # D2 [1 MiB]
+|+- T4: <class 'collections.deque'>
+|`- # T4 [24 B]
+|+- D2: <dict object at 0x1e4a9a91800>
+||+- D2: <dict object at 0x1e4b631c5c0>
+|||+- D2: <dict object at 0x1e4b631cc80>
+||||+- D2: <dict object at 0x1e4b631cc40>
+|||||+- D2: <dict object at 0x1e4b631cc00>
+||||||+- T4: <enum 'OperationStatus'>
+||||||`- # T4 [22 B]
+|||||`- # D2 [106 B]
+|||||+- D2: <dict object at 0x1e4b631cbc0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631cb80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631cb40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631cb00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631cac0>
+|||||`- # D2 [44 B]
+||||`- # D2 [360 B]
+|||`- # D2 [491 B]
+|||+- D2: <dict object at 0x1e4b631ca80>
+||||+- D2: <dict object at 0x1e4b631ca40>
+|||||+- D2: <dict object at 0x1e4b631ca00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631c9c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631c980>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631c940>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631c900>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631c8c0>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4b631c880>
+||||+- D2: <dict object at 0x1e4b631c840>
+|||||+- D2: <dict object at 0x1e4b631c800>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631c7c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631c780>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631c740>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631c700>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631c6c0>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4b631c680>
+||||+- D2: <dict object at 0x1e4b631c640>
+|||||+- D2: <dict object at 0x1e4b631c600>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631c500>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631c480>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631cd00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631cd40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631cd80>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4b631ccc0>
+||||+- D2: <dict object at 0x1e4a9a91e40>
+|||||+- D2: <dict object at 0x1e4b6311400>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9aae680>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9abcac0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9abc540>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9abca80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9abc080>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9abc500>
+||||+- D2: <dict object at 0x1e4a9abc400>
+|||||+- D2: <dict object at 0x1e4a9abc440>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9aafdc0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9aafd80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9aafac0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9aaa100>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9aaf1c0>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9aaef80>
+||||+- D2: <dict object at 0x1e4a9aafa80>
+|||||+- D2: <dict object at 0x1e4a9aaeb00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9aaed40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9aaf4c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9abcbc0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631e5c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631e640>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4b631e6c0>
+||||+- D2: <dict object at 0x1e4b631e780>
+|||||+- D2: <dict object at 0x1e4b631e740>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631e7c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631de80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631dfc0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631e000>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631e140>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4b631e180>
+||||+- D2: <dict object at 0x1e4b631e200>
+|||||+- D2: <dict object at 0x1e4b631e1c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631e2c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631ce40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631c440>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631c3c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631c340>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4b631c2c0>
+||||+- D2: <dict object at 0x1e4b631e340>
+|||||+- D2: <dict object at 0x1e4b631c280>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631c200>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631c180>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631c100>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631c080>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631f300>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4b631c540>
+||||+- D2: <dict object at 0x1e4a9a9f600>
+|||||+- D2: <dict object at 0x1e4b631f780>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631f440>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631f580>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631f4c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631f680>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631f600>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4b631f700>
+||||+- D2: <dict object at 0x1e4b631f500>
+|||||+- D2: <dict object at 0x1e4b631fb00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631f880>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631f900>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631f800>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631fa00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631f980>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4b631fa80>
+||||+- D2: <dict object at 0x1e4b631f540>
+|||||+- D2: <dict object at 0x1e4b631fe80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631fc00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631fc80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631fb80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631fd80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631fd00>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4b631fe00>
+||||+- D2: <dict object at 0x1e4b631f7c0>
+|||||+- D2: <dict object at 0x1e4b6330240>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631ff80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b6330040>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b631ff00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b6330140>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b63300c0>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4b63301c0>
+||||+- D2: <dict object at 0x1e4b631fb40>
+|||||+- D2: <dict object at 0x1e4b63305c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b6330340>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b63303c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b63302c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b63304c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b6330440>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4b631f380>
+||||+- D2: <dict object at 0x1e4b631fec0>
+|||||+- D2: <dict object at 0x1e4a9a9f3c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b6330680>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b6330740>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b6330600>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b63307c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b63308c0>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4b6330840>
+||||+- D2: <dict object at 0x1e4b6330900>
+|||||+- D2: <dict object at 0x1e4b6330940>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b6330a40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b63309c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b6330ac0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b6330b40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b6330c40>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4b6330bc0>
+||||+- D2: <dict object at 0x1e4b6330c80>
+|||||+- D2: <dict object at 0x1e4b6330cc0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b6330dc0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b6330d40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b6330e40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b6330ec0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b6330fc0>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4b6330f40>
+||||+- D2: <dict object at 0x1e4b6331000>
+|||||+- D2: <dict object at 0x1e4b6331040>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b6331140>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b63310c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b63311c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b6331240>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b6331340>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4b63312c0>
+||||+- D2: <dict object at 0x1e4b6331380>
+|||||+- D2: <dict object at 0x1e4b63313c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b63314c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b6331440>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b6331540>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b63315c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b63316c0>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4b6331640>
+||||+- D2: <dict object at 0x1e4b6331700>
+|||||+- D2: <dict object at 0x1e4b6331740>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b6331840>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b63317c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b63318c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b6331940>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b6331a40>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4b63319c0>
+||||+- D2: <dict object at 0x1e4b6331a80>
+|||||+- D2: <dict object at 0x1e4b6331ac0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b6331bc0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b6331b40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b6331c40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b6331cc0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b6331dc0>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4b6331d40>
+||||+- D2: <dict object at 0x1e4b6331e00>
+|||||+- D2: <dict object at 0x1e4b6331e40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b6331f40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b6331ec0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b6331fc0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b6332040>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4b6332140>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+||`- # D2 [7 MiB]
+||+- D2: <dict object at 0x1e4a9af0b80>
+|||+- D2: <dict object at 0x1e4b6330540>
+||||+- D2: <dict object at 0x1e4a9af0e80>
+|||||+- D2: <dict object at 0x1e4a9af0e00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af0d80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af0d00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af0c80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af0c00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af0f00>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9af0f40>
+||||+- D2: <dict object at 0x1e4a9af1200>
+|||||+- D2: <dict object at 0x1e4a9af1180>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af1100>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af1080>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af1000>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af0f80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9ae3ec0>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9a9f840>
+||||+- D2: <dict object at 0x1e4a9af1700>
+|||||+- D2: <dict object at 0x1e4a9af1680>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af1600>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af14c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af1540>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af1580>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af1780>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9af17c0>
+||||+- D2: <dict object at 0x1e4a9af1a80>
+|||||+- D2: <dict object at 0x1e4a9af1a00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af1980>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af1900>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af1880>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af1800>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af1b00>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9af1b40>
+||||+- D2: <dict object at 0x1e4a9af1e00>
+|||||+- D2: <dict object at 0x1e4a9af1d80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af1d00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af1c80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af1c00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af1b80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af1e80>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9af1ec0>
+||||+- D2: <dict object at 0x1e4a9af2180>
+|||||+- D2: <dict object at 0x1e4a9af2100>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af2080>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af2000>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af1f80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af1f00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af2200>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9af2240>
+||||+- D2: <dict object at 0x1e4a9af2500>
+|||||+- D2: <dict object at 0x1e4a9af2480>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af2400>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af2380>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af2300>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af2280>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af2580>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9af0bc0>
+||||+- D2: <dict object at 0x1e4a9af2880>
+|||||+- D2: <dict object at 0x1e4a9af2800>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af2700>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af2780>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af2680>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af2600>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af2940>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9af2900>
+||||+- D2: <dict object at 0x1e4a9af2c00>
+|||||+- D2: <dict object at 0x1e4a9af2b80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af2a80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af2b00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af2a00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af2980>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af2cc0>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9af2c80>
+||||+- D2: <dict object at 0x1e4a9af2f80>
+|||||+- D2: <dict object at 0x1e4a9af2f00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af2e00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af2e80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af2d80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af2d00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9ac03c0>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9ac0a40>
+||||+- D2: <dict object at 0x1e4a9ac0540>
+|||||+- D2: <dict object at 0x1e4a9ac0400>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9ac00c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9ac0500>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9ac0900>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9ac09c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9ac2e40>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9ac0340>
+||||+- D2: <dict object at 0x1e4a9ac2980>
+|||||+- D2: <dict object at 0x1e4a9ac3000>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9ac3800>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9ac2b00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9ac3940>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9ac0280>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9ae1c40>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9ac3300>
+||||+- D2: <dict object at 0x1e4a9ae17c0>
+|||||+- D2: <dict object at 0x1e4a9ae2100>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9ae2a80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9ae25c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9ae2f40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9ae3400>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9ae3b00>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9ae1780>
+||||+- D2: <dict object at 0x1e4a9ae3b40>
+|||||+- D2: <dict object at 0x1e4a9ae34c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9ae0940>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9ae0480>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9ae0e00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9ae12c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9ae3e80>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9ae3b80>
+||||+- D2: <dict object at 0x1e4a9ae3dc0>
+|||||+- D2: <dict object at 0x1e4a9ae3e00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9ae3d00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9ae3d80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9ae3c80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9ae3c00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9a9f700>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9a9f900>
+||||+- D2: <dict object at 0x1e4a9a9f640>
+|||||+- D2: <dict object at 0x1e4a9a9f180>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9a9f500>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9a9f400>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9a9f1c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9a9f6c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af03c0>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9af0440>
+||||+- D2: <dict object at 0x1e4a9af0300>
+|||||+- D2: <dict object at 0x1e4a9af0340>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af0180>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af02c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af0240>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af04c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af0740>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9af07c0>
+||||+- D2: <dict object at 0x1e4a9af0680>
+|||||+- D2: <dict object at 0x1e4a9af06c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af05c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af0640>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af0540>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af0840>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af0ac0>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9af0b40>
+||||+- D2: <dict object at 0x1e4a9af0a00>
+|||||+- D2: <dict object at 0x1e4a9af0a40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af0940>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af09c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af08c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af0e40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af0c40>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9af25c0>
+||||+- D2: <dict object at 0x1e4a9ad0340>
+|||||+- D2: <dict object at 0x1e4a9af10c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af1140>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af1740>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af1240>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af1640>
+|||||`- # D2 [44 B]
+||||`- # D2 [249 B]
+|||`- # D2 [292 B]
+|||+- D2: <dict object at 0x1e4a9af1ac0>
+||||+- D2: <dict object at 0x1e4a9af1500>
+|||||+- D2: <dict object at 0x1e4a9af0fc0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af19c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af1e40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af18c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af1d40>
+|||||`- # D2 [44 B]
+||||`- # D2 [249 B]
+|||`- # D2 [292 B]
+|||+- D2: <dict object at 0x1e4a9af21c0>
+||||+- D2: <dict object at 0x1e4a9af1c40>
+|||||+- D2: <dict object at 0x1e4a9af1840>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af20c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af2540>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af1fc0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af2440>
+|||||`- # D2 [44 B]
+||||`- # D2 [249 B]
+|||`- # D2 [292 B]
+|||+- D2: <dict object at 0x1e4a9af28c0>
+||||+- D2: <dict object at 0x1e4a9af2340>
+|||||+- D2: <dict object at 0x1e4a9af1f40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af27c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af2c40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af26c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af2b40>
+|||||`- # D2 [44 B]
+||||`- # D2 [249 B]
+|||`- # D2 [292 B]
+||`- # D2 [7 MiB]
+||+- D2: <dict object at 0x1e4a9afdfc0>
+|||+- D2: <dict object at 0x1e4a9af0d40>
+||||+- D2: <dict object at 0x1e4a9afdec0>
+|||||+- D2: <dict object at 0x1e4a9afe1c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afe200>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afe4c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afe440>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afe3c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afe340>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9afe2c0>
+||||+- D2: <dict object at 0x1e4a9afe240>
+|||||+- D2: <dict object at 0x1e4a9afe540>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afe580>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afe840>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afe7c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afe740>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afe6c0>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9afe640>
+||||+- D2: <dict object at 0x1e4a9afe5c0>
+|||||+- D2: <dict object at 0x1e4a9afe8c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afe900>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afebc0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afeb40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afeac0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afea40>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9afe9c0>
+||||+- D2: <dict object at 0x1e4a9afe940>
+|||||+- D2: <dict object at 0x1e4a9afec40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afec80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afef40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afeec0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afee40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afedc0>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9afed40>
+||||+- D2: <dict object at 0x1e4a9afecc0>
+|||||+- D2: <dict object at 0x1e4a9afefc0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9aff000>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9aff2c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9aff240>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9aff1c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9aff140>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9afdf40>
+||||+- D2: <dict object at 0x1e4a9aff040>
+|||||+- D2: <dict object at 0x1e4a9aff3c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9aff640>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9aff5c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9aff380>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9aff4c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9aff540>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9aff440>
+||||+- D2: <dict object at 0x1e4a9aff340>
+|||||+- D2: <dict object at 0x1e4a9affac0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9affa40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9aff9c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af12c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9aff8c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9aff700>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9aff900>
+||||+- D2: <dict object at 0x1e4a9afcb80>
+|||||+- D2: <dict object at 0x1e4a9affe00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9affcc0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9affc40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9affd40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9affb40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9affbc0>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9affdc0>
+||||+- D2: <dict object at 0x1e4a9affb00>
+|||||+- D2: <dict object at 0x1e4a9b08380>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afff40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9affec0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afffc0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b08100>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9affe40>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9b08140>
+||||+- D2: <dict object at 0x1e4a9b08080>
+|||||+- D2: <dict object at 0x1e4a9afd200>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b08200>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b08180>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b08280>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afd300>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af2a40>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9afd280>
+||||+- D2: <dict object at 0x1e4a9b08300>
+|||||+- D2: <dict object at 0x1e4a9afd540>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afd100>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afd400>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afd180>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afd640>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afd6c0>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9afd5c0>
+||||+- D2: <dict object at 0x1e4a9ad3600>
+|||||+- D2: <dict object at 0x1e4a9afd8c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afd440>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afd740>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afd4c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afd9c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afda40>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9afd940>
+||||+- D2: <dict object at 0x1e4a9afd240>
+|||||+- D2: <dict object at 0x1e4a9afdc40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afd7c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afdac0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afd840>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afdd40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afddc0>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9aff0c0>
+||||+- D2: <dict object at 0x1e4a9afd580>
+|||||+- D2: <dict object at 0x1e4a9afc080>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afdb40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afdb80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afdc80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afde80>
+|||||`- # D2 [44 B]
+||||`- # D2 [249 B]
+|||`- # D2 [292 B]
+|||+- D2: <dict object at 0x1e4a9afe100>
+||||+- D2: <dict object at 0x1e4a9afe180>
+|||||+- D2: <dict object at 0x1e4a9afd900>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afe080>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afe500>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afdf80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afe400>
+|||||`- # D2 [44 B]
+||||`- # D2 [249 B]
+|||`- # D2 [292 B]
+|||+- D2: <dict object at 0x1e4a9afe880>
+||||+- D2: <dict object at 0x1e4a9afe300>
+|||||+- D2: <dict object at 0x1e4a9afdf00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afe780>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afec00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afe680>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afeb00>
+|||||`- # D2 [44 B]
+||||`- # D2 [249 B]
+|||`- # D2 [292 B]
+|||+- D2: <dict object at 0x1e4a9afef80>
+||||+- D2: <dict object at 0x1e4a9afea00>
+|||||+- D2: <dict object at 0x1e4a9afe600>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afee80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9aff300>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afed80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9aff200>
+|||||`- # D2 [44 B]
+||||`- # D2 [249 B]
+|||`- # D2 [292 B]
+|||+- D2: <dict object at 0x1e4a9aff680>
+||||+- D2: <dict object at 0x1e4a9aff100>
+|||||+- D2: <dict object at 0x1e4a9afed00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9aff580>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9affa80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9aff480>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9aff980>
+|||||`- # D2 [44 B]
+||||`- # D2 [249 B]
+|||`- # D2 [292 B]
+|||+- D2: <dict object at 0x1e4a9affd00>
+||||+- D2: <dict object at 0x1e4a9aff940>
+|||||+- D2: <dict object at 0x1e4a9aff400>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9affc00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9affe80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9afff80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b08040>
+|||||`- # D2 [44 B]
+||||`- # D2 [249 B]
+|||`- # D2 [292 B]
+||`- # D2 [6 MiB]
+||+- D2: <dict object at 0x1e4a9b0a680>
+|||+- D2: <dict object at 0x1e4a9afdcc0>
+||||+- D2: <dict object at 0x1e4a9b0a580>
+|||||+- D2: <dict object at 0x1e4a9b0a500>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0a480>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0a780>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b09800>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0aa40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0a9c0>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9b0a940>
+||||+- D2: <dict object at 0x1e4a9b0a8c0>
+|||||+- D2: <dict object at 0x1e4a9b0a840>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0a7c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0aac0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0ab00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0adc0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0ad40>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9b0acc0>
+||||+- D2: <dict object at 0x1e4a9b0ac40>
+|||||+- D2: <dict object at 0x1e4a9b0abc0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0ab40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0ae40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0ae80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0b140>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0b0c0>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9b0b040>
+||||+- D2: <dict object at 0x1e4a9b0afc0>
+|||||+- D2: <dict object at 0x1e4a9b0af40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0aec0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0b1c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0b200>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0b4c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0b440>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9b0b3c0>
+||||+- D2: <dict object at 0x1e4a9b0b340>
+|||||+- D2: <dict object at 0x1e4a9b0b2c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0b240>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b097c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b08680>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0b8c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0b840>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9b0b580>
+||||+- D2: <dict object at 0x1e4a9b0b740>
+|||||+- D2: <dict object at 0x1e4a9b0b780>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0b940>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0b980>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0bbc0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0bb40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0bac0>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9b0ba40>
+||||+- D2: <dict object at 0x1e4a9b0b9c0>
+|||||+- D2: <dict object at 0x1e4a9b0bc40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0bc80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0bec0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0be40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0bdc0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0bd40>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9b0bcc0>
+||||+- D2: <dict object at 0x1e4a9b0bf40>
+|||||+- D2: <dict object at 0x1e4a9b0bf80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b14200>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b14180>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b14100>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b14080>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0bfc0>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9b14280>
+||||+- D2: <dict object at 0x1e4a9b142c0>
+|||||+- D2: <dict object at 0x1e4a9b14500>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b14480>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b14400>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b14380>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b14300>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b14580>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9b145c0>
+||||+- D2: <dict object at 0x1e4a9b14800>
+|||||+- D2: <dict object at 0x1e4a9b14780>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b14700>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b14680>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b14600>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b08340>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b08e00>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9b0a600>
+||||+- D2: <dict object at 0x1e4a9afc040>
+|||||+- D2: <dict object at 0x1e4a9b09780>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b09340>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b09280>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b092c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b09180>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b09200>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9b09480>
+||||+- D2: <dict object at 0x1e4a9b09300>
+|||||+- D2: <dict object at 0x1e4a9b09c00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b09680>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b09600>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b09700>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b09500>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b09580>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9b09c80>
+||||+- D2: <dict object at 0x1e4a9b09240>
+|||||+- D2: <dict object at 0x1e4a9b09f80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b09a40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b09ac0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b09b80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b09d00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b09b00>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9b09100>
+||||+- D2: <dict object at 0x1e4a9b096c0>
+|||||+- D2: <dict object at 0x1e4a9b14240>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b09f40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b09e00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b09fc0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b09d80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0a380>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9b0a080>
+||||+- D2: <dict object at 0x1e4a9b0a3c0>
+|||||+- D2: <dict object at 0x1e4a9b0a300>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0a200>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0a280>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0a180>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0a100>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0a700>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9b0a400>
+||||+- D2: <dict object at 0x1e4a9b0a740>
+|||||+- D2: <dict object at 0x1e4a9b0a6c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0a4c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0a5c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0aa00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0a900>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0ad80>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9b0a800>
+||||+- D2: <dict object at 0x1e4a9b0ad00>
+|||||+- D2: <dict object at 0x1e4a9b0ac80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0b100>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0ab80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0b000>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0af00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0b380>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9b0b480>
+||||+- D2: <dict object at 0x1e4a9b0b300>
+|||||+- D2: <dict object at 0x1e4a9b0b280>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0b700>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0b880>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0bc00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0bb00>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b0be80>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9b0ba00>
+||||+- D2: <dict object at 0x1e4a9b0be00>
+|||||+- D2: <dict object at 0x1e4a9b0bd80>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af3040>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9b081c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af1280>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af3480>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af35c0>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9af3500>
+||||+- D2: <dict object at 0x1e4a9af3340>
+|||||+- D2: <dict object at 0x1e4a9af3640>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af3780>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af36c0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af3400>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af3900>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af3280>
+|||||`- # D2 [44 B]
+||||`- # D2 [298 B]
+|||`- # D2 [341 B]
+|||+- D2: <dict object at 0x1e4a9b0a000>
+||||+- D2: <dict object at 0x1e4a9a9fa00>
+|||||+- D2: <dict object at 0x1e4a9af3180>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af3200>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af3080>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af3740>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af39c0>
+|||||`- # D2 [44 B]
+||||`- # D2 [249 B]
+|||`- # D2 [292 B]
+|||+- D2: <dict object at 0x1e4a9af3c40>
+||||+- D2: <dict object at 0x1e4a9af3cc0>
+|||||+- D2: <dict object at 0x1e4a9af3300>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af3bc0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af3ac0>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af3b40>
+|||||`- # D2 [44 B]
+|||||+- D2: <dict object at 0x1e4a9af3a40>
+|||||`- # D2 [44 B]
+||||`- # D2 [249 B]
+|||`- # D2 [292 B]
+||`- # D2 [7 MiB]
+|`- # D2 [28 MiB]
+|+- D2: <dict object at 0x1e4b6313f40>
+||+- D2: <dict object at 0x1e4a9b14d00>
+||`- # D2 [98 B]
+||+- D2: <dict object at 0x1e4a9b163c0>
+||`- # D2 [99 B]
+||+- D2: <dict object at 0x1e4a9b16380>
+||`- # D2 [99 B]
+||+- D2: <dict object at 0x1e4a9b166c0>
+||`- # D2 [99 B]
+||+- D2: <dict object at 0x1e4a9b16600>
+||`- # D2 [99 B]
+||+- D2: <dict object at 0x1e4a9b16640>
+||`- # D2 [99 B]
+||+- D2: <dict object at 0x1e4a9b16580>
+||`- # D2 [99 B]
+||+- D2: <dict object at 0x1e4a9b165c0>
+||`- # D2 [99 B]
+||+- D2: <dict object at 0x1e4a9b16500>
+||`- # D2 [99 B]
+||+- D2: <dict object at 0x1e4a9b16480>
+||`- # D2 [99 B]
+||+- D2: <dict object at 0x1e4a9b16540>
+||`- # D2 [99 B]
+||+- D2: <dict object at 0x1e4a9b164c0>
+||`- # D2 [99 B]
+||+- D2: <dict object at 0x1e4a9b16400>
+||`- # D2 [99 B]
+||+- D2: <dict object at 0x1e4a9b16700>
+||`- # D2 [99 B]
+||+- D2: <dict object at 0x1e4a9b16440>
+||`- # D2 [99 B]
+||+- D2: <dict object at 0x1e4a9b16a00>
+||`- # D2 [99 B]
+||+- D2: <dict object at 0x1e4a9b16a40>
+||`- # D2 [99 B]
+||+- D2: <dict object at 0x1e4a9b16740>
+||`- # D2 [99 B]
+||+- D2: <dict object at 0x1e4a9b16980>
+||`- # D2 [99 B]
+||+- D2: <dict object at 0x1e4a9b16900>
+||`- # D2 [99 B]
+||+- D2: <dict object at 0x1e4a9b169c0>
+||`- # D2 [99 B]
+||+- D2: <dict object at 0x1e4a9b16880>
+||`- # D2 [99 B]
+||+- D2: <dict object at 0x1e4a9b16940>
+||`- # D2 [99 B]
+||+- D2: <dict object at 0x1e4a9b16800>
+||`- # D2 [99 B]
+||+- D2: <dict object at 0x1e4a9b168c0>
+||`- # D2 [99 B]
+||+- D2: <dict object at 0x1e4a9b16780>
+||`- # D2 [99 B]
+||+- D2: <dict object at 0x1e4a9b16840>
+||`- # D2 [99 B]
+||+- D2: <dict object at 0x1e4a9b167c0>
+||`- # D2 [99 B]
+||+- D2: <dict object at 0x1e4a9b16a80>
+||`- # D2 [99 B]
+||+- D2: <dict object at 0x1e4a9b15c80>
+||`- # D2 [99 B]
+||+- D2: <dict object at 0x1e4a9b16d80>
+||`- # D2 [99 B]
+||+- D2: <dict object at 0x1e4a9b16d40>
+||`- # D2 [99 B]
+||+- D2: <dict object at 0x1e4a9b16d00>
+||`- # D2 [99 B]
+||+- D2: <dict object at 0x1e4a9b16cc0>
+||`- # D2 [99 B]
+|`- # D2 [3 MiB]
+|+- D2: <dict object at 0x1e4a9aa9540>
+|`- # D2 [109 B]
+|+- D2: <dict object at 0x1e4a9ae2fc0>
+|`- # D2 [2 B]
+|+- D2: <dict object at 0x1e4a9ad3780>
+||+- D2: <dict object at 0x1e4a9ae3480>
+||`- # D2 [2 B]
+||+- D2: <dict object at 0x1e4a9aa9400>
+||`- # D2 [2 B]
+||+- D2: <dict object at 0x1e4a9aa9680>
+||`- # D2 [2 B]
+||+- D2: <dict object at 0x1e4a9aa97c0>
+||`- # D2 [2 B]
+||+- D2: <dict object at 0x1e4a9aa9900>
+||`- # D2 [2 B]
+||+- D2: <dict object at 0x1e4b6313e00>
+||`- # D2 [2 B]
+||+- D2: <dict object at 0x1e4b6313dc0>
+||`- # D2 [2 B]
+||+- D2: <dict object at 0x1e4b6313d80>
+||`- # D2 [2 B]
+||+- D2: <dict object at 0x1e4b6313d40>
+||`- # D2 [2 B]
+||+- D2: <dict object at 0x1e4b6313d00>
+||`- # D2 [2 B]
+||+- D2: <dict object at 0x1e4b6313cc0>
+||`- # D2 [2 B]
+||+- D2: <dict object at 0x1e4b6313c80>
+||`- # D2 [2 B]
+||+- D2: <dict object at 0x1e4b6313c40>
+||`- # D2 [2 B]
+||+- D2: <dict object at 0x1e4b6313c00>
+||`- # D2 [2 B]
+||+- D2: <dict object at 0x1e4b6313bc0>
+||`- # D2 [2 B]
+||+- D2: <dict object at 0x1e4b6313b80>
+||`- # D2 [2 B]
+||+- D2: <dict object at 0x1e4b6313b40>
+||`- # D2 [2 B]
+||+- D2: <dict object at 0x1e4b6313b00>
+||`- # D2 [2 B]
+||+- D2: <dict object at 0x1e4b6313ac0>
+||`- # D2 [2 B]
+||+- D2: <dict object at 0x1e4b6313a80>
+||`- # D2 [2 B]
+||+- D2: <dict object at 0x1e4b6312500>
+||`- # D2 [2 B]
+||+- D2: <dict object at 0x1e4b6311c40>
+||`- # D2 [2 B]
+||+- D2: <dict object at 0x1e4b631c4c0>
+||`- # D2 [2 B]
+||+- D2: <dict object at 0x1e4b631c580>
+||`- # D2 [2 B]
+|`- # D2 [172 B]
+|+- D2: <dict object at 0x1e4a9a91d00>
+|`- # D2 [394 B]
+|+- D2: <dict object at 0x1e4a9a91d40>
+|`- # D2 [342 B]
+|+- D2: <dict object at 0x1e4a9a91d80>
+|`- # D2 [1 MiB]
+|+- D2: <dict object at 0x1e4a9a91dc0>
+|`- # D2 [115 B]
+|+- D2: <dict object at 0x1e4a9b17340>
+|`- # D2 [578 B]
+|+- D2: <dict object at 0x1e4b6311b00>
+|`- # D2 [115 B]
+|+- Nu: ((197, 36), int32)
+||+- F2: <function _create_array at 0x000001E49FD9E7A0>
+||`- # F2 [31 B]
+||+- T4: <class 'numpy.ndarray'>
+||`- # T4 [20 B]
+||+- T4: <class 'numpy.dtype'>
+||`- # T4 [15 B]
+|`- # Nu [27 MiB]
+|+- D2: <dict object at 0x1e4a9a91e80>
+|`- # D2 [2 B]
+|+- D2: <dict object at 0x1e4a9a91ec0>
+|`- # D2 [2 B]
+|+- D2: <dict object at 0x1e4a9a91f00>
+|`- # D2 [2 B]
+|+- D2: <dict object at 0x1e4a9a91f40>
+|`- # D2 [2 B]
+`- # D2 [94 MiB]
+None

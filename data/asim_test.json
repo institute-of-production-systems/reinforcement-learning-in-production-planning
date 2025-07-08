@@ -1,0 +1,2045 @@
+{
+    "worker_capabilities": [
+        "wc1",
+        "wc2",
+        "wc3",
+        "wc4",
+        "wc5",
+        "wc6",
+        "wc7",
+        "intralogistics"
+    ],
+    "workers": {
+        "W1": {
+            "worker_id": "W1",
+            "provided_capabilities": [
+                "wc1",
+                "wc2"
+            ]
+        },
+        "W2": {
+            "worker_id": "W2",
+            "provided_capabilities": [
+                "wc1",
+                "wc2"
+            ]
+        },
+        "W3": {
+            "worker_id": "W3",
+            "provided_capabilities": [
+                "wc3",
+                "wc4"
+            ]
+        },
+        "W4": {
+            "worker_id": "W4",
+            "provided_capabilities": [
+                "wc3",
+                "wc4",
+                "wc5"
+            ]
+        },
+        "W5": {
+            "worker_id": "W5",
+            "provided_capabilities": [
+                "wc6"
+            ]
+        },
+        "W6": {
+            "worker_id": "W6",
+            "provided_capabilities": [
+                "wc7"
+            ]
+        },
+        "W7": {
+            "worker_id": "W7",
+            "provided_capabilities": [
+                "intralogistics"
+            ]
+        },
+        "W8": {
+            "worker_id": "W8",
+            "provided_capabilities": [
+                "intralogistics"
+            ]
+        }
+    },
+    "worker_pools": {
+        "WP1": [
+            "W1",
+            "W2"
+        ],
+        "WP2": [
+            "W3",
+            "W4"
+        ],
+        "WP3": [
+            "W7",
+            "W8"
+        ]
+    },
+    "tools": {
+        "T1": {
+            "tool_id": "T1",
+            "dynamic_properties": {},
+            "static_properties": {}
+        },
+        "T2": {
+            "tool_id": "T2",
+            "dynamic_properties": {},
+            "static_properties": {}
+        },
+        "T3": {
+            "tool_id": "T3",
+            "dynamic_properties": {},
+            "static_properties": {}
+        },
+        "T4": {
+            "tool_id": "T4",
+            "dynamic_properties": {},
+            "static_properties": {}
+        },
+        "T5": {
+            "tool_id": "T5",
+            "dynamic_properties": {},
+            "static_properties": {}
+        },
+        "T6": {
+            "tool_id": "T6",
+            "dynamic_properties": {},
+            "static_properties": {}
+        }
+    },
+    "tool_pools": {
+        "TP1": [
+            "T1",
+            "T2"
+        ],
+        "TP2": [
+            "T3",
+            "T4"
+        ],
+        "TP3": [
+            "T5",
+            "T6"
+        ]
+    },
+    "machine_capabilities": [
+        "mc1",
+        "mc2",
+        "mc3",
+        "mc4",
+        "mc5",
+        "mc6",
+        "transport"
+    ],
+    "machines": {
+        "M1": {
+            "machine_id": "M1",
+            "accepted_capabilities": [],
+            "provided_capabilities": [
+                "mc1"
+            ],
+            "compatible_tools": [
+                "T1",
+                "T2"
+            ],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {
+                "T1": {
+                    "T2": 18.0,
+                    "No tool": 10.0
+                },
+                "T2": {
+                    "T1": 15.0,
+                    "No tool": 5.0
+                },
+                "No tool": {
+                    "T1": 10.0,
+                    "T2": 8.0
+                }
+            },
+            "hardware_setup_time_unit": "min",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {
+                "T1": "ts1",
+                "T2": "ts1"
+            },
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "M2": {
+            "machine_id": "M2",
+            "accepted_capabilities": [],
+            "provided_capabilities": [
+                "mc2"
+            ],
+            "compatible_tools": [
+                "T2"
+            ],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {
+                "T2": {
+                    "No tool": 5.0
+                },
+                "No tool": {
+                    "T2": 8.0
+                }
+            },
+            "hardware_setup_time_unit": "min",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {
+                "T2": "ts1"
+            },
+            "batch_processing": true,
+            "batch_size": {
+                "C1.*": [
+                    2,
+                    10,
+                    1,
+                    ""
+                ],
+                "C4": [
+                    2,
+                    10,
+                    2,
+                    ""
+                ]
+            },
+            "diff_comp_batch": true,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "M3": {
+            "machine_id": "M3",
+            "accepted_capabilities": [],
+            "provided_capabilities": [
+                "mc3",
+                "mc4"
+            ],
+            "compatible_tools": [
+                "T3",
+                "T4"
+            ],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {
+                "T3": {
+                    "T4": 12.0,
+                    "No tool": 7.0
+                },
+                "T4": {
+                    "T3": 14.0,
+                    "No tool": 3.0
+                },
+                "No tool": {
+                    "T3": 5.0,
+                    "T4": 9.0
+                }
+            },
+            "hardware_setup_time_unit": "min",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {
+                "T3": "ts1",
+                "T4": "ts1"
+            },
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "M4": {
+            "machine_id": "M4",
+            "accepted_capabilities": [],
+            "provided_capabilities": [
+                "mc4"
+            ],
+            "compatible_tools": [
+                "T4",
+                "T5"
+            ],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {
+                "T4": {
+                    "T5": 10.0,
+                    "No tool": 3.0
+                },
+                "T5": {
+                    "T4": 10.0,
+                    "No tool": 6.0
+                },
+                "No tool": {
+                    "T4": 9.0,
+                    "T5": 6.0
+                }
+            },
+            "hardware_setup_time_unit": "min",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {
+                "T4": "ts1",
+                "T5": "ts1"
+            },
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "M5": {
+            "machine_id": "M5",
+            "accepted_capabilities": [],
+            "provided_capabilities": [
+                "mc5",
+                "mc6"
+            ],
+            "compatible_tools": [
+                "T5",
+                "T6"
+            ],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {
+                "T5": {
+                    "T6": 17.0,
+                    "No tool": 6.0
+                },
+                "T6": {
+                    "T5": 15.0,
+                    "No tool": 6.0
+                },
+                "No tool": {
+                    "T5": 6.0,
+                    "T6": 6.0
+                }
+            },
+            "hardware_setup_time_unit": "min",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {
+                "T5": "ts1",
+                "T6": "ts1"
+            },
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "M6": {
+            "machine_id": "M6",
+            "accepted_capabilities": [],
+            "provided_capabilities": [
+                "mc5",
+                "mc6"
+            ],
+            "compatible_tools": [
+                "T5",
+                "T6"
+            ],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {
+                "T5": {
+                    "T6": 17.0,
+                    "No tool": 6.0
+                },
+                "T6": {
+                    "T5": 15.0,
+                    "No tool": 6.0
+                },
+                "No tool": {
+                    "T5": 6.0,
+                    "T6": 6.0
+                }
+            },
+            "hardware_setup_time_unit": "min",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {
+                "T5": "ts1",
+                "T6": "ts1"
+            },
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "M7": {
+            "machine_id": "M7",
+            "accepted_capabilities": [
+                "intralogistics"
+            ],
+            "provided_capabilities": [
+                "transport"
+            ],
+            "compatible_tools": [],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {},
+            "hardware_setup_time_unit": "",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {},
+            "batch_processing": true,
+            "batch_size": {
+                "*": [
+                    1,
+                    10,
+                    1,
+                    ""
+                ]
+            },
+            "diff_comp_batch": true,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": true,
+            "power_consumption": 0.0
+        },
+        "M8": {
+            "machine_id": "M8",
+            "accepted_capabilities": [
+                "intralogistics"
+            ],
+            "provided_capabilities": [
+                "transport"
+            ],
+            "compatible_tools": [],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {},
+            "hardware_setup_time_unit": "",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {},
+            "batch_processing": true,
+            "batch_size": {
+                "*": [
+                    1,
+                    20,
+                    1,
+                    ""
+                ]
+            },
+            "diff_comp_batch": true,
+            "speed_factor": 1.5,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": true,
+            "power_consumption": 0.0
+        }
+    },
+    "workstations": {
+        "WS1": {
+            "workstation_id": "WS1",
+            "machine": "M1",
+            "permanent_tools": [],
+            "seized_tools": [],
+            "tools_in_use": [],
+            "allowed_tool_pools": [
+                "TP1"
+            ],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {
+                "1": {
+                    "buffer_location": 1,
+                    "idx1": "1",
+                    "diff_comp_comb": false,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "C1": {
+                            "Max. quantity": 25,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                },
+                "2": {
+                    "buffer_location": 1,
+                    "idx1": "2",
+                    "diff_comp_comb": false,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "C3": {
+                            "Max. quantity": 50,
+                            "Quantity step": 5,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "physical_output_buffers": {
+                "1": {
+                    "buffer_location": 2,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "C1.*": {
+                            "Max. quantity": 25,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                },
+                "2": {
+                    "buffer_location": 2,
+                    "idx1": "2",
+                    "diff_comp_comb": false,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "C3.D": {
+                            "Max. quantity": 20,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "wip_components": [],
+            "allowed_worker_pools": [],
+            "seized_worker": "",
+            "permanent_worker_assignment": false
+        },
+        "WS2": {
+            "workstation_id": "WS2",
+            "machine": "M2",
+            "permanent_tools": [],
+            "seized_tools": [],
+            "tools_in_use": [],
+            "allowed_tool_pools": [
+                "TP1"
+            ],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {
+                "1": {
+                    "buffer_location": 1,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 1,
+                    "comp_specific_sizes": {
+                        "C1.A": {
+                            "Max. quantity": 10,
+                            "Quantity step": 1,
+                            "Group": ""
+                        },
+                        "C1.C": {
+                            "Max. quantity": 20,
+                            "Quantity step": 2,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                },
+                "2": {
+                    "buffer_location": 1,
+                    "idx1": "2",
+                    "diff_comp_comb": false,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "C4": {
+                            "Max. quantity": 16,
+                            "Quantity step": 2,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "physical_output_buffers": {
+                "1": {
+                    "buffer_location": 2,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 1,
+                    "comp_specific_sizes": {
+                        "C2.A": {
+                            "Max. quantity": 10,
+                            "Quantity step": 1,
+                            "Group": ""
+                        },
+                        "C2.C": {
+                            "Max. quantity": 20,
+                            "Quantity step": 2,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                },
+                "2": {
+                    "buffer_location": 2,
+                    "idx1": "2",
+                    "diff_comp_comb": false,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "C4.D": {
+                            "Max. quantity": 16,
+                            "Quantity step": 2,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "wip_components": [],
+            "allowed_worker_pools": [],
+            "seized_worker": "",
+            "permanent_worker_assignment": false
+        },
+        "WS3": {
+            "workstation_id": "WS3",
+            "machine": "M3",
+            "permanent_tools": [
+                "T3",
+                "T4"
+            ],
+            "seized_tools": [],
+            "tools_in_use": [],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {
+                "1": {
+                    "buffer_location": 1,
+                    "idx1": "1",
+                    "diff_comp_comb": false,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "C2": {
+                            "Max. quantity": 10,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                },
+                "2": {
+                    "buffer_location": 1,
+                    "idx1": "2",
+                    "diff_comp_comb": true,
+                    "sequence_type": 1,
+                    "comp_specific_sizes": {
+                        "C2.*": {
+                            "Max. quantity": 12,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "physical_output_buffers": {
+                "1": {
+                    "buffer_location": 2,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "C2.B": {
+                            "Max. quantity": 15,
+                            "Quantity step": 1,
+                            "Group": ""
+                        },
+                        "C3.C": {
+                            "Max. quantity": 15,
+                            "Quantity step": 1,
+                            "Group": ""
+                        },
+                        "C5.C": {
+                            "Max. quantity": 15,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "wip_components": [],
+            "allowed_worker_pools": [
+                "WP2"
+            ],
+            "seized_worker": "",
+            "permanent_worker_assignment": false
+        },
+        "WS4": {
+            "workstation_id": "WS4",
+            "machine": "M4",
+            "permanent_tools": [],
+            "seized_tools": [],
+            "tools_in_use": [],
+            "allowed_tool_pools": [
+                "TP2"
+            ],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {
+                "1": {
+                    "buffer_location": 1,
+                    "idx1": "1",
+                    "diff_comp_comb": false,
+                    "sequence_type": 1,
+                    "comp_specific_sizes": {
+                        "C4.C": {
+                            "Max. quantity": 8,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "physical_output_buffers": {
+                "1": {
+                    "buffer_location": 2,
+                    "idx1": "1",
+                    "diff_comp_comb": false,
+                    "sequence_type": 1,
+                    "comp_specific_sizes": {},
+                    "identical_buffer": "WS9 : IN : 1"
+                }
+            },
+            "wip_components": [],
+            "allowed_worker_pools": [
+                "WP2"
+            ],
+            "seized_worker": "",
+            "permanent_worker_assignment": false
+        },
+        "WS5": {
+            "workstation_id": "WS5",
+            "machine": "M5",
+            "permanent_tools": [],
+            "seized_tools": [],
+            "tools_in_use": [],
+            "allowed_tool_pools": [
+                "TP3"
+            ],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {
+                "1": {
+                    "buffer_location": 1,
+                    "idx1": "1",
+                    "diff_comp_comb": false,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "C6": {
+                            "Max. quantity": 80,
+                            "Quantity step": 4,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                },
+                "2": {
+                    "buffer_location": 1,
+                    "idx1": "2",
+                    "diff_comp_comb": false,
+                    "sequence_type": 1,
+                    "comp_specific_sizes": {
+                        "C7.D": {
+                            "Max. quantity": 10,
+                            "Quantity step": 2,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "physical_output_buffers": {
+                "1": {
+                    "buffer_location": 2,
+                    "idx1": "1",
+                    "diff_comp_comb": false,
+                    "sequence_type": 1,
+                    "comp_specific_sizes": {
+                        "C6.D": {
+                            "Max. quantity": 12,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                },
+                "2": {
+                    "buffer_location": 2,
+                    "idx1": "2",
+                    "diff_comp_comb": false,
+                    "sequence_type": 1,
+                    "comp_specific_sizes": {},
+                    "identical_buffer": ""
+                }
+            },
+            "wip_components": [],
+            "allowed_worker_pools": [],
+            "seized_worker": "",
+            "permanent_worker_assignment": false
+        },
+        "WS6": {
+            "workstation_id": "WS6",
+            "machine": "M6",
+            "permanent_tools": [],
+            "seized_tools": [],
+            "tools_in_use": [],
+            "allowed_tool_pools": [
+                "TP3"
+            ],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {
+                "1": {
+                    "buffer_location": 1,
+                    "idx1": "1",
+                    "diff_comp_comb": false,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "C6": {
+                            "Max. quantity": 80,
+                            "Quantity step": 4,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                },
+                "2": {
+                    "buffer_location": 1,
+                    "idx1": "2",
+                    "diff_comp_comb": false,
+                    "sequence_type": 1,
+                    "comp_specific_sizes": {
+                        "C7.D": {
+                            "Max. quantity": 10,
+                            "Quantity step": 2,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "physical_output_buffers": {
+                "1": {
+                    "buffer_location": 2,
+                    "idx1": "1",
+                    "diff_comp_comb": false,
+                    "sequence_type": 1,
+                    "comp_specific_sizes": {
+                        "C6.D": {
+                            "Max. quantity": 12,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                },
+                "2": {
+                    "buffer_location": 2,
+                    "idx1": "2",
+                    "diff_comp_comb": false,
+                    "sequence_type": 1,
+                    "comp_specific_sizes": {},
+                    "identical_buffer": ""
+                }
+            },
+            "wip_components": [],
+            "allowed_worker_pools": [],
+            "seized_worker": "",
+            "permanent_worker_assignment": false
+        },
+        "WS7": {
+            "workstation_id": "WS7",
+            "machine": "",
+            "permanent_tools": [],
+            "seized_tools": [],
+            "tools_in_use": [],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {
+                "1": {
+                    "buffer_location": 1,
+                    "idx1": "1",
+                    "diff_comp_comb": false,
+                    "sequence_type": 1,
+                    "comp_specific_sizes": {
+                        "C2.A": {
+                            "Max. quantity": 20,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                },
+                "2": {
+                    "buffer_location": 1,
+                    "idx1": "2",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "C1.B": {
+                            "Max. quantity": 10,
+                            "Quantity step": 1,
+                            "Group": ""
+                        },
+                        "C2.B": {
+                            "Max. quantity": 10,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                },
+                "3": {
+                    "buffer_location": 1,
+                    "idx1": "3",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "C3.D": {
+                            "Max. quantity": 12,
+                            "Quantity step": 2,
+                            "Group": ""
+                        },
+                        "C4.D": {
+                            "Max. quantity": 12,
+                            "Quantity step": 2,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "physical_output_buffers": {
+                "1": {
+                    "buffer_location": 2,
+                    "idx1": "1",
+                    "diff_comp_comb": false,
+                    "sequence_type": 1,
+                    "comp_specific_sizes": {},
+                    "identical_buffer": ""
+                },
+                "2": {
+                    "buffer_location": 2,
+                    "idx1": "2",
+                    "diff_comp_comb": false,
+                    "sequence_type": 1,
+                    "comp_specific_sizes": {},
+                    "identical_buffer": ""
+                },
+                "3": {
+                    "buffer_location": 2,
+                    "idx1": "3",
+                    "diff_comp_comb": false,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "C5.D": {
+                            "Max. quantity": 16,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "wip_components": [],
+            "allowed_worker_pools": [
+                "WP1",
+                "WP2"
+            ],
+            "seized_worker": "",
+            "permanent_worker_assignment": false
+        },
+        "WS8": {
+            "workstation_id": "WS8",
+            "machine": "",
+            "permanent_tools": [],
+            "seized_tools": [],
+            "tools_in_use": [],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {
+                "1": {
+                    "buffer_location": 1,
+                    "idx1": "1",
+                    "diff_comp_comb": false,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "C3.C": {
+                            "Max. quantity": 16,
+                            "Quantity step": 2,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                },
+                "2": {
+                    "buffer_location": 1,
+                    "idx1": "2",
+                    "diff_comp_comb": false,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "C8": {
+                            "Max. quantity": 32,
+                            "Quantity step": 4,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "physical_output_buffers": {
+                "1": {
+                    "buffer_location": 2,
+                    "idx1": "1",
+                    "diff_comp_comb": false,
+                    "sequence_type": 1,
+                    "comp_specific_sizes": {},
+                    "identical_buffer": "WS4 : IN : 1"
+                }
+            },
+            "wip_components": [],
+            "allowed_worker_pools": [],
+            "seized_worker": "W5",
+            "permanent_worker_assignment": true
+        },
+        "WS9": {
+            "workstation_id": "WS9",
+            "machine": "",
+            "permanent_tools": [],
+            "seized_tools": [],
+            "tools_in_use": [],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {
+                "1": {
+                    "buffer_location": 1,
+                    "idx1": "1",
+                    "diff_comp_comb": false,
+                    "sequence_type": 1,
+                    "comp_specific_sizes": {
+                        "C5.C": {
+                            "Max. quantity": 8,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                },
+                "2": {
+                    "buffer_location": 1,
+                    "idx1": "2",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "C5.D": {
+                            "Max. quantity": 16,
+                            "Quantity step": 2,
+                            "Group": ""
+                        },
+                        "C6.D": {
+                            "Max. quantity": 16,
+                            "Quantity step": 2,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "physical_output_buffers": {
+                "1": {
+                    "buffer_location": 2,
+                    "idx1": "1",
+                    "diff_comp_comb": false,
+                    "sequence_type": 1,
+                    "comp_specific_sizes": {},
+                    "identical_buffer": ""
+                },
+                "2": {
+                    "buffer_location": 2,
+                    "idx1": "2",
+                    "diff_comp_comb": false,
+                    "sequence_type": 1,
+                    "comp_specific_sizes": {
+                        "C7.D": {
+                            "Max. quantity": 10,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "wip_components": [],
+            "allowed_worker_pools": [],
+            "seized_worker": "W6",
+            "permanent_worker_assignment": true
+        }
+    },
+    "product_instructions": {
+        "product_palette": {
+            "A": [
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "a1",
+                        "display_pos": [
+                            81,
+                            77
+                        ],
+                        "node_uid": 0,
+                        "components": {
+                            "C1": 1
+                        },
+                        "capabilities": [
+                            "mc1"
+                        ],
+                        "tools": {
+                            "T1": {}
+                        },
+                        "processing_time_value": 4.0,
+                        "processing_time_unit": "min",
+                        "output_name": "C1.A"
+                    },
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "a2",
+                        "display_pos": [
+                            236,
+                            78
+                        ],
+                        "node_uid": 1,
+                        "components": {
+                            "C1.A": 1
+                        },
+                        "capabilities": [
+                            "mc2"
+                        ],
+                        "tools": {
+                            "T2": {}
+                        },
+                        "processing_time_value": 8.0,
+                        "processing_time_unit": "min",
+                        "output_name": "C2.A"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "a2",
+                        "display_pos": [
+                            236,
+                            78
+                        ],
+                        "node_uid": 1,
+                        "components": {
+                            "C1.A": 1
+                        },
+                        "capabilities": [
+                            "mc2"
+                        ],
+                        "tools": {
+                            "T2": {}
+                        },
+                        "processing_time_value": 8.0,
+                        "processing_time_unit": "min",
+                        "output_name": "C2.A"
+                    },
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "a3",
+                        "display_pos": [
+                            390,
+                            79
+                        ],
+                        "node_uid": 2,
+                        "components": {
+                            "C2.A": 1
+                        },
+                        "capabilities": [
+                            "wc1"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 3.0,
+                        "processing_time_unit": "min",
+                        "output_name": "A"
+                    }
+                ]
+            ],
+            "B": [
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "b1",
+                        "display_pos": [
+                            71,
+                            45
+                        ],
+                        "node_uid": 3,
+                        "components": {
+                            "C1": 3
+                        },
+                        "capabilities": [
+                            "mc1"
+                        ],
+                        "tools": {
+                            "T2": {}
+                        },
+                        "processing_time_value": 4.0,
+                        "processing_time_unit": "min",
+                        "output_name": "C1.B"
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "b3",
+                        "display_pos": [
+                            278,
+                            103
+                        ],
+                        "node_uid": 5,
+                        "components": {
+                            "C1.B": 1,
+                            "C2.B": 1
+                        },
+                        "capabilities": [
+                            "wc2"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 9.0,
+                        "processing_time_unit": "min",
+                        "output_name": "B"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "b2",
+                        "display_pos": [
+                            71,
+                            159
+                        ],
+                        "node_uid": 4,
+                        "components": {
+                            "C2": 1
+                        },
+                        "capabilities": [
+                            "wc4",
+                            "mc3"
+                        ],
+                        "tools": {
+                            "T3": {}
+                        },
+                        "processing_time_value": 1.0,
+                        "processing_time_unit": "min",
+                        "output_name": "C2.B"
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "b3",
+                        "display_pos": [
+                            278,
+                            103
+                        ],
+                        "node_uid": 5,
+                        "components": {
+                            "C1.B": 1,
+                            "C2.B": 1
+                        },
+                        "capabilities": [
+                            "wc2"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 9.0,
+                        "processing_time_unit": "min",
+                        "output_name": "B"
+                    }
+                ]
+            ],
+            "C": [
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "c1",
+                        "display_pos": [
+                            54,
+                            66
+                        ],
+                        "node_uid": 6,
+                        "components": {
+                            "C1": 1
+                        },
+                        "capabilities": [
+                            "mc1"
+                        ],
+                        "tools": {
+                            "T1": {}
+                        },
+                        "processing_time_value": 5.0,
+                        "processing_time_unit": "min",
+                        "output_name": "C1.C"
+                    },
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "c2",
+                        "display_pos": [
+                            199,
+                            66
+                        ],
+                        "node_uid": 7,
+                        "components": {
+                            "C1.C": 1
+                        },
+                        "capabilities": [
+                            "mc2"
+                        ],
+                        "tools": {
+                            "T2": {}
+                        },
+                        "processing_time_value": 8.0,
+                        "processing_time_unit": "min",
+                        "output_name": "C2.C"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "c2",
+                        "display_pos": [
+                            199,
+                            66
+                        ],
+                        "node_uid": 7,
+                        "components": {
+                            "C1.C": 1
+                        },
+                        "capabilities": [
+                            "mc2"
+                        ],
+                        "tools": {
+                            "T2": {}
+                        },
+                        "processing_time_value": 8.0,
+                        "processing_time_unit": "min",
+                        "output_name": "C2.C"
+                    },
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "c3",
+                        "display_pos": [
+                            347,
+                            68
+                        ],
+                        "node_uid": 8,
+                        "components": {
+                            "C2.C": 1
+                        },
+                        "capabilities": [
+                            "mc3",
+                            "wc3"
+                        ],
+                        "tools": {
+                            "T3": {}
+                        },
+                        "processing_time_value": 7.0,
+                        "processing_time_unit": "min",
+                        "output_name": "C3.C"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "c3",
+                        "display_pos": [
+                            347,
+                            68
+                        ],
+                        "node_uid": 8,
+                        "components": {
+                            "C2.C": 1
+                        },
+                        "capabilities": [
+                            "mc3",
+                            "wc3"
+                        ],
+                        "tools": {
+                            "T3": {}
+                        },
+                        "processing_time_value": 7.0,
+                        "processing_time_unit": "min",
+                        "output_name": "C3.C"
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "c4",
+                        "display_pos": [
+                            504,
+                            68
+                        ],
+                        "node_uid": 9,
+                        "components": {
+                            "C3.C": 1,
+                            "C8": 4
+                        },
+                        "capabilities": [
+                            "wc6"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 8.0,
+                        "processing_time_unit": "min",
+                        "output_name": "C4.C"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "c4",
+                        "display_pos": [
+                            504,
+                            68
+                        ],
+                        "node_uid": 9,
+                        "components": {
+                            "C3.C": 1,
+                            "C8": 4
+                        },
+                        "capabilities": [
+                            "wc6"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 8.0,
+                        "processing_time_unit": "min",
+                        "output_name": "C4.C"
+                    },
+                    {
+                        "node_type": "Non-additive",
+                        "operation_name": "c5",
+                        "display_pos": [
+                            662,
+                            68
+                        ],
+                        "node_uid": 10,
+                        "components": {
+                            "C4.C": 1
+                        },
+                        "capabilities": [
+                            "mc4",
+                            "wc5"
+                        ],
+                        "tools": {
+                            "T4": {}
+                        },
+                        "processing_time_value": 10.0,
+                        "processing_time_unit": "min",
+                        "output_name": "C5.C"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Non-additive",
+                        "operation_name": "c5",
+                        "display_pos": [
+                            662,
+                            68
+                        ],
+                        "node_uid": 10,
+                        "components": {
+                            "C4.C": 1
+                        },
+                        "capabilities": [
+                            "mc4",
+                            "wc5"
+                        ],
+                        "tools": {
+                            "T4": {}
+                        },
+                        "processing_time_value": 10.0,
+                        "processing_time_unit": "min",
+                        "output_name": "C5.C"
+                    },
+                    {
+                        "node_type": "Non-additive",
+                        "operation_name": "c6",
+                        "display_pos": [
+                            818,
+                            68
+                        ],
+                        "node_uid": 11,
+                        "components": {
+                            "C5.C": 1
+                        },
+                        "capabilities": [
+                            "wc7"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 1.0,
+                        "processing_time_unit": "min",
+                        "output_name": "C"
+                    }
+                ]
+            ],
+            "D": [
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "d1",
+                        "display_pos": [
+                            69,
+                            47
+                        ],
+                        "node_uid": 12,
+                        "components": {
+                            "C3": 5
+                        },
+                        "capabilities": [
+                            "mc1"
+                        ],
+                        "tools": {
+                            "T1": {}
+                        },
+                        "processing_time_value": 9.0,
+                        "processing_time_unit": "min",
+                        "output_name": "C3.D"
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "d3",
+                        "display_pos": [
+                            241,
+                            94
+                        ],
+                        "node_uid": 14,
+                        "components": {
+                            "C3.D": 1,
+                            "C4.D": 1
+                        },
+                        "capabilities": [
+                            "wc2"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 10.0,
+                        "processing_time_unit": "min",
+                        "output_name": "C5.D"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "d2",
+                        "display_pos": [
+                            69,
+                            146
+                        ],
+                        "node_uid": 13,
+                        "components": {
+                            "C4": 1
+                        },
+                        "capabilities": [
+                            "mc2"
+                        ],
+                        "tools": {
+                            "T2": {}
+                        },
+                        "processing_time_value": 4.0,
+                        "processing_time_unit": "min",
+                        "output_name": "C4.D"
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "d3",
+                        "display_pos": [
+                            241,
+                            94
+                        ],
+                        "node_uid": 14,
+                        "components": {
+                            "C3.D": 1,
+                            "C4.D": 1
+                        },
+                        "capabilities": [
+                            "wc2"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 10.0,
+                        "processing_time_unit": "min",
+                        "output_name": "C5.D"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "d3",
+                        "display_pos": [
+                            241,
+                            94
+                        ],
+                        "node_uid": 14,
+                        "components": {
+                            "C3.D": 1,
+                            "C4.D": 1
+                        },
+                        "capabilities": [
+                            "wc2"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 10.0,
+                        "processing_time_unit": "min",
+                        "output_name": "C5.D"
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "d5",
+                        "display_pos": [
+                            405,
+                            148
+                        ],
+                        "node_uid": 15,
+                        "components": {
+                            "C5.D": 1,
+                            "C6.D": 1
+                        },
+                        "capabilities": [
+                            "wc7"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 6.0,
+                        "processing_time_unit": "min",
+                        "output_name": "C7.D"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "d4",
+                        "display_pos": [
+                            240,
+                            212
+                        ],
+                        "node_uid": 17,
+                        "components": {
+                            "C6": 4
+                        },
+                        "capabilities": [
+                            "mc5"
+                        ],
+                        "tools": {
+                            "T5": {}
+                        },
+                        "processing_time_value": 6.0,
+                        "processing_time_unit": "min",
+                        "output_name": "C6.D"
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "d5",
+                        "display_pos": [
+                            405,
+                            148
+                        ],
+                        "node_uid": 15,
+                        "components": {
+                            "C5.D": 1,
+                            "C6.D": 1
+                        },
+                        "capabilities": [
+                            "wc7"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 6.0,
+                        "processing_time_unit": "min",
+                        "output_name": "C7.D"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "d5",
+                        "display_pos": [
+                            405,
+                            148
+                        ],
+                        "node_uid": 15,
+                        "components": {
+                            "C5.D": 1,
+                            "C6.D": 1
+                        },
+                        "capabilities": [
+                            "wc7"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 6.0,
+                        "processing_time_unit": "min",
+                        "output_name": "C7.D"
+                    },
+                    {
+                        "node_type": "Non-additive",
+                        "operation_name": "d6",
+                        "display_pos": [
+                            577,
+                            147
+                        ],
+                        "node_uid": 16,
+                        "components": {
+                            "C7.D": 1
+                        },
+                        "capabilities": [
+                            "mc6"
+                        ],
+                        "tools": {
+                            "T6": {}
+                        },
+                        "processing_time_value": 7.0,
+                        "processing_time_unit": "min",
+                        "output_name": "D"
+                    }
+                ]
+            ]
+        }
+    },
+    "supply_behaviours": {
+        "C6": {
+            "component_id": "C6",
+            "allocation_type": 2,
+            "time_unit": "h",
+            "immediate_probability": 1.0,
+            "min": 1,
+            "alpha": 1,
+            "beta": 0.5
+        },
+        "C3": {
+            "component_id": "C3",
+            "allocation_type": 2,
+            "time_unit": "h",
+            "immediate_probability": 1.0,
+            "min": 1,
+            "alpha": 1,
+            "beta": 0.5
+        },
+        "C2": {
+            "component_id": "C2",
+            "allocation_type": 2,
+            "time_unit": "h",
+            "immediate_probability": 1.0,
+            "min": 1,
+            "alpha": 1,
+            "beta": 0.5
+        },
+        "C4": {
+            "component_id": "C4",
+            "allocation_type": 2,
+            "time_unit": "h",
+            "immediate_probability": 0.8,
+            "min": 6,
+            "alpha": 1,
+            "beta": 0.5
+        },
+        "C8": {
+            "component_id": "C8",
+            "allocation_type": 2,
+            "time_unit": "h",
+            "immediate_probability": 1.0,
+            "min": 1,
+            "alpha": 1,
+            "beta": 0.5
+        },
+        "C1": {
+            "component_id": "C1",
+            "allocation_type": 2,
+            "time_unit": "h",
+            "immediate_probability": 0.9,
+            "min": 1,
+            "alpha": 2,
+            "beta": 0.5
+        }
+    },
+    "inventories": {
+        "Inventory 1": {
+            "inventory_id": "Inventory 1",
+            "diff_comp_comb": false,
+            "generation_type": 2,
+            "sequence_type": 3,
+            "comp_specific_sizes": {
+                "C1": {
+                    "Max. quantity": 600,
+                    "Quantity step": 1,
+                    "Group": ""
+                }
+            },
+            "identical_buffer": ""
+        },
+        "Inventory 2": {
+            "inventory_id": "Inventory 2",
+            "diff_comp_comb": false,
+            "generation_type": 2,
+            "sequence_type": 3,
+            "comp_specific_sizes": {
+                "C3": {
+                    "Max. quantity": 400,
+                    "Quantity step": 1,
+                    "Group": ""
+                }
+            },
+            "identical_buffer": ""
+        },
+        "Inventory 3": {
+            "inventory_id": "Inventory 3",
+            "diff_comp_comb": false,
+            "generation_type": 2,
+            "sequence_type": 3,
+            "comp_specific_sizes": {
+                "C6": {
+                    "Max. quantity": 180,
+                    "Quantity step": 1,
+                    "Group": ""
+                }
+            },
+            "identical_buffer": ""
+        },
+        "Inventory 4": {
+            "inventory_id": "Inventory 4",
+            "diff_comp_comb": false,
+            "generation_type": 2,
+            "sequence_type": 3,
+            "comp_specific_sizes": {},
+            "identical_buffer": "WS2 : IN : 2"
+        },
+        "Inventory 5": {
+            "inventory_id": "Inventory 5",
+            "diff_comp_comb": false,
+            "generation_type": 2,
+            "sequence_type": 3,
+            "comp_specific_sizes": {},
+            "identical_buffer": "WS3 : IN : 1"
+        },
+        "Inventory 6": {
+            "inventory_id": "Inventory 6",
+            "diff_comp_comb": false,
+            "generation_type": 3,
+            "sequence_type": 3,
+            "comp_specific_sizes": {},
+            "identical_buffer": "WS5 : OUT : 2"
+        },
+        "Inventory 7": {
+            "inventory_id": "Inventory 7",
+            "diff_comp_comb": false,
+            "generation_type": 3,
+            "sequence_type": 3,
+            "comp_specific_sizes": {},
+            "identical_buffer": "WS6 : OUT : 2"
+        },
+        "Inventory 8": {
+            "inventory_id": "Inventory 8",
+            "diff_comp_comb": false,
+            "generation_type": 3,
+            "sequence_type": 3,
+            "comp_specific_sizes": {},
+            "identical_buffer": "WS7 : OUT : 1"
+        },
+        "Inventory 9": {
+            "inventory_id": "Inventory 9",
+            "diff_comp_comb": false,
+            "generation_type": 2,
+            "sequence_type": 3,
+            "comp_specific_sizes": {},
+            "identical_buffer": "WS8 : IN : 2"
+        },
+        "Inventory 10": {
+            "inventory_id": "Inventory 10",
+            "diff_comp_comb": false,
+            "generation_type": 3,
+            "sequence_type": 3,
+            "comp_specific_sizes": {},
+            "identical_buffer": "WS9 : OUT : 1"
+        }
+    },
+    "conveyors": {},
+    "distance_matrix": {
+        "WS1": {
+            "WS2": 4.0,
+            "WS7": 4.0
+        },
+        "WS2": {
+            "WS3": 4.0,
+            "WS7": 9.0
+        },
+        "WS3": {
+            "WS7": 4.0,
+            "WS8": 5.0,
+            "WS9": 7.0
+        },
+        "WS4": {
+            "WS9": 0.0
+        },
+        "WS5": {
+            "WS9": 5.0
+        },
+        "WS6": {
+            "WS9": 5.0
+        },
+        "WS7": {
+            "WS9": 8.0
+        },
+        "WS8": {
+            "WS3": 5.0,
+            "WS4": 0.0
+        },
+        "WS9": {
+            "WS5": 5.0,
+            "WS6": 5.0
+        },
+        "Inventory 1": {
+            "WS1": 5.0
+        },
+        "Inventory 2": {
+            "WS2": 13.0,
+            "WS1": 13.0
+        },
+        "Inventory 3": {
+            "WS5": 11.0,
+            "WS6": 5.0
+        },
+        "Inventory 4": {
+            "WS2": 0.0
+        }
+    },
+    "order_list": {
+        "order_list": {
+            "O1": {
+                "order_id": "O1",
+                "products": {
+                    "A": 10
+                },
+                "release_time": "24.09.2025 06:00",
+                "deadline": "25.09.2025 06:00"
+            },
+            "O2": {
+                "order_id": "O2",
+                "products": {
+                    "A": 3,
+                    "B": 3,
+                    "C": 2
+                },
+                "release_time": "25.09.2025 06:00",
+                "deadline": "26.09.2025 06:00"
+            },
+            "O3": {
+                "order_id": "O3",
+                "products": {
+                    "B": 50
+                },
+                "release_time": "24.09.2025 06:00",
+                "deadline": "27.09.2025 06:00"
+            },
+            "O4": {
+                "order_id": "O4",
+                "products": {
+                    "B": 10,
+                    "C": 10,
+                    "D": 6
+                },
+                "release_time": "24.09.2025 06:00",
+                "deadline": "27.09.2025 06:00"
+            },
+            "O5": {
+                "order_id": "O5",
+                "products": {
+                    "C": 6
+                },
+                "release_time": "24.09.2025 14:00",
+                "deadline": "24.09.2025 22:00"
+            },
+            "O6": {
+                "order_id": "O6",
+                "products": {
+                    "A": 2,
+                    "B": 3,
+                    "D": 4
+                },
+                "release_time": "26.09.2025 06:00",
+                "deadline": "26.09.2025 14:00"
+            },
+            "O7": {
+                "order_id": "O7",
+                "products": {
+                    "D": 20
+                },
+                "release_time": "24.09.2025 06:00",
+                "deadline": "25.09.2025 14:00"
+            },
+            "O8": {
+                "order_id": "O8",
+                "products": {
+                    "A": 10,
+                    "C": 10,
+                    "D": 10
+                },
+                "release_time": "25.09.2025 14:00",
+                "deadline": "26.09.2025 22:00"
+            }
+        }
+    },
+    "start_timestamp": 1758686439,
+    "end_timestamp": 1758945639,
+    "walking_speed": 1.4,
+    "energy_costs": 20.5
+}

@@ -2,6 +2,21 @@ from copy import copy, deepcopy
 from file_utils import object_to_dict
 from collections import defaultdict, deque
 
+class OperationNodeClean():
+    def __init__(self, node_type, operation_name='', display_pos=None, node_uid=None, components={}, capabilities=[], tools={},
+                 processing_time_value=0.0, processing_time_unit='', output_name=''):
+        self.node_type = node_type
+        self.operation_name = operation_name
+        self.display_pos = display_pos
+        self.node_uid = node_uid
+        # Operation requirements and outputs
+        self.components = components  # key: component name, value: quantity
+        self.capabilities = capabilities  # list of capabilities that are required from resources that execute this operation
+        self.tools = tools  # dictionary of required tools with requirements and effects
+        self.processing_time_value = processing_time_value  # how long the operation takes
+        self.processing_time_unit = processing_time_unit
+        self.output_name = output_name  # name of the part or subassembly that leaves the operation after processing
+
 class ProductPalette():
     '''
     The product palette of a company is stored as a dictionary with
@@ -58,24 +73,74 @@ class ProductPalette():
 
         return raw_material_names
     
+    def clean_operation_node(self, op):
+        return OperationNodeClean(node_type=op.node_type,
+                                    operation_name=op.operation_name,
+                                    display_pos=op.display_pos,
+                                    node_uid=op.node_uid,
+                                    components=op.components,
+                                    capabilities=op.capabilities,
+                                    tools=op.tools,
+                                    processing_time_value=op.processing_time_value,
+                                    processing_time_unit=op.processing_time_unit,
+                                    output_name=op.output_name)
+    
+    def clean_from_qt(self):
+        '''
+        Replaces every instance of an OperationNode by OperationNodeClean in ProductPalette,
+        removing any references to PyQT objects that are not serializable by Ray library for MuZero.
+        '''
+        palette_replacement = {}
+        for product_id, precedence_list in self.product_palette.items():
+            # Product is a list of "precedences" stored as tuples (start_node, end_node)
+            new_precedence_list = []
+            # Use node_uid as identifier to recreate the same structure as in original precedence list
+            temp_clean_op_dict = {}
+            for precedence in precedence_list:
+                source = precedence[0]
+                target = precedence[1]
+                if source.node_uid not in temp_clean_op_dict.keys():
+                    source = self.clean_operation_node(source)
+                    temp_clean_op_dict.update({source.node_uid: source})
+                else:
+                    source = temp_clean_op_dict[source.node_uid]
+                if target.node_uid not in temp_clean_op_dict.keys():
+                    target = self.clean_operation_node(target)
+                    temp_clean_op_dict.update({target.node_uid: target})
+                else:
+                    target = temp_clean_op_dict[target.node_uid]
+                new_precedence_list.append((source, target))
+            palette_replacement.update({product_id: new_precedence_list})
+        self.product_palette = palette_replacement
 
     def get_product_operations(self):
         '''Returns a dictionary that tells what operations constitute a product by a given id.'''
         product_operations = {}
-        for product_id, product in self.product_palette.items():
+        for product_id, precedence_list in self.product_palette.items():
             # Get all predecessor operations
-            predecessors = [connection[0] for connection in product]
+            predecessors = [precedence[0] for precedence in precedence_list]
             # Get all successor operations
-            successors = [connection[1] for connection in product]
+            successors = [precedence[1] for precedence in precedence_list]
             # Get the union of these two sets
             all_operations = list(set(predecessors).union(successors))
-            product_operations.update({product_id: all_operations})
+
+            # Important for Ray serialization: strip OperationNode objects of all Qt functions!
+            all_clean_operations = []
+            for op in all_operations:
+                if not isinstance(op, OperationNodeClean):
+                    op_clean = self.clean_operation_node(op)
+                    all_clean_operations.append(op_clean)
+                else:
+                    all_clean_operations.append(op)
+
+            product_operations.update({product_id: all_clean_operations})
+
         return product_operations
     
 
     def get_predecessor_ids(self, operation, product):
         '''Returns a list of predecessor ids of the operation in the product.'''
-        predecessor_ids = [connection[0].operation_name for connection in product if connection[1] == operation]
+        predecessor_ids = [connection[0].operation_name for connection in product if connection[1].node_uid == operation.node_uid]
         return list(set(predecessor_ids))
     
 
