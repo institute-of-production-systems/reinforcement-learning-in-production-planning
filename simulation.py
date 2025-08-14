@@ -11,14 +11,12 @@ from muzero.games.abstract_game import AbstractGame
 class MuZeroConfig:
     '''Taken from games/lunarlander.py
     '''
-    def __init__(self):
+    def __init__(self, production_system=None):
         # fmt: off
         # More information is available here: https://github.com/werner-duvaud/muzero-general/wiki/Hyperparameter-Optimization
 
         self.seed = 0  # Seed for numpy, torch and the game
         self.max_num_gpus = None  # Fix the maximum number of GPUs to use. It's usually faster to use a single GPU (set it to 1) if it has enough memory. None will use every GPUs available
-
-        # TODO It looks like the observation_shape is being set in the environment... Check whether this necessarily needs to be a 1D array...
 
         ### Game
         self.observation_shape = (1, 1, 8)  # Dimensions of the game observation, must be 3D (channel, height, width). For a 1D array, please reshape it to (1, 1, length of array)
@@ -35,7 +33,7 @@ class MuZeroConfig:
         ### Self-Play
         self.num_workers = 1  # Number of simultaneous threads/workers self-playing to feed the replay buffer
         self.selfplay_on_gpu = False
-        self.max_moves = 700  # Maximum number of moves if game is not finished before
+        self.max_moves = 10000  # Maximum number of moves if game is not finished before
         self.num_simulations = 50  # Number of future moves self-simulated
         self.discount = 0.999  # Chronological discount of the reward
         self.temperature_threshold = None  # Number of moves before dropping the temperature given by visit_softmax_temperature_fn to 0 (ie selecting the best action). If None, visit_softmax_temperature_fn is used every time
@@ -132,8 +130,14 @@ class ProductionSystemSimulation(AbstractGame):
     '''
 
     def __init__(self, seed=None, production_system=None):
-        self.env = load_environment('PrOPPlan-Production-System-v0', production_system, max_episode_steps=10000)
+        #self.env = load_environment('PrOPPlan-Production-System-v0', production_system, max_episode_steps=10000)
+        self.env = production_system
         print('simulation.py ProductionSystemSimulation env type', type(self.env))
+
+        # In the beginning, there is only -1 available in the legal actions
+        if self.legal_actions() == [-1]:
+            self.env.set_action(-1)
+
         #if seed is not None:
         #    print('seed', seed)
         #    self.env.seed(seed)
@@ -162,7 +166,20 @@ class ProductionSystemSimulation(AbstractGame):
         Returns:
             An array of integers, subset of the action space.
         """
-        return self.env.legal_actions()
+        #return self.env.legal_actions()
+        # while self.env.get_legal_actions() == [-1]:
+        #     if self.env.timestamp < self.env.end_timestamp:
+        #         self.env.set_action(-1)
+        #     else:
+        #         break
+
+        # In the beginning of each episode, only the "-1" action is available.
+        # Progress this simulation episode to the first actual decision point.
+        if self.env.timestamp < self.env.start_timestamp:
+            #if self.env.get_legal_actions() == [-1]:
+            self.env.set_action(-1)
+
+        return self.env.get_legal_actions()
     
     def reset(self):
         """

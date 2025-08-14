@@ -11,6 +11,8 @@ import nevergrad
 import numpy
 import os
 os.environ["RAY_PICKLE_VERBOSE_DEBUG"] = "2"
+os.environ["RAY_DEDUP_LOGS"] = "0"
+os.environ["RAY_COLOR_PREFIX"] = "1"
 import ray
 import torch
 from torch.utils.tensorboard import SummaryWriter

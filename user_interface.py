@@ -18,7 +18,7 @@ from PyQt5.QtWidgets import QInputDialog, QMenu, QMessageBox, QListWidgetItem, Q
 from PyQt5.QtWidgets import QStyledItemDelegate, QHeaderView, QCheckBox, QFrame, QScrollArea, QSlider, QGroupBox, QSizePolicy
 from PyQt5.QtWidgets import QWizard, QWizardPage, QTabWidget, QApplication, QMainWindow, QFileDialog, QStyle, QToolBar, QAction
 from PyQt5.QtWidgets import QStackedWidget, QFormLayout, QTreeView, QStackedLayout
-from PyQt5.QtCore import QUrl
+from PyQt5.QtCore import QUrl, QTimer, QItemSelectionModel, QObject, QEvent
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from product_instructions import ProductPalette
 from order_list import OrderList, Order
@@ -28,7 +28,11 @@ from plan_visualizer import SchedulePlotter, TimeSeriesPlotter
 from muzero.muzero import MuZero, CPUActor
 from file_utils import object_to_dict
 
+import os
+os.environ["RAY_DEDUP_LOGS"] = "0"
+os.environ["RAY_COLOR_PREFIX"] = "1"
 import ray
+
 import pickle
 import cloudpickle
 
@@ -153,6 +157,17 @@ class OperationDialog(QDialog):
     def add_capability_fields(self):
         capability_field = QLineEdit("Enter capability")
         self.capabilities_layout.addWidget(capability_field)
+
+        # A Note for the user to pay attention to case sensitivity
+        # if the note is already there it will be deleted to make sure its only on the bottom one time
+        if hasattr(self, "capability_hint_label"):
+            self.capabilities_layout.removeWidget(self.capability_hint_label)
+            self.capability_hint_label.deleteLater()
+            self.capability_hint_label = None
+
+        self.capability_hint_label = QLabel("⚠️ Pay attention to case sensitivity")
+        self.capability_hint_label.setStyleSheet("color: red; font-size: 9pt; margin-top: 5px;")
+        self.capabilities_layout.addWidget(self.capability_hint_label)
 
     def edit_tool_requirements_effects(self, tool_sel_combo):
         # tool requirements and effects = tre
@@ -436,6 +451,11 @@ class OperationNode(QLabel):
             self.clicked_signal.emit(self)  # Emit the node itself
         super().mousePressEvent(event)  # Call parent handler for any default behavior
 
+    def mouseDoubleClickEvent(self, event):
+        ''' components_dialog will be executed when a node ist being double clicked'''
+        components_dialog = OperationDialog(operation=self)         
+        components_dialog.exec_()
+
     def mouseMoveEvent(self, event):
         self.moved_signal.emit(self)
         """Start drag event with the label's offset."""
@@ -526,6 +546,9 @@ class GraphPanel(QWidget):
 
         self.product_selected = False  # whether any product is selected in the list
 
+
+        
+
         # Main layout for the details panel
         layout = QVBoxLayout()
 
@@ -574,12 +597,27 @@ class GraphPanel(QWidget):
             event.ignore()
 
     def dropEvent(self, event):
-        if self.product_selected == False:
+        '''if self.product_selected == False:
             if QMessageBox.Ok == QMessageBox.warning(self,
                                           "Product assignment warning",
                                           "A product from the list must be selected to save graphs properly!",
                                           QMessageBox.Ok):
                 pass
+        '''
+
+
+
+
+        # Nur erlauben, wenn wirklich ein aktives Produkt existiert
+        if not getattr(self, "active_product_id", None):
+            QMessageBox.warning(
+                self,
+                "Product assignment warning",
+                "Bitte zuerst ein Produkt in der Liste auswählen, "
+                "damit der Graph korrekt gespeichert werden kann."
+            )
+            event.ignore()
+            return
 
         node_type = event.mimeData().text()
         offset_data = event.mimeData().data("application/offset").data().decode()
@@ -770,6 +808,10 @@ class ProductInstructionsTab(QWidget):
         self.new_product_button.clicked.connect(self.create_new_product)
 
         self.product_list_widget = QListWidget()
+                                                      
+        self.product_list_widget.installEventFilter(self)                                           ### Keyboard events
+        self.product_list_widget.viewport().installEventFilter(self)                                ### Mouse events
+        self._switch_guard_active = True                                                            # erlaubt, den Filter temporär zu umgehen
         #self.product_list_widget.itemClicked.connect(self.show_product_graph)
         self.product_list_widget.currentItemChanged.connect(self.update_product_graph_display)
         self.product_list_widget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -780,12 +822,14 @@ class ProductInstructionsTab(QWidget):
 
         # Details panel with drag-and-drop workspace
         self.graph_panel = GraphPanel()
+        self.graph_panel.active_product_id = None  ############## <- neu RD
         
         # Set layout structure
         main_layout.addLayout(left_panel, 1)
         main_layout.addWidget(self.graph_panel, 3)  # Stretch details panel to fill more space
 
         self.setLayout(main_layout)
+
 
         #######################
         ### Data management ###
@@ -804,12 +848,219 @@ class ProductInstructionsTab(QWidget):
         self.product_list_widget.addItem(item)
         self.product_palette.add_product_graph(product_name, [])
 
+
+
+    def _restore_previous_selection(self, previous_item):
+        lw = self.product_list_widget
+        if previous_item is None:
+            return
+        prev_row = lw.row(previous_item)
+        if prev_row < 0:
+            prev_row = self._last_ok_row
+
+        lw.blockSignals(True)
+        sm = lw.selectionModel()
+
+        # alles abräumen und die alte Zeile wieder als current+selected setzen
+        sm.clearSelection()
+        idx = lw.model().index(prev_row, 0)
+        sm.setCurrentIndex(idx, QItemSelectionModel.ClearAndSelect | QItemSelectionModel.Current)
+        lw.setCurrentRow(prev_row)   # doppelt hält besser
+        lw.scrollToItem(lw.item(prev_row))
+        lw.blockSignals(False)
+        lw.repaint()
+    
+
+    def eventFilter(self, obj, event):
+        lw = self.product_list_widget
+
+        # --- Maus auf dem viewport() ---
+        if obj is lw.viewport():
+            et = event.type()
+            # Debug: sehen ob wir hier reinkommen
+            '''
+            print("[EF-mouse]", et, "curr=",
+                lw.currentItem().text() if lw.currentItem() else None, flush=True)
+            '''
+
+            if et in (QEvent.MouseButtonPress, QEvent.MouseButtonRelease, QEvent.MouseButtonDblClick):
+                item = lw.itemAt(event.pos())  # pos() ist viewport-Koordinate
+                if not item or item is lw.currentItem():
+                    return False
+                if self._maybe_block_switch(next_item=item):
+                    print("[EF] blocked mouse switch", flush=True)
+                    return True   # Event VERBRAUCHEN -> kein visueller Wechsel
+            return False
+
+        # --- Tastatur-Events auf der Liste selbst ---
+        if obj is lw and event.type() == QEvent.KeyPress:
+            print("[EF-key]", event.key(), "row=", lw.currentRow(), flush=True)
+            key   = event.key()
+            model = lw.model()
+            row   = lw.currentRow()
+
+            if   key in (Qt.Key_Up, Qt.Key_Left):    target = max(0, row - 1)
+            elif key in (Qt.Key_Down, Qt.Key_Right): target = min(model.rowCount()-1, row + 1)
+            elif key == Qt.Key_Home:                 target = 0
+            elif key == Qt.Key_End:                  target = model.rowCount()-1
+            elif key == Qt.Key_PageUp:               target = max(0, row - 10)
+            elif key == Qt.Key_PageDown:             target = min(model.rowCount()-1, row + 10)
+            else:                                    return False
+
+            if target != row:
+                next_item = lw.item(target)
+                if self._maybe_block_switch(next_item=next_item):
+                    print("[EF] blocked key switch", flush=True)
+                    return True
+            return False
+
+        return super().eventFilter(obj, event)
+
+
+    def _maybe_block_switch(self, next_item):
+        """Zeigt Hinweis und blockt die Selektion, wenn Nutzer bleiben will.
+        Gibt True zurück, wenn das Event VERBRAUCHT werden soll (also Wechsel verhindern)."""
+        
+        
+        dangling = self._dangling_operation_nodes()
+        if not dangling:
+            return False  # nichts zu prüfen → Event nicht verbrauchen
+
+        # dauerhaftes Blinken starten
+        self._start_blink_nodes(dangling, interval_ms=180)
+
+        # Dialog
+        box = QMessageBox(self)
+        box.setIcon(QMessageBox.Warning)
+        box.setWindowTitle("Unverbundene Schritte")
+        box.setText(
+            f"Es gibt {len(dangling)} Arbeitsschritt(e), die nicht verbunden sind.\n"
+            "Beim Wechseln gehen diese verloren."
+        )
+        stay_btn = box.addButton("Im aktuellen Produkt bleiben", QMessageBox.RejectRole)
+        go_btn   = box.addButton("Trotzdem wechseln", QMessageBox.AcceptRole)
+        box.setDefaultButton(stay_btn)
+        box.exec_()
+
+        # Blinken stoppen
+        self._stop_blink_nodes()
+
+        if box.clickedButton() is stay_btn:
+            # Event VERBRAUCHEN → Selektion bleibt unverändert (kein Blauwechsel)
+            return True
+
+        # Nutzer will wechseln → wir lassen das Event normal weiterlaufen.
+        # Optional: Wenn du beim eigentlichen Wechsel noch Code hast, der in currentItemChanged hängt,
+        # kannst du hier z. B. einen Flag setzen, um Doppel-Dialoge zu vermeiden:
+        # self._allow_next_programmatic_switch = True
+        return False
+
+    
+    def _set_node_highlight(self, node, on: bool):
+        """Node-Umrandung an/aus (QWidget oder QGraphicsItem)."""
+        # QWidget-Weg
+        if hasattr(node, "setStyleSheet"):
+            if on:
+                node.setStyleSheet("border: 2px solid orange;")
+            else:
+                node.setStyleSheet("")
+            return
+
+        # QGraphicsItem-Weg
+        if hasattr(node, "setPen"):
+            # originalen Pen merken/wiederherstellen
+            if on:
+                if not hasattr(node, "_orig_pen"):
+                    try:
+                        node._orig_pen = node.pen()
+                    except Exception:
+                        node._orig_pen = None
+                try:
+                    node.setPen(QPen(Qt.yellow, 3))
+                except Exception:
+                    pass
+            else:
+                try:
+                    if hasattr(node, "_orig_pen") and node._orig_pen is not None:
+                        node.setPen(node._orig_pen)
+                    else:
+                        node.setPen(QPen())  # reset
+                except Exception:
+                    pass
+
+
+    def _visible_operation_nodes(self):
+        """Alle sichtbaren OperationNodes im Workspace."""
+        nodes = []
+        for obj in self.graph_panel.workspace.children():
+            # robustes Duck-Typing: hat eine node_uid? dann ist's ein Node
+            if hasattr(obj, "node_uid"):
+                try:
+                    if obj.isVisible():  # QWidget/QGraphicsItem-kompatibel
+                        nodes.append(obj)
+                except Exception:
+                    nodes.append(obj)
+        return nodes
+    
+
+    def _start_blink_nodes(self, nodes, interval_ms: int = 180):
+        """Startet dauerhaftes Blinken der gegebenen Nodes."""
+        self._blink_state = {"on": False, "nodes": nodes}
+
+        def tick():
+            if not hasattr(self, "_blink_state"):
+                return  # schon gestoppt
+            self._blink_state["on"] = not self._blink_state["on"]
+            for n in self._blink_state["nodes"]:
+                self._set_node_highlight(n, self._blink_state["on"])
+            self._blink_state["timer"] = QTimer.singleShot(interval_ms, tick)
+
+        tick()
+
+    def _stop_blink_nodes(self):
+        """Beendet das Blinken und entfernt Highlights."""
+        if hasattr(self, "_blink_state"):
+            for n in self._blink_state["nodes"]:
+                self._set_node_highlight(n, False)
+            del self._blink_state
+
+    def _dangling_operation_nodes(self):
+        """
+        Liefert sichtbare Nodes, die weder als Quelle noch als Ziel in
+        self.graph_panel.connections vorkommen. Vergleicht über node_uid.
+        """
+        # alle sichtbaren Knoten einsammeln
+        visible_nodes = []
+        for obj in self.graph_panel.workspace.children():
+            if hasattr(obj, "node_uid"):
+                try:
+                    if obj.isVisible():
+                        visible_nodes.append(obj)
+                except Exception:
+                    visible_nodes.append(obj)
+
+        if not visible_nodes:
+            return []
+
+        # verbundene UIDs aus den Kanten holen
+        connected_uids = set()
+        for conn in getattr(self.graph_panel, "connections", []):
+            if not isinstance(conn, (list, tuple)) or len(conn) < 2:
+                continue
+            src, dst = conn[0], conn[1]
+            if hasattr(src, "node_uid"):
+                connected_uids.add(src.node_uid)
+            if hasattr(dst, "node_uid"):
+                connected_uids.add(dst.node_uid)
+
+        # lose = Node-UID nicht in connected_uids
+        return [n for n in visible_nodes if getattr(n, "node_uid", None) not in connected_uids]
+    
     def update_product_graph_display(self, current_item, previous_item):
         '''
         Displays the product graph of the clicked product
         '''
-        self.graph_panel.product_selected = True
-
+        
         # Save product graph of previously selected product (for visualization)
         if previous_item:
             self.clean_up_product_palette()
@@ -826,9 +1077,10 @@ class ProductInstructionsTab(QWidget):
             connection[0].setHidden(True)
             connection[1].setHidden(True)
             self.graph_panel.update()
-
+        
         # Show and load the GraphPanel with the selected product's graph
         sel_prod_id = current_item.text()
+        self.graph_panel.active_product_id = sel_prod_id   ############ <- neu RD
         try:
             # Logic to load and display the production graph for the clicked product
             for connection in self.product_palette.product_palette[sel_prod_id]:
@@ -837,6 +1089,8 @@ class ProductInstructionsTab(QWidget):
                 self.graph_panel.connections.append(connection)
         except KeyError:
             print(f"Product {sel_prod_id} has no production graph!")
+        
+        self._last_ok_row = self.product_list_widget.currentRow()
 
     def save_product_graph(self, item):
         '''
@@ -1447,6 +1701,7 @@ class ProductionResourcesTab(QWidget):
         self.workers_list_widget = QListWidget()
         self.workers_list_widget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         workers_layout.addWidget(self.workers_list_widget)
+        self.workers_list_widget.itemDoubleClicked.connect(self.edit_workers_by_item)
 
         # Worker pool list
         worker_pools_layout = QVBoxLayout()
@@ -1469,6 +1724,8 @@ class ProductionResourcesTab(QWidget):
         self.worker_pool_list_widget = QListWidget()
         self.worker_pool_list_widget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         worker_pools_layout.addWidget(self.worker_pool_list_widget)
+        self.worker_pool_list_widget.itemDoubleClicked.connect(self.edit_worker_pool_by_item)
+        
 
         # Machine capabilities
         machine_capabilities_layout = QVBoxLayout()
@@ -1514,6 +1771,7 @@ class ProductionResourcesTab(QWidget):
         self.machines_list_widget = QListWidget()
         self.machines_list_widget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         machines_layout.addWidget(self.machines_list_widget)
+        self.machines_list_widget.itemDoubleClicked.connect(self.edit_machines_by_item) 
 
         # Add Workstation
         workstation_layout = QVBoxLayout()
@@ -1536,6 +1794,7 @@ class ProductionResourcesTab(QWidget):
         self.workstation_list_widget = QListWidget()
         self.workstation_list_widget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         workstation_layout.addWidget(self.workstation_list_widget)
+        self.workstation_list_widget.itemDoubleClicked.connect(self.edit_workstation_by_item)
 
         # Tools
         tools_layout = QVBoxLayout()
@@ -1558,6 +1817,7 @@ class ProductionResourcesTab(QWidget):
         self.tool_list_widget = QListWidget()
         self.tool_list_widget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         tools_layout.addWidget(self.tool_list_widget)
+        self.tool_list_widget.itemDoubleClicked.connect(self.edit_tool_by_item) 
 
         # Tool pools
         toolpools_layout = QVBoxLayout()
@@ -1580,6 +1840,7 @@ class ProductionResourcesTab(QWidget):
         self.toolpools_list_widget = QListWidget()
         self.toolpools_list_widget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         toolpools_layout.addWidget(self.toolpools_list_widget)
+        self.toolpools_list_widget.itemDoubleClicked.connect(self.edit_toolpool_by_item)  
 
         self.resources_grid_layout.addLayout(worker_capabilities_layout, 0, 0)
         self.resources_grid_layout.addLayout(workers_layout, 0, 1)
@@ -1642,6 +1903,75 @@ class ProductionResourcesTab(QWidget):
         self.workers_list_widget.customContextMenuRequested.connect(self.show_worker_menu)
         
 
+    def edit_workers_by_item(self, item):
+        edit_dialog = QDialog()
+        edit_dialog.setWindowTitle(f"Properties of worker {item.text()}")
+
+        # Main layout for the dialog
+        worker_edit_layout = QVBoxLayout()
+        prov_cap_label = QLabel("Provided capabilities:")
+        prov_cap_label.setFixedWidth(400)
+        worker_edit_layout.addWidget(prov_cap_label)
+
+        # Button to add a capability of this worker
+        def add_worker_cap_row():
+            capability_selection = QComboBox()
+            lw = self.resources_grid_layout.itemAtPosition(0,0).layout().itemAt(2).widget()
+            items = [lw.item(x).text() for x in range(lw.count())]
+            wrkr_caps = list(items)
+            capability_selection.addItems(wrkr_caps)
+            edit_dialog.layout().itemAt(2).layout().addWidget(capability_selection)
+        
+        add_cap_button = QPushButton("Add capability")
+        add_cap_button.clicked.connect(add_worker_cap_row)
+        worker_edit_layout.addWidget(add_cap_button)
+
+        # Placeholder for capability drop-downs
+        wrkr_cap_lt = QVBoxLayout()  # only for holding the QComboBoxes with selected capabilities
+        worker_edit_layout.addLayout(wrkr_cap_lt)
+
+        # To load previously saved worker capabilities
+        def load_worker_data():
+            if self.production_system.workers:
+                try:
+                    worker = self.production_system.workers[item.text()]
+                    if worker.provided_capabilities:
+                        for c in worker.provided_capabilities:
+                            capability_name_field = QComboBox()
+                            lw = self.resources_grid_layout.itemAtPosition(0,0).layout().itemAt(2).widget()
+                            capas = [lw.item(x).text() for x in range(lw.count())]
+                            capability_name_field.addItems(capas)
+                            i = capability_name_field.findText(c)
+                            capability_name_field.setCurrentIndex(i)
+                            edit_dialog.layout().itemAt(2).layout().addWidget(capability_name_field)
+                except KeyError:
+                    print(f"No information about worker {item.text()} is stored yet.")
+            else:
+                # there are no workers saved yet
+                return
+
+        def save_worker_capability_list():
+            capa_list = []
+            for i in range(wrkr_cap_lt.count()):
+                c = wrkr_cap_lt.itemAt(i).widget().currentText()
+                capa_list.append(c)
+            self.production_system.workers.update({item.text(): Worker(worker_id=item.text(), provided_capabilities=capa_list)})
+
+        def accept():
+            save_worker_capability_list()
+
+        # Dialog buttons
+        QBtn = QDialogButtonBox.Save | QDialogButtonBox.Cancel
+        buttonBox = QDialogButtonBox(QBtn)
+        buttonBox.accepted.connect(accept)
+        buttonBox.accepted.connect(edit_dialog.accept)
+        buttonBox.rejected.connect(edit_dialog.reject)
+        worker_edit_layout.addWidget(buttonBox)
+
+        edit_dialog.setLayout(worker_edit_layout)
+        load_worker_data()
+        edit_dialog.exec()
+
     def show_worker_menu(self,position):
         menu = QMenu()
         rename_action = menu.addAction("Rename")
@@ -1668,73 +1998,8 @@ class ProductionResourcesTab(QWidget):
             row = self.workers_list_widget.row(item)
             self.workers_list_widget.takeItem(row)
         elif action == edit_action:
-            edit_dialog = QDialog()
-            edit_dialog.setWindowTitle(f"Properties of worker {item.text()}")
-
-            # Main layout for the dialog
-            worker_edit_layout = QVBoxLayout()
-            prov_cap_label = QLabel("Provided capabilities:")
-            prov_cap_label.setFixedWidth(400)
-            worker_edit_layout.addWidget(prov_cap_label)
-
-            # Button to add a capability of this worker
-            def add_worker_cap_row():
-                capability_selection = QComboBox()
-                lw = self.resources_grid_layout.itemAtPosition(0,0).layout().itemAt(2).widget()
-                items = [lw.item(x).text() for x in range(lw.count())]
-                wrkr_caps = list(items)
-                capability_selection.addItems(wrkr_caps)
-                edit_dialog.layout().itemAt(2).layout().addWidget(capability_selection)
+            self.edit_workers_by_item(item)
             
-            add_cap_button = QPushButton("Add capability")
-            add_cap_button.clicked.connect(add_worker_cap_row)
-            worker_edit_layout.addWidget(add_cap_button)
-
-            # Placeholder for capability drop-downs
-            wrkr_cap_lt = QVBoxLayout()  # only for holding the QComboBoxes with selected capabilities
-            worker_edit_layout.addLayout(wrkr_cap_lt)
-
-            # To load previously saved worker capabilities
-            def load_worker_data():
-                if self.production_system.workers:
-                    try:
-                        worker = self.production_system.workers[item.text()]
-                        if worker.provided_capabilities:
-                            for c in worker.provided_capabilities:
-                                capability_name_field = QComboBox()
-                                lw = self.resources_grid_layout.itemAtPosition(0,0).layout().itemAt(2).widget()
-                                capas = [lw.item(x).text() for x in range(lw.count())]
-                                capability_name_field.addItems(capas)
-                                i = capability_name_field.findText(c)
-                                capability_name_field.setCurrentIndex(i)
-                                edit_dialog.layout().itemAt(2).layout().addWidget(capability_name_field)
-                    except KeyError:
-                        print(f"No information about worker {item.text()} is stored yet.")
-                else:
-                    # there are no workers saved yet
-                    return
-
-            def save_worker_capability_list():
-                capa_list = []
-                for i in range(wrkr_cap_lt.count()):
-                    c = wrkr_cap_lt.itemAt(i).widget().currentText()
-                    capa_list.append(c)
-                self.production_system.workers.update({item.text(): Worker(worker_id=item.text(), provided_capabilities=capa_list)})
-
-            def accept():
-                save_worker_capability_list()
-
-            # Dialog buttons
-            QBtn = QDialogButtonBox.Save | QDialogButtonBox.Cancel
-            buttonBox = QDialogButtonBox(QBtn)
-            buttonBox.accepted.connect(accept)
-            buttonBox.accepted.connect(edit_dialog.accept)
-            buttonBox.rejected.connect(edit_dialog.reject)
-            worker_edit_layout.addWidget(buttonBox)
-
-            edit_dialog.setLayout(worker_edit_layout)
-            load_worker_data()
-            edit_dialog.exec()
     
     def add_new_pool(self, pool_id=None, provided_list=None):
         if provided_list is None:
@@ -1750,6 +2015,68 @@ class ProductionResourcesTab(QWidget):
         self.worker_pool_list_widget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.worker_pool_list_widget.customContextMenuRequested.connect(self.show_pool_menu)   
         
+
+    def edit_worker_pool_by_item(self, item):
+        edit_dialog = QDialog()
+        edit_dialog.setWindowTitle(f"Properties of worker pool {item.text()}")
+        # Main layout for the dialog
+        worker_pool_edit_layout = QVBoxLayout()
+        assigned_workers_label = QLabel("Assigned workers:")
+        assigned_workers_label.setFixedWidth(400)
+        worker_pool_edit_layout.addWidget(assigned_workers_label)
+        # Button to add a worker to this pool
+        def add_worker_row():
+            worker_selection = QComboBox()
+            lw = self.resources_grid_layout.itemAtPosition(0,1).layout().itemAt(2).widget()
+            items = [lw.item(x).text() for x in range(lw.count())]
+            wrkrs = list(items)
+            worker_selection.addItems(wrkrs)
+            edit_dialog.layout().itemAt(2).layout().addWidget(worker_selection)
+        add_wrkr_button = QPushButton("Add worker")
+        add_wrkr_button.clicked.connect(add_worker_row)
+        worker_pool_edit_layout.addWidget(add_wrkr_button)
+        # Placeholder for worker drop-downs
+        wrkr_lt = QVBoxLayout()
+        worker_pool_edit_layout.addLayout(wrkr_lt)
+
+        # To load previously saved workers
+        def load_workers():
+            if not self.production_system.worker_pools:
+                return
+            try:
+                worker_list = self.production_system.worker_pools[item.text()]
+                if worker_list:
+                    for w in worker_list:
+                        worker_field = QComboBox()
+                        lw = self.resources_grid_layout.itemAtPosition(0,1).layout().itemAt(2).widget()
+                        wrkrs = [lw.item(x).text() for x in range(lw.count())]
+                        worker_field.addItems(wrkrs)
+                        i = worker_field.findText(w)
+                        worker_field.setCurrentIndex(i)
+                        edit_dialog.layout().itemAt(2).layout().addWidget(worker_field)
+            except KeyError:
+                print(f"No information about Worker Pool {item.text()} has been stored yet.")
+
+        def save_worker_list():
+            wrkr_list = []
+            for i in range(wrkr_lt.count()):
+                w = wrkr_lt.itemAt(i).widget().currentText()
+                wrkr_list.append(w)
+            self.production_system.worker_pools.update({item.text(): wrkr_list})
+
+        def accept():
+            save_worker_list()
+
+        # Dialog buttons
+        QBtn = QDialogButtonBox.Save | QDialogButtonBox.Cancel
+        buttonBox = QDialogButtonBox(QBtn)
+        buttonBox.accepted.connect(accept)
+        buttonBox.accepted.connect(edit_dialog.accept)
+        buttonBox.rejected.connect(edit_dialog.reject)
+        worker_pool_edit_layout.addWidget(buttonBox)
+        edit_dialog.setLayout(worker_pool_edit_layout)
+        load_workers()
+        edit_dialog.exec()
 
     def show_pool_menu(self,position):   
         menu = QMenu()
@@ -1775,70 +2102,11 @@ class ProductionResourcesTab(QWidget):
             row = self.worker_pool_list_widget.row(item)
             self.worker_pool_list_widget.takeItem(row)
         elif action == edit_action:
-            edit_dialog = QDialog()
-            edit_dialog.setWindowTitle(f"Properties of worker pool {item.text()}")
-            # Main layout for the dialog
-            worker_pool_edit_layout = QVBoxLayout()
-            assigned_workers_label = QLabel("Assigned workers:")
-            assigned_workers_label.setFixedWidth(400)
-            worker_pool_edit_layout.addWidget(assigned_workers_label)
-            # Button to add a worker to this pool
-            def add_worker_row():
-                worker_selection = QComboBox()
-                lw = self.resources_grid_layout.itemAtPosition(0,1).layout().itemAt(2).widget()
-                items = [lw.item(x).text() for x in range(lw.count())]
-                wrkrs = list(items)
-                worker_selection.addItems(wrkrs)
-                edit_dialog.layout().itemAt(2).layout().addWidget(worker_selection)
-            add_wrkr_button = QPushButton("Add worker")
-            add_wrkr_button.clicked.connect(add_worker_row)
-            worker_pool_edit_layout.addWidget(add_wrkr_button)
-            # Placeholder for worker drop-downs
-            wrkr_lt = QVBoxLayout()
-            worker_pool_edit_layout.addLayout(wrkr_lt)
-
-            # To load previously saved workers
-            def load_workers():
-                if not self.production_system.worker_pools:
-                    return
-                try:
-                    worker_list = self.production_system.worker_pools[item.text()]
-                    if worker_list:
-                        for w in worker_list:
-                            worker_field = QComboBox()
-                            lw = self.resources_grid_layout.itemAtPosition(0,1).layout().itemAt(2).widget()
-                            wrkrs = [lw.item(x).text() for x in range(lw.count())]
-                            worker_field.addItems(wrkrs)
-                            i = worker_field.findText(w)
-                            worker_field.setCurrentIndex(i)
-                            edit_dialog.layout().itemAt(2).layout().addWidget(worker_field)
-                except KeyError:
-                    print(f"No information about Worker Pool {item.text()} has been stored yet.")
-
-            def save_worker_list():
-                wrkr_list = []
-                for i in range(wrkr_lt.count()):
-                    w = wrkr_lt.itemAt(i).widget().currentText()
-                    wrkr_list.append(w)
-                self.production_system.worker_pools.update({item.text(): wrkr_list})
-
-            def accept():
-                save_worker_list()
-
-            # Dialog buttons
-            QBtn = QDialogButtonBox.Save | QDialogButtonBox.Cancel
-            buttonBox = QDialogButtonBox(QBtn)
-            buttonBox.accepted.connect(accept)
-            buttonBox.accepted.connect(edit_dialog.accept)
-            buttonBox.rejected.connect(edit_dialog.reject)
-            worker_pool_edit_layout.addWidget(buttonBox)
-            edit_dialog.setLayout(worker_pool_edit_layout)
-            load_workers()
-            edit_dialog.exec()
-
+            self.edit_worker_pool_by_item(item)
+            
     def add_new_tool(self, provided_dict=None):
         if provided_dict is None:
-            i = self.tool_list_widget.count()
+            i = self.tool_list_widget.count() + 1
             tool_name = "Tool " + str(i)
             item = QListWidgetItem(tool_name)  
             self.tool_list_widget.addItem(item)
@@ -1875,6 +2143,112 @@ class ProductionResourcesTab(QWidget):
         dtp_table.setItem(row_position, 9, QTableWidgetItem(""))  # cost per unit -
         # Costs per unit change will be calculated from required energy and energy prices but can be input manually
 
+    def edit_tool_by_item(self, item):
+        edit_dialog = QDialog()
+        edit_dialog.setWindowTitle(f"Properties of tool {item.text()}")
+        edit_dialog.setMinimumWidth(1000)
+        tool_edit_layout = QVBoxLayout()
+
+        # Button to add a static tool property
+        add_stat_tool_prop_btn = QPushButton("Add static property")
+        tool_edit_layout.addWidget(add_stat_tool_prop_btn)
+        # Table for static tool properties
+        stp_table = QTableWidget()
+        stp_table.setColumnCount(3)
+        stp_table.setHorizontalHeaderLabels(["Property", "Value", "Unit"])
+        stp_table.setColumnWidth(0, 150)
+        stp_table.setColumnWidth(1, 80)
+        stp_table.setColumnWidth(2, 80)
+        stp_table.setMinimumHeight(100)
+        tool_edit_layout.addWidget(stp_table)
+        add_stat_tool_prop_btn.clicked.connect(lambda:self.add_static_tool_property(stp_table))
+        # Button to add a dynamic tool property
+        add_dyn_tool_prop_btn = QPushButton("Add dynamic property")
+        tool_edit_layout.addWidget(add_dyn_tool_prop_btn)
+        tool_edit_layout.addWidget(QLabel("Costs per unit change will be calculated from required energy and energy prices but can be input manually."))
+        # Table for dynamic tool properties
+        dtp_table = QTableWidget()
+        dtp_table.setColumnCount(10)
+        dtp_table.setHorizontalHeaderLabels(["Property", "Min", "Max", "Unit", "Time(+)\n[s/unit]", "Energy(+)\n[Wh/unit]", "Cost(+)\n[€/unit]", "Time(-)\n[s/unit]", "Energy(-)\n[Wh/unit]", "Cost(-)\n[€/unit]"])
+        dtp_table.setColumnWidth(0, 150)
+        dtp_table.setColumnWidth(1, 80)
+        dtp_table.setColumnWidth(2, 80)
+        dtp_table.setColumnWidth(3, 80)
+        dtp_table.setColumnWidth(4, 80)
+        dtp_table.setColumnWidth(5, 80)
+        dtp_table.setColumnWidth(6, 80)
+        dtp_table.setColumnWidth(7, 80)
+        dtp_table.setColumnWidth(8, 80)
+        dtp_table.setColumnWidth(9, 80)
+        dtp_table.setMinimumHeight(100)
+        tool_edit_layout.addWidget(dtp_table)
+        add_dyn_tool_prop_btn.clicked.connect(lambda:self.add_dynamic_tool_property(dtp_table))
+        # Save and Cancel buttons
+
+        # To load previously saved tool properties
+        def load_tool_properties():
+            if self.production_system.tools:
+                tool = self.production_system.tools[item.text()]  # gets a Tool object by its ID
+                if tool:
+                    print("Loaded from memory:")
+                    print(tool.static_properties)
+                    print(tool.dynamic_properties)
+                    for k,v in tool.static_properties.items():
+                        row_position = stp_table.rowCount()
+                        stp_table.insertRow(row_position)
+                        stp_table.setItem(row_position, 0, QTableWidgetItem(k))
+                        stp_table.setItem(row_position, 1, QTableWidgetItem(str(v['Value'])))
+                        stp_table.setItem(row_position, 2, QTableWidgetItem(str(v['Unit'])))
+                    for k,v in tool.dynamic_properties.items():
+                        row_position = dtp_table.rowCount()
+                        dtp_table.insertRow(row_position)
+                        dtp_table.setItem(row_position, 0, QTableWidgetItem(k))
+                        dtp_table.setItem(row_position, 1, QTableWidgetItem(str(v['Min'])))
+                        dtp_table.setItem(row_position, 2, QTableWidgetItem(str(v['Max'])))
+                        dtp_table.setItem(row_position, 3, QTableWidgetItem(str(v['Unit'])))
+                        dtp_table.setItem(row_position, 4, QTableWidgetItem(str(v['Time/unit+'])))
+                        dtp_table.setItem(row_position, 5, QTableWidgetItem(str(v['Energy/unit+'])))
+                        dtp_table.setItem(row_position, 6, QTableWidgetItem('' if v['Cost/unit+'] is None else str(v['Cost/unit+'])))
+                        dtp_table.setItem(row_position, 7, QTableWidgetItem(str(v['Time/unit-'])))
+                        dtp_table.setItem(row_position, 8, QTableWidgetItem(str(v['Energy/unit-'])))
+                        dtp_table.setItem(row_position, 9, QTableWidgetItem('' if v['Cost/unit-'] is None else str(v['Cost/unit-'])))
+            else:
+                # there are no tools saved yet
+                return
+
+        def save_tool_properties():
+            stp = dict()
+            dtp = dict()
+            for row in range(stp_table.rowCount()):
+                stp.update({stp_table.item(row,0).text(): {'Value': float(stp_table.item(row,1).text()),
+                                                            'Unit': stp_table.item(row,2).text()}})
+            for row in range(dtp_table.rowCount()):
+                dtp.update({dtp_table.item(row,0).text(): {'Min': float(dtp_table.item(row,1).text()),
+                                                            'Max': float(dtp_table.item(row,2).text()),
+                                                            'Unit': dtp_table.item(row,3).text(),
+                                                            'Time/unit+': float(dtp_table.item(row,4).text()),
+                                                            'Energy/unit+': float(dtp_table.item(row,5).text()),
+                                                            'Cost/unit+': None if dtp_table.item(row,6).text()=='' else float(dtp_table.item(row,6).text()),
+                                                            'Time/unit-': float(dtp_table.item(row,7).text()),
+                                                            'Energy/unit-': float(dtp_table.item(row,8).text()),
+                                                            'Cost/unit-': None if dtp_table.item(row,9).text()=='' else float(dtp_table.item(row,9).text())}})
+            self.production_system.tools.update({item.text(): Tool(tool_id=item.text(), static_properties=stp, dynamic_properties=dtp)})
+
+        def accept():
+            save_tool_properties()
+
+        # Dialog buttons
+        QBtn = QDialogButtonBox.Save | QDialogButtonBox.Cancel
+        buttonBox = QDialogButtonBox(QBtn)
+        buttonBox.accepted.connect(accept)
+        buttonBox.accepted.connect(edit_dialog.accept)
+        buttonBox.rejected.connect(edit_dialog.reject)
+        tool_edit_layout.addWidget(buttonBox)
+
+        edit_dialog.setLayout(tool_edit_layout)
+        load_tool_properties()
+        edit_dialog.exec_()
+
     def show_tool_menu(self, position):
         menu = QMenu()
         rename_action = menu.addAction("Rename")
@@ -1902,110 +2276,8 @@ class ProductionResourcesTab(QWidget):
             row = self.tool_list_widget.row(item)
             self.tool_list_widget.takeItem(row)
         elif action == edit_action:
-            edit_dialog = QDialog()
-            edit_dialog.setWindowTitle(f"Properties of tool {item.text()}")
-            edit_dialog.setMinimumWidth(1000)
-            tool_edit_layout = QVBoxLayout()
-
-            # Button to add a static tool property
-            add_stat_tool_prop_btn = QPushButton("Add static property")
-            tool_edit_layout.addWidget(add_stat_tool_prop_btn)
-            # Table for static tool properties
-            stp_table = QTableWidget()
-            stp_table.setColumnCount(3)
-            stp_table.setHorizontalHeaderLabels(["Property", "Value", "Unit"])
-            stp_table.setColumnWidth(0, 150)
-            stp_table.setColumnWidth(1, 80)
-            stp_table.setColumnWidth(2, 80)
-            stp_table.setMinimumHeight(100)
-            tool_edit_layout.addWidget(stp_table)
-            add_stat_tool_prop_btn.clicked.connect(lambda:self.add_static_tool_property(stp_table))
-            # Button to add a dynamic tool property
-            add_dyn_tool_prop_btn = QPushButton("Add dynamic property")
-            tool_edit_layout.addWidget(add_dyn_tool_prop_btn)
-            tool_edit_layout.addWidget(QLabel("Costs per unit change will be calculated from required energy and energy prices but can be input manually."))
-            # Table for dynamic tool properties
-            dtp_table = QTableWidget()
-            dtp_table.setColumnCount(10)
-            dtp_table.setHorizontalHeaderLabels(["Property", "Min", "Max", "Unit", "Time(+)\n[s/unit]", "Energy(+)\n[Wh/unit]", "Cost(+)\n[€/unit]", "Time(-)\n[s/unit]", "Energy(-)\n[Wh/unit]", "Cost(-)\n[€/unit]"])
-            dtp_table.setColumnWidth(0, 150)
-            dtp_table.setColumnWidth(1, 80)
-            dtp_table.setColumnWidth(2, 80)
-            dtp_table.setColumnWidth(3, 80)
-            dtp_table.setColumnWidth(4, 80)
-            dtp_table.setColumnWidth(5, 80)
-            dtp_table.setColumnWidth(6, 80)
-            dtp_table.setColumnWidth(7, 80)
-            dtp_table.setColumnWidth(8, 80)
-            dtp_table.setColumnWidth(9, 80)
-            dtp_table.setMinimumHeight(100)
-            tool_edit_layout.addWidget(dtp_table)
-            add_dyn_tool_prop_btn.clicked.connect(lambda:self.add_dynamic_tool_property(dtp_table))
-            # Save and Cancel buttons
-
-            # To load previously saved tool properties
-            def load_tool_properties():
-                if self.production_system.tools:
-                    tool = self.production_system.tools[item.text()]  # gets a Tool object by its ID
-                    if tool:
-                        print("Loaded from memory:")
-                        print(tool.static_properties)
-                        print(tool.dynamic_properties)
-                        for k,v in tool.static_properties.items():
-                            row_position = stp_table.rowCount()
-                            stp_table.insertRow(row_position)
-                            stp_table.setItem(row_position, 0, QTableWidgetItem(k))
-                            stp_table.setItem(row_position, 1, QTableWidgetItem(str(v['Value'])))
-                            stp_table.setItem(row_position, 2, QTableWidgetItem(str(v['Unit'])))
-                        for k,v in tool.dynamic_properties.items():
-                            row_position = dtp_table.rowCount()
-                            dtp_table.insertRow(row_position)
-                            dtp_table.setItem(row_position, 0, QTableWidgetItem(k))
-                            dtp_table.setItem(row_position, 1, QTableWidgetItem(str(v['Min'])))
-                            dtp_table.setItem(row_position, 2, QTableWidgetItem(str(v['Max'])))
-                            dtp_table.setItem(row_position, 3, QTableWidgetItem(str(v['Unit'])))
-                            dtp_table.setItem(row_position, 4, QTableWidgetItem(str(v['Time/unit+'])))
-                            dtp_table.setItem(row_position, 5, QTableWidgetItem(str(v['Energy/unit+'])))
-                            dtp_table.setItem(row_position, 6, QTableWidgetItem('' if v['Cost/unit+'] is None else str(v['Cost/unit+'])))
-                            dtp_table.setItem(row_position, 7, QTableWidgetItem(str(v['Time/unit-'])))
-                            dtp_table.setItem(row_position, 8, QTableWidgetItem(str(v['Energy/unit-'])))
-                            dtp_table.setItem(row_position, 9, QTableWidgetItem('' if v['Cost/unit-'] is None else str(v['Cost/unit-'])))
-                else:
-                    # there are no tools saved yet
-                    return
-
-            def save_tool_properties():
-                stp = dict()
-                dtp = dict()
-                for row in range(stp_table.rowCount()):
-                    stp.update({stp_table.item(row,0).text(): {'Value': float(stp_table.item(row,1).text()),
-                                                               'Unit': stp_table.item(row,2).text()}})
-                for row in range(dtp_table.rowCount()):
-                    dtp.update({dtp_table.item(row,0).text(): {'Min': float(dtp_table.item(row,1).text()),
-                                                               'Max': float(dtp_table.item(row,2).text()),
-                                                               'Unit': dtp_table.item(row,3).text(),
-                                                               'Time/unit+': float(dtp_table.item(row,4).text()),
-                                                               'Energy/unit+': float(dtp_table.item(row,5).text()),
-                                                               'Cost/unit+': None if dtp_table.item(row,6).text()=='' else float(dtp_table.item(row,6).text()),
-                                                               'Time/unit-': float(dtp_table.item(row,7).text()),
-                                                               'Energy/unit-': float(dtp_table.item(row,8).text()),
-                                                               'Cost/unit-': None if dtp_table.item(row,9).text()=='' else float(dtp_table.item(row,9).text())}})
-                self.production_system.tools.update({item.text(): Tool(tool_id=item.text(), static_properties=stp, dynamic_properties=dtp)})
-
-            def accept():
-                save_tool_properties()
-
-            # Dialog buttons
-            QBtn = QDialogButtonBox.Save | QDialogButtonBox.Cancel
-            buttonBox = QDialogButtonBox(QBtn)
-            buttonBox.accepted.connect(accept)
-            buttonBox.accepted.connect(edit_dialog.accept)
-            buttonBox.rejected.connect(edit_dialog.reject)
-            tool_edit_layout.addWidget(buttonBox)
-
-            edit_dialog.setLayout(tool_edit_layout)
-            load_tool_properties()
-            edit_dialog.exec_()
+            self.edit_tool_by_item(item)
+           
 
     def add_new_machine_capability(self, provided_str=None):
         cap_name = ''
@@ -2070,7 +2342,520 @@ class ProductionResourcesTab(QWidget):
                                                                         tool_slots=provided_dict['tool_slots'])})
         self.machines_list_widget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.machines_list_widget.customContextMenuRequested.connect(self.show_machine_menu)
+
+    def edit_machines_by_item(self, item):
+        edit_dialog = QDialog()
+        edit_dialog.setWindowTitle(f"Properties of machine {item.text()}")
+
+        # Main layout for the dialog
+        machine_edit_layout = QGridLayout()
+
+        # Box for accepted capabilities
+        acc_cap_lt = QVBoxLayout()
+        acc_cap_label = QLabel("Accepted capabilities:")
+        acc_cap_label.setFixedWidth(200)
+        lw = self.resources_grid_layout.itemAtPosition(0,0).layout().itemAt(2).widget()  # worker capabilities list widget
+        wrkr_caps = [lw.item(x).text() for x in range(lw.count())]
+        acc_cap_combo = CheckableComboBox()
+        acc_cap_combo.addItems(wrkr_caps)
+        acc_cap_lt.addWidget(acc_cap_label)
+        acc_cap_lt.addWidget(acc_cap_combo)
+
+        # Box for provided capabilities
+        prov_cap_lt = QVBoxLayout()
+        prov_cap_label = QLabel("Provided capabilities:")
+        prov_cap_label.setFixedWidth(200)
+        lw = self.resources_grid_layout.itemAtPosition(1,1).layout().itemAt(2).widget()  # machine capabilities list widget
+        m_caps = [lw.item(x).text() for x in range(lw.count())]
+        prov_cap_combo = CheckableComboBox()
+        prov_cap_combo.addItems(m_caps)
+        prov_cap_lt.addWidget(prov_cap_label)
+        prov_cap_lt.addWidget(prov_cap_combo)
+
+        # Box for compatible tools
+        compat_tools_lt = QVBoxLayout()
+        compat_tools_label = QLabel("Compatible tools:")
+        compat_tools_label.setFixedWidth(200)
+        lw = self.resources_grid_layout.itemAtPosition(0,3).layout().itemAt(2).widget()  # tool list widget
+        ctls = [lw.item(x).text() for x in range(lw.count())]
+        compat_tools_combo = CheckableComboBox()
+        compat_tools_combo.addItems(ctls)
+        compat_tools_lt.addWidget(compat_tools_label)
+        compat_tools_lt.addWidget(compat_tools_combo)
+
+        # Box for software setup information
+        soft_setup_lt = QVBoxLayout()
+        soft_setup_label = QLabel("Software setup")
+        soft_setup_label.setFixedWidth(200)
+        sst_lt = QHBoxLayout()
+        sst_value_field = QLineEdit("0.0")
+        sst_unit_field = QComboBox()
+        sst_unit_field.addItems(['s', 'min', 'h', 'd'])
+        sst_unit_field.setFixedWidth(50)
+        sst_lt.addWidget(sst_value_field)
+        sst_lt.addWidget(sst_unit_field)
+        sst_lt.setAlignment(Qt.AlignTop)
+        pto_cb = QCheckBox("Parallel to operation")
+        soft_setup_lt.addWidget(soft_setup_label)
+        soft_setup_lt.addLayout(sst_lt)
+        soft_setup_lt.addWidget(pto_cb)
+        soft_setup_fr = QFrame()
+        soft_setup_fr.setLayout(soft_setup_lt)
+        soft_setup_fr.setFrameStyle(QFrame.Box | QFrame.Plain)
+
+        # Box for hardware setup information
+        hw_setup_lt = QVBoxLayout()
+        hw_setup_label = QLabel("Hardware setup")
+        hw_setup_label.setFixedWidth(200)
+
+        # New version with a dialog to specify a setup matrix
+        hw_setup_btn = QPushButton("Setup matrix")
+        hw_setup_op_parallel = QCheckBox("Parallel to operation")
+
+        self.temp_hst_time_unit = ''
+        self.temp_hw_setup_matrix = {}  # to retain setup matrix while editing the machine
+        self.temp_tool_slots = {}  # to retain tool slot mapping while editing the machine
+
+        def specify_setup_matrix():
+            setup_matrix_dialog = QDialog()
+            setup_matrix_dialog.setWindowTitle(f"Specify hardware setup matrix for machine {item.text()}")
+            setup_matrix_dialog.setMinimumWidth(300)
+            # Main layout of hardware setup dialog: tables and save/cancel
+            setup_matrix_dialog_layout = QVBoxLayout()
+            # Horizontal layout for the setup matrix and the tool slot assignment table
+            sm_horiz_lt = QHBoxLayout()
+            # Vertical layout of the left column: time unit selection and the setup table
+            sm_col1_vert_lt = QVBoxLayout()
+            # Vertical layout of the right column: tool slot assignment
+            sm_col2_vert_lt = QVBoxLayout()
+            time_unit_hlt = QHBoxLayout()
+            time_unit_hlt.addWidget(QLabel("Time unit:"))
+            time_unit_cb = QComboBox()
+            time_unit_cb.addItems(['s', 'min', 'h', 'd'])
+            time_unit_cb.setFixedWidth(50)
+            # ToDo: set selected if unit already known
+            if self.temp_hst_time_unit != '':
+                time_unit_cb.setCurrentIndex(time_unit_cb.findText(self.temp_hst_time_unit))
+            elif self.production_system.machines:
+                machine = self.production_system.machines[item.text()]
+                if machine:
+                    time_unit_cb.setCurrentIndex(time_unit_cb.findText(machine.hardware_setup_time_unit))
+            time_unit_hlt.addWidget(time_unit_cb)
+            time_unit_hlt.setAlignment(Qt.AlignTop)
+            # Rows (both setup matrix and tool slot assignment) = machine's selected compatible tools
+            sel_compat_tools = [compat_tools_combo.itemText(x) for x in range(compat_tools_combo.count()) if compat_tools_combo.model().data(compat_tools_combo.model().index(x,0), Qt.CheckStateRole)==Qt.Checked]
+            index_list = sel_compat_tools + ['No tool']
+            # Retrieve hardware setup matrix if available
+            setup_matrix_table = None
+            if self.temp_hw_setup_matrix:
+                print("Temp hardware setup matrix:")
+                print(self.temp_hw_setup_matrix)
+                # Filter setup matrix by selected compatible tools
+                filtered_setup_matrix = {row: {col: "" for col in index_list} for row in index_list}
+                for row in index_list:
+                    for col in index_list:
+                        if row in self.temp_hw_setup_matrix.keys():
+                            if col in self.temp_hw_setup_matrix[row].keys():
+                                filtered_setup_matrix[row][col] = self.temp_hw_setup_matrix[row][col]
+                        else:
+                            # new row name has been added, which should also mean that a column with the same name has been added...
+                            filtered_setup_matrix[row][col] = ''
+                print("Filtered by compatible tool selection:")
+                print(filtered_setup_matrix)
+                setup_matrix_table = SetupMatrixTable(setup_table=filtered_setup_matrix)
+            elif self.production_system.machines:
+                machine = self.production_system.machines[item.text()]
+                if machine:
+                    print("Hardware setup matrix loaded from memory:")
+                    print(machine.setup_matrix)
+                    if machine.setup_matrix != {}:
+                        # Filter setup matrix by selected compatible tools
+                        filtered_setup_matrix = {row: {col: "" for col in index_list} for row in index_list}
+                        for row in index_list:
+                            for col in index_list:
+                                if row in machine.setup_matrix.keys():
+                                    if col in machine.setup_matrix[row].keys():
+                                        filtered_setup_matrix[row][col] = machine.setup_matrix[row][col]
+                                else:
+                                    # new row name has been added, which should also mean that a column with the same name has been added...
+                                    filtered_setup_matrix[row][col] = ''
+                        print("Filtered by compatible tool selection:")
+                        print(filtered_setup_matrix)
+                        setup_matrix_table = SetupMatrixTable(setup_table=filtered_setup_matrix)
+                    else:
+                        # No data in production system object yet, and no data in temporary variable regarding hardware setup
+                        # We still need to create a table with rows and columns = compatible tools + no tool
+                        setup_matrix = {row: {col: "" for col in index_list} for row in index_list}
+                        setup_matrix_table = SetupMatrixTable(setup_table=setup_matrix)
+
+            tool_slot_label = QLabel("Tool slots")
+            tool_slot_table = QTableWidget()
+            tool_slot_table.setColumnCount(2)
+            tool_slot_table.setHorizontalHeaderLabels(['Tool', 'Slot'])
+            tool_slot_table.setColumnWidth(0, 150)
+            tool_slot_table.setColumnWidth(1, 100)
+            # Retrieve tool slot mapping if available
+            if self.temp_tool_slots:
+                print("Temp tool slots:")
+                print(self.temp_tool_slots)
+                # Add rows only for currently selected compatible tools and get their tool mapping if available
+                for tool in sel_compat_tools:
+                    row_position = tool_slot_table.rowCount()
+                    tool_slot_table.insertRow(row_position)
+                    tool_slot_table.setItem(row_position, 0, QTableWidgetItem(tool))
+                    if tool in self.temp_tool_slots.keys():
+                        tool_slot_table.setItem(row_position, 1, QTableWidgetItem(self.temp_tool_slots[tool]))
+                    else:
+                        tool_slot_table.setItem(row_position, 1, QTableWidgetItem(""))
+            elif self.production_system.machines:
+                machine = self.production_system.machines[item.text()]
+                if machine:
+                    print("Tool slots loaded from memory:")
+                    print(machine.tool_slots)
+                    if machine.tool_slots != {}:
+                        for tool, slot in machine.tool_slots:
+                            row_position = tool_slot_table.rowCount()
+                            tool_slot_table.insertRow(row_position)
+                            tool_slot_table.setItem(row_position, 0, QTableWidgetItem(tool))
+                            tool_slot_table.setItem(row_position, 1, QTableWidgetItem(slot))
+                    else:
+                        # No data regarding tool slot assignment
+                        for tool in sel_compat_tools:
+                            row_position = tool_slot_table.rowCount()
+                            tool_slot_table.insertRow(row_position)
+                            tool_slot_table.setItem(row_position, 0, QTableWidgetItem(tool))
+                            tool_slot_table.setItem(row_position, 1, QTableWidgetItem(""))
+            
+            # Save setup matrix and tool slot assignment (also in temp variables?)
+            def accept_sm():
+                hw_setup_matrix = {}
+                # Save time unit
+                self.temp_hst_time_unit = time_unit_cb.currentText()
+                # Save hardware setup matrix
+                sm_input_table = setup_matrix_table.layout().itemAt(1).layout().itemAt(1).widget()
+                # For each row and column combination
+                for row in range(sm_input_table.rowCount()):
+                    row_header = sm_input_table.verticalHeaderItem(row).text()
+                    hw_setup_row_dict = {}
+                    for col in range(sm_input_table.columnCount()):       
+                        # Get the names of the headers corresponding to the table item
+                        col_header = sm_input_table.horizontalHeaderItem(col).text()
+                        # Get the value of the table item
+                        st_value = sm_input_table.item(row,col).text()
+                        # Update target dictionary with the entry
+                        if st_value != '' and st_value is not None:
+                            hw_setup_row_dict.update({col_header: float(st_value)})
+                    hw_setup_matrix.update({row_header: hw_setup_row_dict})
+                self.temp_hw_setup_matrix = hw_setup_matrix
+                # Save tool slot assignment
+                filtered_tool_slots = {}
+                for row in range(tool_slot_table.rowCount()):
+                    dict_item = {tool_slot_table.item(row,0).text(): tool_slot_table.item(row,1).text()}
+                    filtered_tool_slots.update(dict_item)
+                    self.temp_tool_slots = filtered_tool_slots
+
+            # Column 1 of setup matrix dialog
+            sm_col1_vert_lt.addLayout(time_unit_hlt)
+            sm_col1_vert_lt.addWidget(setup_matrix_table)
+
+            # Column 2 of setup matrix dialog
+            sm_col2_vert_lt.addWidget(tool_slot_label)
+            sm_col2_vert_lt.addWidget(tool_slot_table)
+
+            sm_horiz_lt.addLayout(sm_col1_vert_lt)
+            sm_horiz_lt.addLayout(sm_col2_vert_lt)
+            setup_matrix_dialog_layout.addLayout(sm_horiz_lt)
+
+            save_sm_btn = QDialogButtonBox.Save | QDialogButtonBox.Cancel
+            buttonBox = QDialogButtonBox(save_sm_btn)
+            buttonBox.accepted.connect(setup_matrix_dialog.accept)
+            buttonBox.accepted.connect(accept_sm)
+            buttonBox.rejected.connect(setup_matrix_dialog.reject)
+            setup_matrix_dialog_layout.addWidget(buttonBox)
+            setup_matrix_dialog.setLayout(setup_matrix_dialog_layout)
+            setup_matrix_dialog.exec()
+            
+
+        # Old version with a fixed time value for any setup
+        '''
+        hst_lt = QHBoxLayout()
+        hst_value_field = QLineEdit("0.0")
+        hst_unit_field = QComboBox()
+        hst_unit_field.addItems(['s', 'min', 'h', 'd'])
+        hst_unit_field.setFixedWidth(50)
+        hst_lt.addWidget(hst_value_field)
+        hst_lt.addWidget(hst_unit_field)
+        hst_lt.setAlignment(Qt.AlignTop)
+        '''
+
+        hw_setup_lt.addWidget(hw_setup_label)
+        #hw_setup_lt.addLayout(hst_lt)
+        hw_setup_btn.clicked.connect(specify_setup_matrix)
+        hw_setup_lt.addWidget(hw_setup_btn)
+        hw_setup_lt.addWidget(hw_setup_op_parallel)
+        hw_setup_fr = QFrame()
+        hw_setup_fr.setLayout(hw_setup_lt)
+        hw_setup_fr.setFrameStyle(QFrame.Box | QFrame.Plain)
+
+        # Box for processing properties
+        pp_lt = QVBoxLayout()
+        bp_cb = QCheckBox("Batch processing")
+        bs_btn = QPushButton("Batch sizes")
+        power_lbl = QLabel("Power consumption (W)")
+        power_field = QLineEdit("0.0")
+        power_lt = QHBoxLayout()
+        power_lt.addWidget(power_lbl)
+        power_lt.addWidget(power_field)
+        self.temp_bs_diff = None  # to retain batch specifications while editing the machine
+        self.temp_bs_table = {}  # to retain batch specifications while editing the machine
+        def specify_batch_size():
+            if not bp_cb.isChecked():
+                # If this machine doesn't support batch processing, no need to let the user input batch specifications
+                return
+            bs_dialog = QDialog()
+            bs_dialog.setWindowTitle(f"Specify batch size for machine {item.text()}")
+            bs_dialog.setMinimumWidth(700)
+            bs_layout = QVBoxLayout()
+            regex_hint_lbl = QLabel("Use * in the component name as placeholder for any symbols, e.g. M6x8_screw will match *_screw")
+            bs_layout.addWidget(regex_hint_lbl)
+            diff_comp_comb_cb = QCheckBox("Different components combinable in batch")
+            # Retrieve flag from memory if available
+            if self.temp_bs_diff is not None:
+                diff_comp_comb_cb.setChecked(self.temp_bs_diff)
+            elif self.production_system.machines:
+                machine = self.production_system.machines[item.text()]
+                if machine and (machine.diff_comp_batch is not None):
+                    diff_comp_comb_cb.setChecked(machine.diff_comp_batch)
+                    self.temp_bs_diff = machine.diff_comp_batch
+            
+            bs_layout.addWidget(diff_comp_comb_cb)
+            add_comp_btn = QPushButton("Add component batch size")
+            bs_layout.addWidget(add_comp_btn)
+            bs_table = QTableWidget()
+            bs_table.setColumnCount(5)
+            bs_table.setHorizontalHeaderLabels(
+                ["Component name", "Min. batch size", "Max. batch size", "Quantity step", "Group"]
+            )
+            bs_table.setColumnWidth(0, 200)
+            bs_layout.addWidget(bs_table)
+            def add_bs_row():
+                row_position = bs_table.rowCount()
+                bs_table.insertRow(row_position)
+                bs_table.setItem(row_position, 0, QTableWidgetItem("Component"))
+                bs_table.setItem(row_position, 1, QTableWidgetItem("0"))
+                bs_table.setItem(row_position, 2, QTableWidgetItem("0"))
+                bs_table.setItem(row_position, 3, QTableWidgetItem("0"))
+                bs_table.setItem(row_position, 4, QTableWidgetItem(""))  # default combination group
+            add_comp_btn.clicked.connect(add_bs_row)
+            # Retrieve batch size definitions if available
+            if self.temp_bs_table:
+                print("Temp batch size table:")
+                print(self.temp_bs_table)
+                for k,v in self.temp_bs_table.items():
+                    row_position = bs_table.rowCount()
+                    bs_table.insertRow(row_position)
+                    bs_table.setItem(row_position, 0, QTableWidgetItem(k))
+                    bs_table.setItem(row_position, 1, QTableWidgetItem(str(v[0])))
+                    bs_table.setItem(row_position, 2, QTableWidgetItem(str(v[1])))
+                    bs_table.setItem(row_position, 3, QTableWidgetItem(str(v[2])))
+                    bs_table.setItem(row_position, 4, QTableWidgetItem(str(v[3])))
+            elif self.production_system.machines:
+                machine = self.production_system.machines[item.text()]
+                if machine:
+                    print("Loaded from memory:")
+                    print(machine.batch_size)
+                    for k,v in machine.batch_size.items():
+                        row_position = bs_table.rowCount()
+                        bs_table.insertRow(row_position)
+                        bs_table.setItem(row_position, 0, QTableWidgetItem(k))
+                        bs_table.setItem(row_position, 1, QTableWidgetItem(str(v[0])))
+                        bs_table.setItem(row_position, 2, QTableWidgetItem(str(v[1])))
+                        bs_table.setItem(row_position, 3, QTableWidgetItem(str(v[2])))
+                        bs_table.setItem(row_position, 4, QTableWidgetItem(str(v[3])))
+            
+            # Save or cancel
+            def accept_bs():
+                self.temp_bs_diff = diff_comp_comb_cb.isChecked()
+                for row in range(bs_table.rowCount()):
+                    dict_item = {bs_table.item(row,0).text(): (int(bs_table.item(row,1).text()),
+                                                                int(bs_table.item(row,2).text()),
+                                                                int(bs_table.item(row,3).text()),
+                                                                bs_table.item(row,4).text())}
+                    self.temp_bs_table.update(dict_item)
+                
+            save_bs_btn = QDialogButtonBox.Save | QDialogButtonBox.Cancel
+            buttonBox = QDialogButtonBox(save_bs_btn)
+            buttonBox.accepted.connect(bs_dialog.accept)
+            buttonBox.accepted.connect(accept_bs)
+            buttonBox.rejected.connect(bs_dialog.reject)
+            bs_layout.addWidget(buttonBox)
+            bs_dialog.setLayout(bs_layout)
+            bs_dialog.exec()
+        bs_btn.clicked.connect(specify_batch_size)
+
+        sf_hlt = QHBoxLayout()
+        sf_label = QLabel("Speed factor")
+        sf_field = QLineEdit("1.0")
+        sf_field.setFixedWidth(50)
+        sf_hlt.addWidget(sf_label)
+        sf_hlt.addWidget(sf_field)
+        pp_lt.addWidget(bp_cb)
+        pp_lt.addWidget(bs_btn)
+        pp_lt.addLayout(power_lt)
+        pp_lt.addLayout(sf_hlt)
+
+        # Box for MTBF
+        mtbf_lt = QVBoxLayout()
+        mtbf_label = QLabel("MTBF")
+        mtbf_label.setFixedWidth(200)
+        hmtbf_lt = QHBoxLayout()
+        hmtbf_value_field = QLineEdit("inf")
+        hmtbf_unit_field = QComboBox()
+        hmtbf_unit_field.addItems(['s', 'min', 'h', 'd'])
+        hmtbf_unit_field.setFixedWidth(50)
+        hmtbf_lt.addWidget(hmtbf_value_field)
+        hmtbf_lt.addWidget(hmtbf_unit_field)
+        hmtbf_lt.setAlignment(Qt.AlignTop)
+        mtbf_lt.addWidget(mtbf_label)
+        mtbf_lt.addLayout(hmtbf_lt)
+
+        # Box for MTTR
+        mttr_lt = QVBoxLayout()
+        mttr_label = QLabel("MTTR")
+        mttr_label.setFixedWidth(200)
+        hmttr_lt = QHBoxLayout()
+        hmttr_value_field = QLineEdit("0.0")
+        hmttr_unit_field = QComboBox()
+        hmttr_unit_field.addItems(['s', 'min', 'h', 'd'])
+        hmttr_unit_field.setFixedWidth(50)
+        hmttr_lt.addWidget(hmttr_value_field)
+        hmttr_lt.addWidget(hmttr_unit_field)
+        hmttr_lt.setAlignment(Qt.AlignTop)
+        mttr_lt.addWidget(mttr_label)
+        mttr_lt.addLayout(hmttr_lt)
+
+        # Put everything into machine edit layout
+        machine_edit_layout.addLayout(acc_cap_lt, 0, 0)
+        machine_edit_layout.addLayout(prov_cap_lt, 0, 1)
+        machine_edit_layout.addLayout(compat_tools_lt, 0, 2)
+        machine_edit_layout.addWidget(soft_setup_fr, 1, 0)
+        machine_edit_layout.addWidget(hw_setup_fr, 1, 1)  
+        machine_edit_layout.addLayout(pp_lt, 1, 2)
+        machine_edit_layout.addLayout(mtbf_lt, 2, 0)
+        machine_edit_layout.addLayout(mttr_lt, 2, 1)
+
+        def transport_warning():
+            QMessageBox.warning(self,
+                                        "Transport machine hint",
+                                        "Please input the speed factor of this transport machine\n as the actual speed in m/s!",
+                                        QMessageBox.Yes)
+
+        # Transport machine flag
+        transport_machine_cb = QCheckBox("Transport machine")
+        transport_machine_cb.clicked.connect(transport_warning)
         
+        # To load previously saved machine info into machine edit dialog (for display purposes)
+        def load_machine():
+            if not self.production_system.machines:
+                return
+            machine = self.production_system.machines[item.text()]
+            if machine:
+                for c in machine.accepted_capabilities:
+                    c_idx = acc_cap_combo.findText(c)
+                    acc_cap_combo.setItemData(c_idx, Qt.Checked, Qt.CheckStateRole)
+                for c in machine.provided_capabilities:
+                    c_idx = prov_cap_combo.findText(c)
+                    prov_cap_combo.setItemData(c_idx, Qt.Checked, Qt.CheckStateRole)
+                for t in machine.compatible_tools:
+                    t_idx = compat_tools_combo.findText(t)
+                    compat_tools_combo.setItemData(t_idx, Qt.Checked, Qt.CheckStateRole)
+                sst_value_field.setText(str(machine.software_setup_time_value))
+                sst_unit_field.setCurrentIndex(sst_unit_field.findText(machine.software_setup_time_unit))
+                pto_cb.setChecked(machine.software_setup_parallel_to_operation)
+                #hst_value_field.setText(str(machine.hardware_setup_time_value))
+                #hst_unit_field.setCurrentIndex(hst_unit_field.findText(machine.hardware_setup_time_unit))
+                self.temp_hw_setup_matrix = machine.setup_matrix
+                self.temp_tool_slots = machine.tool_slots
+                hw_setup_op_parallel.setChecked(machine.hardware_setup_parallel_to_operation)
+                bp_cb.setChecked(machine.batch_processing)
+                self.temp_bs_diff = machine.diff_comp_batch
+                self.temp_bs_table = machine.batch_size
+                sf_field.setText(str(machine.speed_factor))
+                hmtbf_value_field.setText(str(machine.mtbf_value))
+                hmtbf_unit_field.setCurrentIndex(hmtbf_unit_field.findText(machine.mtbf_unit))
+                hmttr_value_field.setText(str(machine.mttr_value))
+                hmttr_unit_field.setCurrentIndex(hmttr_unit_field.findText(machine.mttr_unit))
+                transport_machine_cb.setChecked(machine.is_transport)
+                power_field.setText(str(machine.power_consumption))
+
+        def save_machine():
+            sel_acc_caps = [acc_cap_combo.itemText(x) for x in range(acc_cap_combo.count()) if acc_cap_combo.model().data(acc_cap_combo.model().index(x,0), Qt.CheckStateRole)==Qt.Checked]
+            sel_prov_caps = [prov_cap_combo.itemText(x) for x in range(prov_cap_combo.count()) if prov_cap_combo.model().data(prov_cap_combo.model().index(x,0), Qt.CheckStateRole)==Qt.Checked]
+            sel_tools = [compat_tools_combo.itemText(x) for x in range(compat_tools_combo.count()) if compat_tools_combo.model().data(compat_tools_combo.model().index(x,0), Qt.CheckStateRole)==Qt.Checked]
+            # ToDo input format checking
+            sst_val = float(sst_value_field.text())
+            sst_unit = sst_unit_field.currentText()
+            ss_po = pto_cb.isChecked()
+            #hst_val = float(hst_value_field.text())
+            hst_unit = self.temp_hst_time_unit
+            hst = self.temp_hw_setup_matrix
+            t_slt = self.temp_tool_slots
+            hs_po = hw_setup_op_parallel.isChecked()
+            bp = bp_cb.isChecked()
+            bs = self.temp_bs_table
+            sf = float(sf_field.text())
+            mtbf_val = float(hmtbf_value_field.text())
+            mtbf_unit = hmtbf_unit_field.currentText()
+            mttr_val = float(hmttr_value_field.text())
+            mttr_unit = hmttr_unit_field.currentText()
+            is_transport = transport_machine_cb.isChecked()
+            dcb = self.temp_bs_diff
+            pow_cons = float(power_field.text())
+
+            # Specify the Machine's attributes according to GUI selections
+            machine = Machine(machine_id=item.text(), accepted_capabilities=sel_acc_caps, provided_capabilities=sel_prov_caps, compatible_tools=sel_tools,
+                                software_setup_time_value=sst_val, software_setup_time_unit=sst_unit, software_setup_parallel_to_operation=ss_po,
+                                hardware_setup_time_value=None, hardware_setup_time_unit=hst_unit, batch_processing=bp, batch_size=bs,
+                                speed_factor=sf, mtbf_value=mtbf_val, mtbf_unit=mtbf_unit, mttr_value=mttr_val, mttr_unit=mttr_unit, is_transport=is_transport,
+                                diff_comp_batch=dcb, power_consumption=pow_cons, hardware_setup_parallel_to_operation=hs_po, setup_matrix=hst, tool_slots=t_slt)
+
+            self.production_system.machines.update({item.text(): machine})
+            print("--> Saved machine in working memory:")
+            print("machine_id:\t\t\t\t", self.production_system.machines[item.text()].machine_id)
+            print("accepted_capabilities:\t\t\t", self.production_system.machines[item.text()].accepted_capabilities)
+            print("provided_capabilities:\t\t\t", self.production_system.machines[item.text()].provided_capabilities)
+            print("compatible_tools:\t\t\t", self.production_system.machines[item.text()].compatible_tools)
+            print("software_setup_time:\t\t\t", self.production_system.machines[item.text()].software_setup_time_value, self.production_system.machines[item.text()].software_setup_time_unit)
+            print("software_setup_parallel_to_operation:\t", self.production_system.machines[item.text()].software_setup_parallel_to_operation)
+            print("setup_matrix:\t\t\t\t", self.production_system.machines[item.text()].setup_matrix, self.production_system.machines[item.text()].hardware_setup_time_unit)
+            print("tool_slots:\t\t\t\t", self.production_system.machines[item.text()].tool_slots)
+            print("batch_processing:\t\t\t", self.production_system.machines[item.text()].batch_processing)
+            print("batch_size:\t\t\t\t", self.production_system.machines[item.text()].batch_size)
+            print("power_consumption:\t\t\t", self.production_system.machines[item.text()].power_consumption)
+            print("diff_comp_batch:\t\t\t", self.production_system.machines[item.text()].diff_comp_batch)
+            print("speed_factor:\t\t\t\t", self.production_system.machines[item.text()].speed_factor)
+            print("MTBF:\t\t\t\t\t", self.production_system.machines[item.text()].mtbf_value, self.production_system.machines[item.text()].mtbf_unit)
+            print("MTTR:\t\t\t\t\t", self.production_system.machines[item.text()].mttr_value, self.production_system.machines[item.text()].mttr_unit)
+            print("is_transport:\t\t\t\t", self.production_system.machines[item.text()].is_transport)
+
+        def accept():
+            save_machine()
+
+        layout_2_2 = QVBoxLayout()
+        layout_2_2.addWidget(transport_machine_cb)
+
+        # Dialog buttons
+        QBtn = QDialogButtonBox.Save | QDialogButtonBox.Cancel
+        buttonBox = QDialogButtonBox(QBtn)
+        buttonBox.accepted.connect(edit_dialog.accept)
+        buttonBox.accepted.connect(accept)
+        buttonBox.rejected.connect(edit_dialog.reject)
+        layout_2_2.addWidget(buttonBox)
+        machine_edit_layout.addLayout(layout_2_2, 2, 2)
+
+        edit_dialog.setLayout(machine_edit_layout)
+        load_machine()
+        edit_dialog.exec()    
 
     def show_machine_menu(self,position):
         menu = QMenu()
@@ -2098,522 +2883,12 @@ class ProductionResourcesTab(QWidget):
             self.machines_list_widget.takeItem(row)
             self.production_system.machines.pop(item.text())
         elif action == edit_action:
-            edit_dialog = QDialog()
-            edit_dialog.setWindowTitle(f"Properties of machine {item.text()}")
-
-            # Main layout for the dialog
-            machine_edit_layout = QGridLayout()
-
-            # Box for accepted capabilities
-            acc_cap_lt = QVBoxLayout()
-            acc_cap_label = QLabel("Accepted capabilities:")
-            acc_cap_label.setFixedWidth(200)
-            lw = self.resources_grid_layout.itemAtPosition(0,0).layout().itemAt(2).widget()  # worker capabilities list widget
-            wrkr_caps = [lw.item(x).text() for x in range(lw.count())]
-            acc_cap_combo = CheckableComboBox()
-            acc_cap_combo.addItems(wrkr_caps)
-            acc_cap_lt.addWidget(acc_cap_label)
-            acc_cap_lt.addWidget(acc_cap_combo)
-
-            # Box for provided capabilities
-            prov_cap_lt = QVBoxLayout()
-            prov_cap_label = QLabel("Provided capabilities:")
-            prov_cap_label.setFixedWidth(200)
-            lw = self.resources_grid_layout.itemAtPosition(1,1).layout().itemAt(2).widget()  # machine capabilities list widget
-            m_caps = [lw.item(x).text() for x in range(lw.count())]
-            prov_cap_combo = CheckableComboBox()
-            prov_cap_combo.addItems(m_caps)
-            prov_cap_lt.addWidget(prov_cap_label)
-            prov_cap_lt.addWidget(prov_cap_combo)
-
-            # Box for compatible tools
-            compat_tools_lt = QVBoxLayout()
-            compat_tools_label = QLabel("Compatible tools:")
-            compat_tools_label.setFixedWidth(200)
-            lw = self.resources_grid_layout.itemAtPosition(0,3).layout().itemAt(2).widget()  # tool list widget
-            ctls = [lw.item(x).text() for x in range(lw.count())]
-            compat_tools_combo = CheckableComboBox()
-            compat_tools_combo.addItems(ctls)
-            compat_tools_lt.addWidget(compat_tools_label)
-            compat_tools_lt.addWidget(compat_tools_combo)
-
-            # Box for software setup information
-            soft_setup_lt = QVBoxLayout()
-            soft_setup_label = QLabel("Software setup")
-            soft_setup_label.setFixedWidth(200)
-            sst_lt = QHBoxLayout()
-            sst_value_field = QLineEdit("0.0")
-            sst_unit_field = QComboBox()
-            sst_unit_field.addItems(['s', 'min', 'h', 'd'])
-            sst_unit_field.setFixedWidth(50)
-            sst_lt.addWidget(sst_value_field)
-            sst_lt.addWidget(sst_unit_field)
-            sst_lt.setAlignment(Qt.AlignTop)
-            pto_cb = QCheckBox("Parallel to operation")
-            soft_setup_lt.addWidget(soft_setup_label)
-            soft_setup_lt.addLayout(sst_lt)
-            soft_setup_lt.addWidget(pto_cb)
-            soft_setup_fr = QFrame()
-            soft_setup_fr.setLayout(soft_setup_lt)
-            soft_setup_fr.setFrameStyle(QFrame.Box | QFrame.Plain)
-
-            # Box for hardware setup information
-            hw_setup_lt = QVBoxLayout()
-            hw_setup_label = QLabel("Hardware setup")
-            hw_setup_label.setFixedWidth(200)
-
-            # New version with a dialog to specify a setup matrix
-            hw_setup_btn = QPushButton("Setup matrix")
-            hw_setup_op_parallel = QCheckBox("Parallel to operation")
-
-            self.temp_hst_time_unit = ''
-            self.temp_hw_setup_matrix = {}  # to retain setup matrix while editing the machine
-            self.temp_tool_slots = {}  # to retain tool slot mapping while editing the machine
-
-            def specify_setup_matrix():
-                setup_matrix_dialog = QDialog()
-                setup_matrix_dialog.setWindowTitle(f"Specify hardware setup matrix for machine {item.text()}")
-                setup_matrix_dialog.setMinimumWidth(300)
-                # Main layout of hardware setup dialog: tables and save/cancel
-                setup_matrix_dialog_layout = QVBoxLayout()
-                # Horizontal layout for the setup matrix and the tool slot assignment table
-                sm_horiz_lt = QHBoxLayout()
-                # Vertical layout of the left column: time unit selection and the setup table
-                sm_col1_vert_lt = QVBoxLayout()
-                # Vertical layout of the right column: tool slot assignment
-                sm_col2_vert_lt = QVBoxLayout()
-                time_unit_hlt = QHBoxLayout()
-                time_unit_hlt.addWidget(QLabel("Time unit:"))
-                time_unit_cb = QComboBox()
-                time_unit_cb.addItems(['s', 'min', 'h', 'd'])
-                time_unit_cb.setFixedWidth(50)
-                # ToDo: set selected if unit already known
-                if self.temp_hst_time_unit != '':
-                    time_unit_cb.setCurrentIndex(time_unit_cb.findText(self.temp_hst_time_unit))
-                elif self.production_system.machines:
-                    machine = self.production_system.machines[item.text()]
-                    if machine:
-                        time_unit_cb.setCurrentIndex(time_unit_cb.findText(machine.hardware_setup_time_unit))
-                time_unit_hlt.addWidget(time_unit_cb)
-                time_unit_hlt.setAlignment(Qt.AlignTop)
-                # Rows (both setup matrix and tool slot assignment) = machine's selected compatible tools
-                sel_compat_tools = [compat_tools_combo.itemText(x) for x in range(compat_tools_combo.count()) if compat_tools_combo.model().data(compat_tools_combo.model().index(x,0), Qt.CheckStateRole)==Qt.Checked]
-                index_list = sel_compat_tools + ['No tool']
-                # Retrieve hardware setup matrix if available
-                setup_matrix_table = None
-                if self.temp_hw_setup_matrix:
-                    print("Temp hardware setup matrix:")
-                    print(self.temp_hw_setup_matrix)
-                    # Filter setup matrix by selected compatible tools
-                    filtered_setup_matrix = {row: {col: "" for col in index_list} for row in index_list}
-                    for row in index_list:
-                        for col in index_list:
-                            if row in self.temp_hw_setup_matrix.keys():
-                                if col in self.temp_hw_setup_matrix[row].keys():
-                                    filtered_setup_matrix[row][col] = self.temp_hw_setup_matrix[row][col]
-                            else:
-                                # new row name has been added, which should also mean that a column with the same name has been added...
-                                filtered_setup_matrix[row][col] = ''
-                    print("Filtered by compatible tool selection:")
-                    print(filtered_setup_matrix)
-                    setup_matrix_table = SetupMatrixTable(setup_table=filtered_setup_matrix)
-                elif self.production_system.machines:
-                    machine = self.production_system.machines[item.text()]
-                    if machine:
-                        print("Hardware setup matrix loaded from memory:")
-                        print(machine.setup_matrix)
-                        if machine.setup_matrix != {}:
-                            # Filter setup matrix by selected compatible tools
-                            filtered_setup_matrix = {row: {col: "" for col in index_list} for row in index_list}
-                            for row in index_list:
-                                for col in index_list:
-                                    if row in machine.setup_matrix.keys():
-                                        if col in machine.setup_matrix[row].keys():
-                                            filtered_setup_matrix[row][col] = machine.setup_matrix[row][col]
-                                    else:
-                                        # new row name has been added, which should also mean that a column with the same name has been added...
-                                        filtered_setup_matrix[row][col] = ''
-                            print("Filtered by compatible tool selection:")
-                            print(filtered_setup_matrix)
-                            setup_matrix_table = SetupMatrixTable(setup_table=filtered_setup_matrix)
-                        else:
-                            # No data in production system object yet, and no data in temporary variable regarding hardware setup
-                            # We still need to create a table with rows and columns = compatible tools + no tool
-                            setup_matrix = {row: {col: "" for col in index_list} for row in index_list}
-                            setup_matrix_table = SetupMatrixTable(setup_table=setup_matrix)
-
-                tool_slot_label = QLabel("Tool slots")
-                tool_slot_table = QTableWidget()
-                tool_slot_table.setColumnCount(2)
-                tool_slot_table.setHorizontalHeaderLabels(['Tool', 'Slot'])
-                tool_slot_table.setColumnWidth(0, 150)
-                tool_slot_table.setColumnWidth(1, 100)
-                # Retrieve tool slot mapping if available
-                if self.temp_tool_slots:
-                    print("Temp tool slots:")
-                    print(self.temp_tool_slots)
-                    # Add rows only for currently selected compatible tools and get their tool mapping if available
-                    for tool in sel_compat_tools:
-                        row_position = tool_slot_table.rowCount()
-                        tool_slot_table.insertRow(row_position)
-                        tool_slot_table.setItem(row_position, 0, QTableWidgetItem(tool))
-                        if tool in self.temp_tool_slots.keys():
-                            tool_slot_table.setItem(row_position, 1, QTableWidgetItem(self.temp_tool_slots[tool]))
-                        else:
-                            tool_slot_table.setItem(row_position, 1, QTableWidgetItem(""))
-                elif self.production_system.machines:
-                    machine = self.production_system.machines[item.text()]
-                    if machine:
-                        print("Tool slots loaded from memory:")
-                        print(machine.tool_slots)
-                        if machine.tool_slots != {}:
-                            for tool, slot in machine.tool_slots:
-                                row_position = tool_slot_table.rowCount()
-                                tool_slot_table.insertRow(row_position)
-                                tool_slot_table.setItem(row_position, 0, QTableWidgetItem(tool))
-                                tool_slot_table.setItem(row_position, 1, QTableWidgetItem(slot))
-                        else:
-                            # No data regarding tool slot assignment
-                            for tool in sel_compat_tools:
-                                row_position = tool_slot_table.rowCount()
-                                tool_slot_table.insertRow(row_position)
-                                tool_slot_table.setItem(row_position, 0, QTableWidgetItem(tool))
-                                tool_slot_table.setItem(row_position, 1, QTableWidgetItem(""))
-                
-                # Save setup matrix and tool slot assignment (also in temp variables?)
-                def accept_sm():
-                    hw_setup_matrix = {}
-                    # Save time unit
-                    self.temp_hst_time_unit = time_unit_cb.currentText()
-                    # Save hardware setup matrix
-                    sm_input_table = setup_matrix_table.layout().itemAt(1).layout().itemAt(1).widget()
-                    # For each row and column combination
-                    for row in range(sm_input_table.rowCount()):
-                        row_header = sm_input_table.verticalHeaderItem(row).text()
-                        hw_setup_row_dict = {}
-                        for col in range(sm_input_table.columnCount()):       
-                            # Get the names of the headers corresponding to the table item
-                            col_header = sm_input_table.horizontalHeaderItem(col).text()
-                            # Get the value of the table item
-                            st_value = sm_input_table.item(row,col).text()
-                            # Update target dictionary with the entry
-                            if st_value != '' and st_value is not None:
-                                hw_setup_row_dict.update({col_header: float(st_value)})
-                        hw_setup_matrix.update({row_header: hw_setup_row_dict})
-                    self.temp_hw_setup_matrix = hw_setup_matrix
-                    # Save tool slot assignment
-                    filtered_tool_slots = {}
-                    for row in range(tool_slot_table.rowCount()):
-                        dict_item = {tool_slot_table.item(row,0).text(): tool_slot_table.item(row,1).text()}
-                        filtered_tool_slots.update(dict_item)
-                        self.temp_tool_slots = filtered_tool_slots
-
-                # Column 1 of setup matrix dialog
-                sm_col1_vert_lt.addLayout(time_unit_hlt)
-                sm_col1_vert_lt.addWidget(setup_matrix_table)
-
-                # Column 2 of setup matrix dialog
-                sm_col2_vert_lt.addWidget(tool_slot_label)
-                sm_col2_vert_lt.addWidget(tool_slot_table)
-
-                sm_horiz_lt.addLayout(sm_col1_vert_lt)
-                sm_horiz_lt.addLayout(sm_col2_vert_lt)
-                setup_matrix_dialog_layout.addLayout(sm_horiz_lt)
-
-                save_sm_btn = QDialogButtonBox.Save | QDialogButtonBox.Cancel
-                buttonBox = QDialogButtonBox(save_sm_btn)
-                buttonBox.accepted.connect(setup_matrix_dialog.accept)
-                buttonBox.accepted.connect(accept_sm)
-                buttonBox.rejected.connect(setup_matrix_dialog.reject)
-                setup_matrix_dialog_layout.addWidget(buttonBox)
-                setup_matrix_dialog.setLayout(setup_matrix_dialog_layout)
-                setup_matrix_dialog.exec()
-                
-
-            # Old version with a fixed time value for any setup
-            '''
-            hst_lt = QHBoxLayout()
-            hst_value_field = QLineEdit("0.0")
-            hst_unit_field = QComboBox()
-            hst_unit_field.addItems(['s', 'min', 'h', 'd'])
-            hst_unit_field.setFixedWidth(50)
-            hst_lt.addWidget(hst_value_field)
-            hst_lt.addWidget(hst_unit_field)
-            hst_lt.setAlignment(Qt.AlignTop)
-            '''
-
-            hw_setup_lt.addWidget(hw_setup_label)
-            #hw_setup_lt.addLayout(hst_lt)
-            hw_setup_btn.clicked.connect(specify_setup_matrix)
-            hw_setup_lt.addWidget(hw_setup_btn)
-            hw_setup_lt.addWidget(hw_setup_op_parallel)
-            hw_setup_fr = QFrame()
-            hw_setup_fr.setLayout(hw_setup_lt)
-            hw_setup_fr.setFrameStyle(QFrame.Box | QFrame.Plain)
-
-            # Box for processing properties
-            pp_lt = QVBoxLayout()
-            bp_cb = QCheckBox("Batch processing")
-            bs_btn = QPushButton("Batch sizes")
-            power_lbl = QLabel("Power consumption (W)")
-            power_field = QLineEdit("0.0")
-            power_lt = QHBoxLayout()
-            power_lt.addWidget(power_lbl)
-            power_lt.addWidget(power_field)
-            self.temp_bs_diff = None  # to retain batch specifications while editing the machine
-            self.temp_bs_table = {}  # to retain batch specifications while editing the machine
-            def specify_batch_size():
-                if not bp_cb.isChecked():
-                    # If this machine doesn't support batch processing, no need to let the user input batch specifications
-                    return
-                bs_dialog = QDialog()
-                bs_dialog.setWindowTitle(f"Specify batch size for machine {item.text()}")
-                bs_dialog.setMinimumWidth(700)
-                bs_layout = QVBoxLayout()
-                regex_hint_lbl = QLabel("Use * in the component name as placeholder for any symbols, e.g. M6x8_screw will match *_screw")
-                bs_layout.addWidget(regex_hint_lbl)
-                diff_comp_comb_cb = QCheckBox("Different components combinable in batch")
-                # Retrieve flag from memory if available
-                if self.temp_bs_diff is not None:
-                    diff_comp_comb_cb.setChecked(self.temp_bs_diff)
-                elif self.production_system.machines:
-                    machine = self.production_system.machines[item.text()]
-                    if machine and (machine.diff_comp_batch is not None):
-                        diff_comp_comb_cb.setChecked(machine.diff_comp_batch)
-                        self.temp_bs_diff = machine.diff_comp_batch
-                
-                bs_layout.addWidget(diff_comp_comb_cb)
-                add_comp_btn = QPushButton("Add component batch size")
-                bs_layout.addWidget(add_comp_btn)
-                bs_table = QTableWidget()
-                bs_table.setColumnCount(5)
-                bs_table.setHorizontalHeaderLabels(
-                    ["Component name", "Min. batch size", "Max. batch size", "Quantity step", "Group"]
-                )
-                bs_table.setColumnWidth(0, 200)
-                bs_layout.addWidget(bs_table)
-                def add_bs_row():
-                    row_position = bs_table.rowCount()
-                    bs_table.insertRow(row_position)
-                    bs_table.setItem(row_position, 0, QTableWidgetItem("Component"))
-                    bs_table.setItem(row_position, 1, QTableWidgetItem("0"))
-                    bs_table.setItem(row_position, 2, QTableWidgetItem("0"))
-                    bs_table.setItem(row_position, 3, QTableWidgetItem("0"))
-                    bs_table.setItem(row_position, 4, QTableWidgetItem(""))  # default combination group
-                add_comp_btn.clicked.connect(add_bs_row)
-                # Retrieve batch size definitions if available
-                if self.temp_bs_table:
-                    print("Temp batch size table:")
-                    print(self.temp_bs_table)
-                    for k,v in self.temp_bs_table.items():
-                        row_position = bs_table.rowCount()
-                        bs_table.insertRow(row_position)
-                        bs_table.setItem(row_position, 0, QTableWidgetItem(k))
-                        bs_table.setItem(row_position, 1, QTableWidgetItem(str(v[0])))
-                        bs_table.setItem(row_position, 2, QTableWidgetItem(str(v[1])))
-                        bs_table.setItem(row_position, 3, QTableWidgetItem(str(v[2])))
-                        bs_table.setItem(row_position, 4, QTableWidgetItem(str(v[3])))
-                elif self.production_system.machines:
-                    machine = self.production_system.machines[item.text()]
-                    if machine:
-                        print("Loaded from memory:")
-                        print(machine.batch_size)
-                        for k,v in machine.batch_size.items():
-                            row_position = bs_table.rowCount()
-                            bs_table.insertRow(row_position)
-                            bs_table.setItem(row_position, 0, QTableWidgetItem(k))
-                            bs_table.setItem(row_position, 1, QTableWidgetItem(str(v[0])))
-                            bs_table.setItem(row_position, 2, QTableWidgetItem(str(v[1])))
-                            bs_table.setItem(row_position, 3, QTableWidgetItem(str(v[2])))
-                            bs_table.setItem(row_position, 4, QTableWidgetItem(str(v[3])))
-                
-                # Save or cancel
-                def accept_bs():
-                    self.temp_bs_diff = diff_comp_comb_cb.isChecked()
-                    for row in range(bs_table.rowCount()):
-                        dict_item = {bs_table.item(row,0).text(): (int(bs_table.item(row,1).text()),
-                                                                   int(bs_table.item(row,2).text()),
-                                                                   int(bs_table.item(row,3).text()),
-                                                                   bs_table.item(row,4).text())}
-                        self.temp_bs_table.update(dict_item)
-                    
-                save_bs_btn = QDialogButtonBox.Save | QDialogButtonBox.Cancel
-                buttonBox = QDialogButtonBox(save_bs_btn)
-                buttonBox.accepted.connect(bs_dialog.accept)
-                buttonBox.accepted.connect(accept_bs)
-                buttonBox.rejected.connect(bs_dialog.reject)
-                bs_layout.addWidget(buttonBox)
-                bs_dialog.setLayout(bs_layout)
-                bs_dialog.exec()
-            bs_btn.clicked.connect(specify_batch_size)
-
-            sf_hlt = QHBoxLayout()
-            sf_label = QLabel("Speed factor")
-            sf_field = QLineEdit("1.0")
-            sf_field.setFixedWidth(50)
-            sf_hlt.addWidget(sf_label)
-            sf_hlt.addWidget(sf_field)
-            pp_lt.addWidget(bp_cb)
-            pp_lt.addWidget(bs_btn)
-            pp_lt.addLayout(power_lt)
-            pp_lt.addLayout(sf_hlt)
-
-            # Box for MTBF
-            mtbf_lt = QVBoxLayout()
-            mtbf_label = QLabel("MTBF")
-            mtbf_label.setFixedWidth(200)
-            hmtbf_lt = QHBoxLayout()
-            hmtbf_value_field = QLineEdit("inf")
-            hmtbf_unit_field = QComboBox()
-            hmtbf_unit_field.addItems(['s', 'min', 'h', 'd'])
-            hmtbf_unit_field.setFixedWidth(50)
-            hmtbf_lt.addWidget(hmtbf_value_field)
-            hmtbf_lt.addWidget(hmtbf_unit_field)
-            hmtbf_lt.setAlignment(Qt.AlignTop)
-            mtbf_lt.addWidget(mtbf_label)
-            mtbf_lt.addLayout(hmtbf_lt)
-
-            # Box for MTTR
-            mttr_lt = QVBoxLayout()
-            mttr_label = QLabel("MTTR")
-            mttr_label.setFixedWidth(200)
-            hmttr_lt = QHBoxLayout()
-            hmttr_value_field = QLineEdit("0.0")
-            hmttr_unit_field = QComboBox()
-            hmttr_unit_field.addItems(['s', 'min', 'h', 'd'])
-            hmttr_unit_field.setFixedWidth(50)
-            hmttr_lt.addWidget(hmttr_value_field)
-            hmttr_lt.addWidget(hmttr_unit_field)
-            hmttr_lt.setAlignment(Qt.AlignTop)
-            mttr_lt.addWidget(mttr_label)
-            mttr_lt.addLayout(hmttr_lt)
-
-            # Put everything into machine edit layout
-            machine_edit_layout.addLayout(acc_cap_lt, 0, 0)
-            machine_edit_layout.addLayout(prov_cap_lt, 0, 1)
-            machine_edit_layout.addLayout(compat_tools_lt, 0, 2)
-            machine_edit_layout.addWidget(soft_setup_fr, 1, 0)
-            machine_edit_layout.addWidget(hw_setup_fr, 1, 1)  
-            machine_edit_layout.addLayout(pp_lt, 1, 2)
-            machine_edit_layout.addLayout(mtbf_lt, 2, 0)
-            machine_edit_layout.addLayout(mttr_lt, 2, 1)
-
-            def transport_warning():
-                QMessageBox.warning(self,
-                                          "Transport machine hint",
-                                          "Please input the speed factor of this transport machine\n as the actual speed in m/s!",
-                                          QMessageBox.Yes)
-
-            # Transport machine flag
-            transport_machine_cb = QCheckBox("Transport machine")
-            transport_machine_cb.clicked.connect(transport_warning)
-            
-            # To load previously saved machine info into machine edit dialog (for display purposes)
-            def load_machine():
-                if not self.production_system.machines:
-                    return
-                machine = self.production_system.machines[item.text()]
-                if machine:
-                    for c in machine.accepted_capabilities:
-                        c_idx = acc_cap_combo.findText(c)
-                        acc_cap_combo.setItemData(c_idx, Qt.Checked, Qt.CheckStateRole)
-                    for c in machine.provided_capabilities:
-                        c_idx = prov_cap_combo.findText(c)
-                        prov_cap_combo.setItemData(c_idx, Qt.Checked, Qt.CheckStateRole)
-                    for t in machine.compatible_tools:
-                        t_idx = compat_tools_combo.findText(t)
-                        compat_tools_combo.setItemData(t_idx, Qt.Checked, Qt.CheckStateRole)
-                    sst_value_field.setText(str(machine.software_setup_time_value))
-                    sst_unit_field.setCurrentIndex(sst_unit_field.findText(machine.software_setup_time_unit))
-                    pto_cb.setChecked(machine.software_setup_parallel_to_operation)
-                    #hst_value_field.setText(str(machine.hardware_setup_time_value))
-                    #hst_unit_field.setCurrentIndex(hst_unit_field.findText(machine.hardware_setup_time_unit))
-                    self.temp_hw_setup_matrix = machine.setup_matrix
-                    self.temp_tool_slots = machine.tool_slots
-                    hw_setup_op_parallel.setChecked(machine.hardware_setup_parallel_to_operation)
-                    bp_cb.setChecked(machine.batch_processing)
-                    self.temp_bs_diff = machine.diff_comp_batch
-                    self.temp_bs_table = machine.batch_size
-                    sf_field.setText(str(machine.speed_factor))
-                    hmtbf_value_field.setText(str(machine.mtbf_value))
-                    hmtbf_unit_field.setCurrentIndex(hmtbf_unit_field.findText(machine.mtbf_unit))
-                    hmttr_value_field.setText(str(machine.mttr_value))
-                    hmttr_unit_field.setCurrentIndex(hmttr_unit_field.findText(machine.mttr_unit))
-                    transport_machine_cb.setChecked(machine.is_transport)
-                    power_field.setText(str(machine.power_consumption))
-
-            def save_machine():
-                sel_acc_caps = [acc_cap_combo.itemText(x) for x in range(acc_cap_combo.count()) if acc_cap_combo.model().data(acc_cap_combo.model().index(x,0), Qt.CheckStateRole)==Qt.Checked]
-                sel_prov_caps = [prov_cap_combo.itemText(x) for x in range(prov_cap_combo.count()) if prov_cap_combo.model().data(prov_cap_combo.model().index(x,0), Qt.CheckStateRole)==Qt.Checked]
-                sel_tools = [compat_tools_combo.itemText(x) for x in range(compat_tools_combo.count()) if compat_tools_combo.model().data(compat_tools_combo.model().index(x,0), Qt.CheckStateRole)==Qt.Checked]
-                # ToDo input format checking
-                sst_val = float(sst_value_field.text())
-                sst_unit = sst_unit_field.currentText()
-                ss_po = pto_cb.isChecked()
-                #hst_val = float(hst_value_field.text())
-                hst_unit = self.temp_hst_time_unit
-                hst = self.temp_hw_setup_matrix
-                t_slt = self.temp_tool_slots
-                hs_po = hw_setup_op_parallel.isChecked()
-                bp = bp_cb.isChecked()
-                bs = self.temp_bs_table
-                sf = float(sf_field.text())
-                mtbf_val = float(hmtbf_value_field.text())
-                mtbf_unit = hmtbf_unit_field.currentText()
-                mttr_val = float(hmttr_value_field.text())
-                mttr_unit = hmttr_unit_field.currentText()
-                is_transport = transport_machine_cb.isChecked()
-                dcb = self.temp_bs_diff
-                pow_cons = float(power_field.text())
-
-                # Specify the Machine's attributes according to GUI selections
-                machine = Machine(machine_id=item.text(), accepted_capabilities=sel_acc_caps, provided_capabilities=sel_prov_caps, compatible_tools=sel_tools,
-                                  software_setup_time_value=sst_val, software_setup_time_unit=sst_unit, software_setup_parallel_to_operation=ss_po,
-                                  hardware_setup_time_value=None, hardware_setup_time_unit=hst_unit, batch_processing=bp, batch_size=bs,
-                                  speed_factor=sf, mtbf_value=mtbf_val, mtbf_unit=mtbf_unit, mttr_value=mttr_val, mttr_unit=mttr_unit, is_transport=is_transport,
-                                  diff_comp_batch=dcb, power_consumption=pow_cons, hardware_setup_parallel_to_operation=hs_po, setup_matrix=hst, tool_slots=t_slt)
-
-                self.production_system.machines.update({item.text(): machine})
-                print("--> Saved machine in working memory:")
-                print("machine_id:\t\t\t\t", self.production_system.machines[item.text()].machine_id)
-                print("accepted_capabilities:\t\t\t", self.production_system.machines[item.text()].accepted_capabilities)
-                print("provided_capabilities:\t\t\t", self.production_system.machines[item.text()].provided_capabilities)
-                print("compatible_tools:\t\t\t", self.production_system.machines[item.text()].compatible_tools)
-                print("software_setup_time:\t\t\t", self.production_system.machines[item.text()].software_setup_time_value, self.production_system.machines[item.text()].software_setup_time_unit)
-                print("software_setup_parallel_to_operation:\t", self.production_system.machines[item.text()].software_setup_parallel_to_operation)
-                print("setup_matrix:\t\t\t\t", self.production_system.machines[item.text()].setup_matrix, self.production_system.machines[item.text()].hardware_setup_time_unit)
-                print("tool_slots:\t\t\t\t", self.production_system.machines[item.text()].tool_slots)
-                print("batch_processing:\t\t\t", self.production_system.machines[item.text()].batch_processing)
-                print("batch_size:\t\t\t\t", self.production_system.machines[item.text()].batch_size)
-                print("power_consumption:\t\t\t", self.production_system.machines[item.text()].power_consumption)
-                print("diff_comp_batch:\t\t\t", self.production_system.machines[item.text()].diff_comp_batch)
-                print("speed_factor:\t\t\t\t", self.production_system.machines[item.text()].speed_factor)
-                print("MTBF:\t\t\t\t\t", self.production_system.machines[item.text()].mtbf_value, self.production_system.machines[item.text()].mtbf_unit)
-                print("MTTR:\t\t\t\t\t", self.production_system.machines[item.text()].mttr_value, self.production_system.machines[item.text()].mttr_unit)
-                print("is_transport:\t\t\t\t", self.production_system.machines[item.text()].is_transport)
-
-            def accept():
-                save_machine()
-
-            layout_2_2 = QVBoxLayout()
-            layout_2_2.addWidget(transport_machine_cb)
-
-            # Dialog buttons
-            QBtn = QDialogButtonBox.Save | QDialogButtonBox.Cancel
-            buttonBox = QDialogButtonBox(QBtn)
-            buttonBox.accepted.connect(edit_dialog.accept)
-            buttonBox.accepted.connect(accept)
-            buttonBox.rejected.connect(edit_dialog.reject)
-            layout_2_2.addWidget(buttonBox)
-            machine_edit_layout.addLayout(layout_2_2, 2, 2)
-
-            edit_dialog.setLayout(machine_edit_layout)
-            load_machine()
-            edit_dialog.exec()
+            self.edit_machines_by_item(item)
+           
 
     def add_new_workstation(self, provided_dict=None):
         if provided_dict is None:
-            i = self.workstation_list_widget.count()     
+            i = self.workstation_list_widget.count() + 1
             stan_name = "Workstation " + str(i)
             item = QListWidgetItem(stan_name)
             self.workstation_list_widget.addItem(item)
@@ -2660,7 +2935,251 @@ class ProductionResourcesTab(QWidget):
             self.temp_phys_output_buffers = provided_dict['physical_output_buffers']
         self.workstation_list_widget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.workstation_list_widget.customContextMenuRequested.connect(self.show_workstation_menu)
+
+    def edit_workstation_by_item(self, item):
+        edit_dialog = QDialog()
+        edit_dialog.setWindowTitle(f"Properties of workstation {item.text()}")
+        edit_dialog.setMinimumSize(1024, 700)
+
+        # Main layout for the dialog
+        workstation_edit_layout = QGridLayout()
+
+        # Box for machine selection
+        m_sel_lt = QVBoxLayout()
+        m_sel_label = QLabel("Machine:")
+        m_sel_label.setMinimumWidth(200)
+        mlw = self.resources_grid_layout.itemAtPosition(1,2).layout().itemAt(2).widget()  # machine list widget
+        machines = [mlw.item(x).text() for x in range(mlw.count())]
+        m_sel_combo = QComboBox()
+        m_sel_combo.addItem("")  # empty item in case this is a manual workstation
+        m_sel_combo.addItems(machines)
+        m_sel_lt.addWidget(m_sel_label)
+        m_sel_lt.addWidget(m_sel_combo)
+
+        # Box for worker assignment
+        w_assign_lt = QVBoxLayout()
+        perm_w_assign_cb = QCheckBox("Permanent worker assignment")
+        wlw = self.resources_grid_layout.itemAtPosition(0,1).layout().itemAt(2).widget()  # worker list widget
+        workers = [wlw.item(x).text() for x in range(wlw.count())]
+        w_assign_combo = QComboBox()
+        w_assign_combo.addItem("")  # empty item in case no workers are assigned to this workstation permanently
+        w_assign_combo.addItems(workers)
+        w_assign_lt.addWidget(perm_w_assign_cb)
+        w_assign_lt.addWidget(w_assign_combo)
+
+        # Box for permanent tools assignment
+        perm_tools_lt = QVBoxLayout()
+        perm_tools_label = QLabel("Permanent tools:")
+        perm_tools_label.setMinimumWidth(200)
+        tlw = self.resources_grid_layout.itemAtPosition(0,3).layout().itemAt(2).widget()  # tools list widget
+        tools = [tlw.item(x).text() for x in range(tlw.count())]
+        perm_tools_combo = CheckableComboBox()
+        perm_tools_combo.addItems(tools)
+        perm_tools_lt.addWidget(perm_tools_label)
+        perm_tools_lt.addWidget(perm_tools_combo)
+
+        # Box for allowed resource pools
+        allowed_res_pools_lt = QVBoxLayout()
+        # Row for allowed worker pools
+        allowed_wp_lt = QHBoxLayout()
+        allowed_wp_label = QLabel("Allowed worker pools:")
+        allowed_wp_label.setMinimumWidth(120)
+        wplw = self.resources_grid_layout.itemAtPosition(0,2).layout().itemAt(2).widget()  # worker pools list widget
+        worker_pools = [wplw.item(x).text() for x in range(wplw.count())]
+        allowed_wp_combo = CheckableComboBox()
+        allowed_wp_combo.addItems(worker_pools)
+        allowed_wp_lt.addWidget(allowed_wp_label)
+        allowed_wp_lt.addWidget(allowed_wp_combo)
+        allowed_res_pools_lt.addLayout(allowed_wp_lt)
+        # Row for allowed tool pools
+        allowed_tp_lt = QHBoxLayout()
+        allowed_tp_label = QLabel("Allowed tool pools:")
+        allowed_tp_label.setMinimumWidth(120)
+        tplw = self.resources_grid_layout.itemAtPosition(1,0).layout().itemAt(2).widget()  # tool pools list widget
+        tool_pools = [tplw.item(x).text() for x in range(tplw.count())]
+        allowed_tp_combo = CheckableComboBox()
+        allowed_tp_combo.addItems(tool_pools)
+        allowed_tp_lt.addWidget(allowed_tp_label)
+        allowed_tp_lt.addWidget(allowed_tp_combo)
+        allowed_res_pools_lt.addLayout(allowed_tp_lt)
+
+        #  Box for input buffers
+        #buffer_layout = QVBoxLayout()  # We are using GridLayout, so no separate boxes for in & out buffers required
+        input_buffer_lt = QVBoxLayout()
+        ib_label = QLabel("Physical input buffers:")
+        #ib_label.setStyleSheet("font-weight: bold")
+        ib_label.setMinimumWidth(200)
+        input_buffer_lt.addWidget(ib_label)
+        add_input_buffer_btn = QPushButton("Add buffer")
+        add_input_buffer_btn.clicked.connect(lambda: self.add_input_buffer_section(buffer=None))
+        input_buffer_lt.addWidget(add_input_buffer_btn)
+        # Scroll area for input buffers (ib)
+        ib_scroll_area = QScrollArea()
+        ib_scroll_area.setWidgetResizable(True)
+        ib_scroll_content = QWidget()
+        self.ib_scroll_layout = QVBoxLayout(ib_scroll_content)  # Attach the scroll layout
+        ib_scroll_area.setWidget(ib_scroll_content)
+        input_buffer_lt.addWidget(ib_scroll_area)
         
+        #  Box for output buffers
+        #buffer_layout = QVBoxLayout()  # We are using GridLayout, so no separate boxes for in & out buffers required
+        output_buffer_lt = QVBoxLayout()
+        ob_label = QLabel("Physical output buffers:")
+        #ob_label.setStyleSheet("font-weight: bold")
+        ob_label.setMinimumWidth(200)
+        output_buffer_lt.addWidget(ob_label)
+        add_output_buffer_btn = QPushButton("Add buffer")
+        add_output_buffer_btn.clicked.connect(lambda: self.add_output_buffer_section(buffer=None))
+        output_buffer_lt.addWidget(add_output_buffer_btn)
+        # Scroll area for output buffers (ob)
+        ob_scroll_area = QScrollArea()
+        ob_scroll_area.setWidgetResizable(True)
+        ob_scroll_content = QWidget()
+        self.ob_scroll_layout = QVBoxLayout(ob_scroll_content)  # Attach the scroll layout
+        ob_scroll_area.setWidget(ob_scroll_content)
+        output_buffer_lt.addWidget(ob_scroll_area)
+
+        self.temp_phys_input_buffers = dict()
+        self.temp_phys_output_buffers = dict()
+
+        # To load previously saved workstation info into workstation edit dialog (for display purposes)
+        def load_workstation():
+            if not self.production_system.workstations:
+                return
+            workstation = self.production_system.workstations[item.text()]
+            if workstation:
+                m_sel_combo.setCurrentIndex(m_sel_combo.findText(workstation.machine))
+                perm_w_assign_cb.setChecked(workstation.permanent_worker_assignment)
+                w_assign_combo.setCurrentIndex(w_assign_combo.findText(workstation.seized_worker))  # for permanently assigned workers this won't be changed
+                for pt in workstation.permanent_tools:
+                    pt_idx = perm_tools_combo.findText(pt)
+                    perm_tools_combo.setItemData(pt_idx, Qt.Checked, Qt.CheckStateRole)
+                for awp in workstation.allowed_worker_pools:
+                    awp_idx = allowed_wp_combo.findText(awp)
+                    allowed_wp_combo.setItemData(awp_idx, Qt.Checked, Qt.CheckStateRole)
+                for atp in workstation.allowed_tool_pools:
+                    atp_idx = allowed_tp_combo.findText(atp)
+                    allowed_tp_combo.setItemData(atp_idx, Qt.Checked, Qt.CheckStateRole)
+                self.temp_phys_input_buffers = workstation.physical_input_buffers
+                for k,v in self.temp_phys_input_buffers.items():
+                    self.add_input_buffer_section(buffer=v)
+                self.temp_phys_output_buffers = workstation.physical_output_buffers
+                for k,v in self.temp_phys_output_buffers.items():
+                    self.add_output_buffer_section(buffer=v)
+            else:
+                print("No workstation with such name known.")
+
+        
+        def save_workstation():
+            m = m_sel_combo.currentText()
+            pwa = perm_w_assign_cb.isChecked()
+            perm_wrkr = w_assign_combo.currentText()
+            perm_tls = [perm_tools_combo.itemText(x) for x in range(perm_tools_combo.count()) if perm_tools_combo.model().data(perm_tools_combo.model().index(x,0), Qt.CheckStateRole)==Qt.Checked]
+            allowed_wps = [allowed_wp_combo.itemText(x) for x in range(allowed_wp_combo.count()) if allowed_wp_combo.model().data(allowed_wp_combo.model().index(x,0), Qt.CheckStateRole)==Qt.Checked]
+            allowed_tps = [allowed_tp_combo.itemText(x) for x in range(allowed_tp_combo.count()) if allowed_tp_combo.model().data(allowed_tp_combo.model().index(x,0), Qt.CheckStateRole)==Qt.Checked]
+            
+            # Input buffers
+            input_buffers = {}
+            for i in range(self.ib_scroll_layout.count()):
+                # Buffer label
+                buff_loc = BufferLocation.IN
+                buff_idx1 = i + 1
+                # Sequence type
+                buffer_type = None
+                buffer_type_lt = self.ib_scroll_layout.itemAt(i).widget().layout().itemAt(1).layout()
+                for j in range(buffer_type_lt.count()):
+                    if buffer_type_lt.itemAt(j).widget().isChecked():
+                        buffer_type = BufferSequenceType(j + 1)
+                # Different components combinable
+                diff_comp_comb = self.ib_scroll_layout.itemAt(i).widget().layout().itemAt(2).widget().isChecked()
+                # Buffer size table
+                bs_table = self.ib_scroll_layout.itemAt(i).widget().layout().itemAt(3).widget()
+                bs_dict = {}
+                for row in range(bs_table.rowCount()):
+                    dict_item = {bs_table.item(row,0).text(): {'Max. quantity': int(bs_table.item(row,1).text()),
+                                                                'Quantity step': int(bs_table.item(row,2).text()),
+                                                                'Group': bs_table.item(row,3).text()}}
+                    bs_dict.update(dict_item)
+                buffer_save = Buffer(buffer_location=buff_loc, idx1=buff_idx1, sequence_type=buffer_type, diff_comp_comb=diff_comp_comb, comp_specific_sizes=bs_dict)
+                input_buffers.update({buff_idx1: buffer_save})
+
+            # Output buffers    
+            output_buffers = {}
+            for i in range(self.ob_scroll_layout.count()):
+                # Buffer label
+                buff_loc = BufferLocation.OUT
+                buff_idx1 = i + 1
+                # Sequence type
+                buffer_type = None
+                buffer_type_lt = self.ob_scroll_layout.itemAt(i).widget().layout().itemAt(1).layout()
+                for j in range(buffer_type_lt.count()):
+                    if buffer_type_lt.itemAt(j).widget().isChecked():
+                        buffer_type = BufferSequenceType(j + 1)
+                # "Identical with" combo box
+                id_with = self.ob_scroll_layout.itemAt(i).widget().layout().itemAt(2).layout().itemAt(1).widget().currentText()
+                # Different components combinable
+                diff_comp_comb = self.ob_scroll_layout.itemAt(i).widget().layout().itemAt(3).widget().isChecked()
+                # Buffer size table
+                bs_table = self.ob_scroll_layout.itemAt(i).widget().layout().itemAt(4).widget()
+                bs_dict = {}
+                for row in range(bs_table.rowCount()):
+                    dict_item = {bs_table.item(row,0).text(): {'Max. quantity': int(bs_table.item(row,1).text()),
+                                                                'Quantity step': int(bs_table.item(row,2).text()),
+                                                                'Group': bs_table.item(row,3).text()}}
+                    bs_dict.update(dict_item)
+                buffer_save = Buffer(buffer_location=buff_loc, idx1=buff_idx1, sequence_type=buffer_type, diff_comp_comb=diff_comp_comb, comp_specific_sizes=bs_dict, identical_buffer=id_with)
+                output_buffers.update({buff_idx1: buffer_save})
+
+            # Specify the Workstation's attributes according to GUI selections
+            workstation = Workstation(workstation_id=item.text(), machine=m, permanent_worker_assignment=pwa, seized_worker=perm_wrkr, permanent_tools=perm_tls,
+                                        allowed_worker_pools=allowed_wps, allowed_tool_pools=allowed_tps, physical_input_buffers=input_buffers, physical_output_buffers=output_buffers)
+
+            self.production_system.workstations.update({item.text(): workstation})
+
+            print("--> Saved workstation in working memory:")
+            print("workstation_id:", self.production_system.workstations[item.text()].workstation_id)
+            print("machine:", self.production_system.workstations[item.text()].machine)
+            print("permanent_worker_assignment:", self.production_system.workstations[item.text()].permanent_worker_assignment)
+            print("seized_worker:", self.production_system.workstations[item.text()].seized_worker)
+            print("permanent_tools:", self.production_system.workstations[item.text()].permanent_tools)
+            print("allowed_worker_pools:", self.production_system.workstations[item.text()].allowed_worker_pools)
+            print("allowed_tool_pools:", self.production_system.workstations[item.text()].allowed_tool_pools)
+            for k,v in self.production_system.workstations[item.text()].physical_input_buffers.items():
+                print("Input buffer", k)
+                print("sequence_type:", v.sequence_type)
+                print("diff_comp_comb:", v.diff_comp_comb)
+                print("comp_specific_sizes:", v.comp_specific_sizes)
+            for k,v in self.production_system.workstations[item.text()].physical_output_buffers.items():
+                print("Output buffer", k)
+                print("sequence_type:", v.sequence_type)
+                print("diff_comp_comb:", v.diff_comp_comb)
+                print("comp_specific_sizes:", v.comp_specific_sizes)
+                
+
+        def accept():
+            save_workstation()
+
+
+        # Dialog buttons
+        save_cancel_lt = QVBoxLayout()
+        QBtn = QDialogButtonBox.Save | QDialogButtonBox.Cancel
+        buttonBox = QDialogButtonBox(QBtn)
+        buttonBox.accepted.connect(edit_dialog.accept)
+        buttonBox.accepted.connect(accept)
+        buttonBox.rejected.connect(edit_dialog.reject)
+        save_cancel_lt.addWidget(buttonBox)
+        
+        workstation_edit_layout.addLayout(m_sel_lt,0,0)
+        workstation_edit_layout.addLayout(w_assign_lt,0,1)
+        workstation_edit_layout.addLayout(perm_tools_lt,1,0)
+        workstation_edit_layout.addLayout(allowed_res_pools_lt,1,1)
+        workstation_edit_layout.addLayout(input_buffer_lt,2,0)
+        workstation_edit_layout.addLayout(output_buffer_lt,2,1)
+        workstation_edit_layout.addLayout(save_cancel_lt, 3,1)
+
+        edit_dialog.setLayout(workstation_edit_layout)
+        load_workstation()
+        edit_dialog.exec_()    
 
     def show_workstation_menu(self,position):
         menu = QMenu()
@@ -2688,249 +3207,8 @@ class ProductionResourcesTab(QWidget):
             self.workstation_list_widget.takeItem(row)
             self.production_system.workstations.pop(item.text())
         elif action == edit_action:
-            edit_dialog = QDialog()
-            edit_dialog.setWindowTitle(f"Properties of workstation {item.text()}")
-            edit_dialog.setMinimumSize(1024, 700)
+            self.edit_workstation_by_item(item)
 
-            # Main layout for the dialog
-            workstation_edit_layout = QGridLayout()
-
-            # Box for machine selection
-            m_sel_lt = QVBoxLayout()
-            m_sel_label = QLabel("Machine:")
-            m_sel_label.setMinimumWidth(200)
-            mlw = self.resources_grid_layout.itemAtPosition(1,2).layout().itemAt(2).widget()  # machine list widget
-            machines = [mlw.item(x).text() for x in range(mlw.count())]
-            m_sel_combo = QComboBox()
-            m_sel_combo.addItem("")  # empty item in case this is a manual workstation
-            m_sel_combo.addItems(machines)
-            m_sel_lt.addWidget(m_sel_label)
-            m_sel_lt.addWidget(m_sel_combo)
-
-            # Box for worker assignment
-            w_assign_lt = QVBoxLayout()
-            perm_w_assign_cb = QCheckBox("Permanent worker assignment")
-            wlw = self.resources_grid_layout.itemAtPosition(0,1).layout().itemAt(2).widget()  # worker list widget
-            workers = [wlw.item(x).text() for x in range(wlw.count())]
-            w_assign_combo = QComboBox()
-            w_assign_combo.addItem("")  # empty item in case no workers are assigned to this workstation permanently
-            w_assign_combo.addItems(workers)
-            w_assign_lt.addWidget(perm_w_assign_cb)
-            w_assign_lt.addWidget(w_assign_combo)
-
-            # Box for permanent tools assignment
-            perm_tools_lt = QVBoxLayout()
-            perm_tools_label = QLabel("Permanent tools:")
-            perm_tools_label.setMinimumWidth(200)
-            tlw = self.resources_grid_layout.itemAtPosition(0,3).layout().itemAt(2).widget()  # tools list widget
-            tools = [tlw.item(x).text() for x in range(tlw.count())]
-            perm_tools_combo = CheckableComboBox()
-            perm_tools_combo.addItems(tools)
-            perm_tools_lt.addWidget(perm_tools_label)
-            perm_tools_lt.addWidget(perm_tools_combo)
-
-            # Box for allowed resource pools
-            allowed_res_pools_lt = QVBoxLayout()
-            # Row for allowed worker pools
-            allowed_wp_lt = QHBoxLayout()
-            allowed_wp_label = QLabel("Allowed worker pools:")
-            allowed_wp_label.setMinimumWidth(120)
-            wplw = self.resources_grid_layout.itemAtPosition(0,2).layout().itemAt(2).widget()  # worker pools list widget
-            worker_pools = [wplw.item(x).text() for x in range(wplw.count())]
-            allowed_wp_combo = CheckableComboBox()
-            allowed_wp_combo.addItems(worker_pools)
-            allowed_wp_lt.addWidget(allowed_wp_label)
-            allowed_wp_lt.addWidget(allowed_wp_combo)
-            allowed_res_pools_lt.addLayout(allowed_wp_lt)
-            # Row for allowed tool pools
-            allowed_tp_lt = QHBoxLayout()
-            allowed_tp_label = QLabel("Allowed tool pools:")
-            allowed_tp_label.setMinimumWidth(120)
-            tplw = self.resources_grid_layout.itemAtPosition(1,0).layout().itemAt(2).widget()  # tool pools list widget
-            tool_pools = [tplw.item(x).text() for x in range(tplw.count())]
-            allowed_tp_combo = CheckableComboBox()
-            allowed_tp_combo.addItems(tool_pools)
-            allowed_tp_lt.addWidget(allowed_tp_label)
-            allowed_tp_lt.addWidget(allowed_tp_combo)
-            allowed_res_pools_lt.addLayout(allowed_tp_lt)
-
-            #  Box for input buffers
-            #buffer_layout = QVBoxLayout()  # We are using GridLayout, so no separate boxes for in & out buffers required
-            input_buffer_lt = QVBoxLayout()
-            ib_label = QLabel("Physical input buffers:")
-            #ib_label.setStyleSheet("font-weight: bold")
-            ib_label.setMinimumWidth(200)
-            input_buffer_lt.addWidget(ib_label)
-            add_input_buffer_btn = QPushButton("Add buffer")
-            add_input_buffer_btn.clicked.connect(lambda: self.add_input_buffer_section(buffer=None))
-            input_buffer_lt.addWidget(add_input_buffer_btn)
-            # Scroll area for input buffers (ib)
-            ib_scroll_area = QScrollArea()
-            ib_scroll_area.setWidgetResizable(True)
-            ib_scroll_content = QWidget()
-            self.ib_scroll_layout = QVBoxLayout(ib_scroll_content)  # Attach the scroll layout
-            ib_scroll_area.setWidget(ib_scroll_content)
-            input_buffer_lt.addWidget(ib_scroll_area)
-            
-            #  Box for output buffers
-            #buffer_layout = QVBoxLayout()  # We are using GridLayout, so no separate boxes for in & out buffers required
-            output_buffer_lt = QVBoxLayout()
-            ob_label = QLabel("Physical output buffers:")
-            #ob_label.setStyleSheet("font-weight: bold")
-            ob_label.setMinimumWidth(200)
-            output_buffer_lt.addWidget(ob_label)
-            add_output_buffer_btn = QPushButton("Add buffer")
-            add_output_buffer_btn.clicked.connect(lambda: self.add_output_buffer_section(buffer=None))
-            output_buffer_lt.addWidget(add_output_buffer_btn)
-            # Scroll area for output buffers (ob)
-            ob_scroll_area = QScrollArea()
-            ob_scroll_area.setWidgetResizable(True)
-            ob_scroll_content = QWidget()
-            self.ob_scroll_layout = QVBoxLayout(ob_scroll_content)  # Attach the scroll layout
-            ob_scroll_area.setWidget(ob_scroll_content)
-            output_buffer_lt.addWidget(ob_scroll_area)
-
-            self.temp_phys_input_buffers = dict()
-            self.temp_phys_output_buffers = dict()
-
-            # To load previously saved workstation info into workstation edit dialog (for display purposes)
-            def load_workstation():
-                if not self.production_system.workstations:
-                    return
-                workstation = self.production_system.workstations[item.text()]
-                if workstation:
-                    m_sel_combo.setCurrentIndex(m_sel_combo.findText(workstation.machine))
-                    perm_w_assign_cb.setChecked(workstation.permanent_worker_assignment)
-                    w_assign_combo.setCurrentIndex(w_assign_combo.findText(workstation.seized_worker))  # for permanently assigned workers this won't be changed
-                    for pt in workstation.permanent_tools:
-                        pt_idx = perm_tools_combo.findText(pt)
-                        perm_tools_combo.setItemData(pt_idx, Qt.Checked, Qt.CheckStateRole)
-                    for awp in workstation.allowed_worker_pools:
-                        awp_idx = allowed_wp_combo.findText(awp)
-                        allowed_wp_combo.setItemData(awp_idx, Qt.Checked, Qt.CheckStateRole)
-                    for atp in workstation.allowed_tool_pools:
-                        atp_idx = allowed_tp_combo.findText(atp)
-                        allowed_tp_combo.setItemData(atp_idx, Qt.Checked, Qt.CheckStateRole)
-                    self.temp_phys_input_buffers = workstation.physical_input_buffers
-                    for k,v in self.temp_phys_input_buffers.items():
-                        self.add_input_buffer_section(buffer=v)
-                    self.temp_phys_output_buffers = workstation.physical_output_buffers
-                    for k,v in self.temp_phys_output_buffers.items():
-                        self.add_output_buffer_section(buffer=v)
-                else:
-                    print("No workstation with such name known.")
-
-            
-            def save_workstation():
-                m = m_sel_combo.currentText()
-                pwa = perm_w_assign_cb.isChecked()
-                perm_wrkr = w_assign_combo.currentText()
-                perm_tls = [perm_tools_combo.itemText(x) for x in range(perm_tools_combo.count()) if perm_tools_combo.model().data(perm_tools_combo.model().index(x,0), Qt.CheckStateRole)==Qt.Checked]
-                allowed_wps = [allowed_wp_combo.itemText(x) for x in range(allowed_wp_combo.count()) if allowed_wp_combo.model().data(allowed_wp_combo.model().index(x,0), Qt.CheckStateRole)==Qt.Checked]
-                allowed_tps = [allowed_tp_combo.itemText(x) for x in range(allowed_tp_combo.count()) if allowed_tp_combo.model().data(allowed_tp_combo.model().index(x,0), Qt.CheckStateRole)==Qt.Checked]
-                
-                # Input buffers
-                input_buffers = {}
-                for i in range(self.ib_scroll_layout.count()):
-                    # Buffer label
-                    buff_loc = BufferLocation.IN
-                    buff_idx1 = i + 1
-                    # Sequence type
-                    buffer_type = None
-                    buffer_type_lt = self.ib_scroll_layout.itemAt(i).widget().layout().itemAt(1).layout()
-                    for j in range(buffer_type_lt.count()):
-                        if buffer_type_lt.itemAt(j).widget().isChecked():
-                            buffer_type = BufferSequenceType(j + 1)
-                    # Different components combinable
-                    diff_comp_comb = self.ib_scroll_layout.itemAt(i).widget().layout().itemAt(2).widget().isChecked()
-                    # Buffer size table
-                    bs_table = self.ib_scroll_layout.itemAt(i).widget().layout().itemAt(3).widget()
-                    bs_dict = {}
-                    for row in range(bs_table.rowCount()):
-                        dict_item = {bs_table.item(row,0).text(): {'Max. quantity': int(bs_table.item(row,1).text()),
-                                                                   'Quantity step': int(bs_table.item(row,2).text()),
-                                                                   'Group': bs_table.item(row,3).text()}}
-                        bs_dict.update(dict_item)
-                    buffer_save = Buffer(buffer_location=buff_loc, idx1=buff_idx1, sequence_type=buffer_type, diff_comp_comb=diff_comp_comb, comp_specific_sizes=bs_dict)
-                    input_buffers.update({buff_idx1: buffer_save})
-
-                # Output buffers    
-                output_buffers = {}
-                for i in range(self.ob_scroll_layout.count()):
-                    # Buffer label
-                    buff_loc = BufferLocation.OUT
-                    buff_idx1 = i + 1
-                    # Sequence type
-                    buffer_type = None
-                    buffer_type_lt = self.ob_scroll_layout.itemAt(i).widget().layout().itemAt(1).layout()
-                    for j in range(buffer_type_lt.count()):
-                        if buffer_type_lt.itemAt(j).widget().isChecked():
-                            buffer_type = BufferSequenceType(j + 1)
-                    # "Identical with" combo box
-                    id_with = self.ob_scroll_layout.itemAt(i).widget().layout().itemAt(2).layout().itemAt(1).widget().currentText()
-                    # Different components combinable
-                    diff_comp_comb = self.ob_scroll_layout.itemAt(i).widget().layout().itemAt(3).widget().isChecked()
-                    # Buffer size table
-                    bs_table = self.ob_scroll_layout.itemAt(i).widget().layout().itemAt(4).widget()
-                    bs_dict = {}
-                    for row in range(bs_table.rowCount()):
-                        dict_item = {bs_table.item(row,0).text(): {'Max. quantity': int(bs_table.item(row,1).text()),
-                                                                   'Quantity step': int(bs_table.item(row,2).text()),
-                                                                   'Group': bs_table.item(row,3).text()}}
-                        bs_dict.update(dict_item)
-                    buffer_save = Buffer(buffer_location=buff_loc, idx1=buff_idx1, sequence_type=buffer_type, diff_comp_comb=diff_comp_comb, comp_specific_sizes=bs_dict, identical_buffer=id_with)
-                    output_buffers.update({buff_idx1: buffer_save})
-
-                # Specify the Workstation's attributes according to GUI selections
-                workstation = Workstation(workstation_id=item.text(), machine=m, permanent_worker_assignment=pwa, seized_worker=perm_wrkr, permanent_tools=perm_tls,
-                                          allowed_worker_pools=allowed_wps, allowed_tool_pools=allowed_tps, physical_input_buffers=input_buffers, physical_output_buffers=output_buffers)
-
-                self.production_system.workstations.update({item.text(): workstation})
-
-                print("--> Saved workstation in working memory:")
-                print("workstation_id:", self.production_system.workstations[item.text()].workstation_id)
-                print("machine:", self.production_system.workstations[item.text()].machine)
-                print("permanent_worker_assignment:", self.production_system.workstations[item.text()].permanent_worker_assignment)
-                print("seized_worker:", self.production_system.workstations[item.text()].seized_worker)
-                print("permanent_tools:", self.production_system.workstations[item.text()].permanent_tools)
-                print("allowed_worker_pools:", self.production_system.workstations[item.text()].allowed_worker_pools)
-                print("allowed_tool_pools:", self.production_system.workstations[item.text()].allowed_tool_pools)
-                for k,v in self.production_system.workstations[item.text()].physical_input_buffers.items():
-                    print("Input buffer", k)
-                    print("sequence_type:", v.sequence_type)
-                    print("diff_comp_comb:", v.diff_comp_comb)
-                    print("comp_specific_sizes:", v.comp_specific_sizes)
-                for k,v in self.production_system.workstations[item.text()].physical_output_buffers.items():
-                    print("Output buffer", k)
-                    print("sequence_type:", v.sequence_type)
-                    print("diff_comp_comb:", v.diff_comp_comb)
-                    print("comp_specific_sizes:", v.comp_specific_sizes)
-                    
-
-            def accept():
-                save_workstation()
-
-
-            # Dialog buttons
-            save_cancel_lt = QVBoxLayout()
-            QBtn = QDialogButtonBox.Save | QDialogButtonBox.Cancel
-            buttonBox = QDialogButtonBox(QBtn)
-            buttonBox.accepted.connect(edit_dialog.accept)
-            buttonBox.accepted.connect(accept)
-            buttonBox.rejected.connect(edit_dialog.reject)
-            save_cancel_lt.addWidget(buttonBox)
-            
-            workstation_edit_layout.addLayout(m_sel_lt,0,0)
-            workstation_edit_layout.addLayout(w_assign_lt,0,1)
-            workstation_edit_layout.addLayout(perm_tools_lt,1,0)
-            workstation_edit_layout.addLayout(allowed_res_pools_lt,1,1)
-            workstation_edit_layout.addLayout(input_buffer_lt,2,0)
-            workstation_edit_layout.addLayout(output_buffer_lt,2,1)
-            workstation_edit_layout.addLayout(save_cancel_lt, 3,1)
-
-            edit_dialog.setLayout(workstation_edit_layout)
-            load_workstation()
-            edit_dialog.exec_()  
 
     def add_input_buffer_section(self, buffer):
         section_layout = QVBoxLayout()
@@ -3110,6 +3388,72 @@ class ProductionResourcesTab(QWidget):
         self.toolpools_list_widget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.toolpools_list_widget.customContextMenuRequested.connect(self.show_toolpools_menu)
         
+    def edit_toolpool_by_item(self, item):                                        
+        edit_dialog = QDialog()
+        edit_dialog.setWindowTitle(f"Properties of tool pool {item.text()}")
+
+        # Main layout for the dialog
+        toolpool_edit_layout = QVBoxLayout()
+        prov_tool_label = QLabel("Provided tools:")
+        prov_tool_label.setFixedWidth(400)
+        toolpool_edit_layout.addWidget(prov_tool_label)
+
+        # Button to add a tool to this tool pool
+        def add_tool_row():
+            tool_selection = QComboBox()
+            lw = self.resources_grid_layout.itemAtPosition(0,3).layout().itemAt(2).widget()
+            items = [lw.item(x).text() for x in range(lw.count())]
+            tls = list(items)
+            tool_selection.addItems(tls)
+            edit_dialog.layout().itemAt(2).layout().addWidget(tool_selection)
+            
+        add_tool_button = QPushButton("Add tool")
+        add_tool_button.clicked.connect(add_tool_row)
+        toolpool_edit_layout.addWidget(add_tool_button)
+
+        # Placeholder for capability drop-downs
+        tp_lt = QVBoxLayout()
+        toolpool_edit_layout.addLayout(tp_lt)
+
+        # To load previously saved worker capabilities
+        def load_tool_data():
+            if self.production_system.tool_pools:
+                tool_list = self.production_system.tool_pools[item.text()]
+                if tool_list:
+                    for c in tool_list:
+                        tool_name_field = QComboBox()
+                        lw = self.resources_grid_layout.itemAtPosition(0,3).layout().itemAt(2).widget()
+                        tools = [lw.item(x).text() for x in range(lw.count())]
+                        tool_name_field.addItems(tools)
+                        i = tool_name_field.findText(c)
+                        tool_name_field.setCurrentIndex(i)
+                        edit_dialog.layout().itemAt(2).layout().addWidget(tool_name_field)
+            else:
+                # there are no tools saved yet
+                return
+
+        def save_tool_list():
+            #Important: for each instance of the same tool in a tool pool, a separate list entry is created, their tool_id are the same.
+            tool_list = []
+            for i in range(tp_lt.count()):
+                c = tp_lt.itemAt(i).widget().currentText()
+                tool_list.append(c)
+            self.production_system.tool_pools.update({item.text(): tool_list})
+
+        def accept():
+            save_tool_list()
+
+        # Dialog buttons
+        QBtn = QDialogButtonBox.Save | QDialogButtonBox.Cancel
+        buttonBox = QDialogButtonBox(QBtn)
+        buttonBox.accepted.connect(accept)
+        buttonBox.accepted.connect(edit_dialog.accept)
+        buttonBox.rejected.connect(edit_dialog.reject)
+        toolpool_edit_layout.addWidget(buttonBox)
+
+        edit_dialog.setLayout(toolpool_edit_layout)
+        load_tool_data()
+        edit_dialog.exec()     
    
     def show_toolpools_menu(self,position):
         menu = QMenu()
@@ -3133,76 +3477,13 @@ class ProductionResourcesTab(QWidget):
                     self.production_system.tool_pools.update({new_name: []})
                 item.setText(new_name)
         elif action == delete_action:
-            self.production_system.tool_pools.pop(item.name())
+            item = self.toolpools_list_widget.itemAt(position)
+            self.production_system.tool_pools.pop(item.text())
             row = self.toolpools_list_widget.row(item)
             self.toolpools_list_widget.takeItem(row)
         elif action == edit_action:
-            edit_dialog = QDialog()
-            edit_dialog.setWindowTitle(f"Properties of tool pool {item.text()}")
-
-            # Main layout for the dialog
-            toolpool_edit_layout = QVBoxLayout()
-            prov_tool_label = QLabel("Provided tools:")
-            prov_tool_label.setFixedWidth(400)
-            toolpool_edit_layout.addWidget(prov_tool_label)
-
-            # Button to add a tool to this tool pool
-            def add_tool_row():
-                tool_selection = QComboBox()
-                lw = self.resources_grid_layout.itemAtPosition(0,3).layout().itemAt(2).widget()
-                items = [lw.item(x).text() for x in range(lw.count())]
-                tls = list(items)
-                tool_selection.addItems(tls)
-                edit_dialog.layout().itemAt(2).layout().addWidget(tool_selection)
-            
-            add_tool_button = QPushButton("Add tool")
-            add_tool_button.clicked.connect(add_tool_row)
-            toolpool_edit_layout.addWidget(add_tool_button)
-
-            # Placeholder for capability drop-downs
-            tp_lt = QVBoxLayout()
-            toolpool_edit_layout.addLayout(tp_lt)
-
-            # To load previously saved worker capabilities
-            def load_tool_data():
-                if self.production_system.tool_pools:
-                    tool_list = self.production_system.tool_pools[item.text()]
-                    if tool_list:
-                        for c in tool_list:
-                            tool_name_field = QComboBox()
-                            lw = self.resources_grid_layout.itemAtPosition(0,3).layout().itemAt(2).widget()
-                            tools = [lw.item(x).text() for x in range(lw.count())]
-                            tool_name_field.addItems(tools)
-                            i = tool_name_field.findText(c)
-                            tool_name_field.setCurrentIndex(i)
-                            edit_dialog.layout().itemAt(2).layout().addWidget(tool_name_field)
-                else:
-                    # there are no tools saved yet
-                    return
-
-            def save_tool_list():
-                '''Important: for each instance of the same tool in a tool pool, a separate list entry is created, their tool_id are the same.'''
-                tool_list = []
-                for i in range(tp_lt.count()):
-                    c = tp_lt.itemAt(i).widget().currentText()
-                    tool_list.append(c)
-                self.production_system.tool_pools.update({item.text(): tool_list})
-
-            def accept():
-                save_tool_list()
-
-            # Dialog buttons
-            QBtn = QDialogButtonBox.Save | QDialogButtonBox.Cancel
-            buttonBox = QDialogButtonBox(QBtn)
-            buttonBox.accepted.connect(accept)
-            buttonBox.accepted.connect(edit_dialog.accept)
-            buttonBox.rejected.connect(edit_dialog.reject)
-            toolpool_edit_layout.addWidget(buttonBox)
-
-            edit_dialog.setLayout(toolpool_edit_layout)
-            load_tool_data()
-            edit_dialog.exec()
-
+            self.edit_toolpool_by_item(item)
+           
     def populate_widgets_with_loaded_data(self):
         '''Add entries to the lists in the Production Resources tab after production system object is loaded'''
         if self.production_system:
@@ -4031,6 +4312,7 @@ class UseCaseDialog(QDialog):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("PrOPPlan: load use case")
+        self.setWindowIcon(QIcon("images/RIFLOGO.png")) 
         self.selected_file = None
 
         # Layout and widgets
@@ -4121,7 +4403,8 @@ class ManualPlanningDialog(QDialog):
         self.setWindowTitle(f"Simulation control ({run_id})")
         self.setMinimumSize(1200, 800)
         self.showMaximized()
-        
+        self.setWindowIcon(QIcon("images/RIFLOGO.png")) 
+
         # Main layout
         self.main_layout = QVBoxLayout()
 
@@ -4452,8 +4735,8 @@ class ManualPlanningDialog(QDialog):
         - "Prod. time ratio" and "Setup time ratio": cumulative time divided by elapsed time.
         """
         elapsed = self.production_system.timestamp - self.production_system.start_timestamp
-        if elapsed <= 0:
-            elapsed = 1
+        #if elapsed <= 0:
+        #    elapsed = 1
 
         for row, (ws_id, ws) in enumerate(self.production_system.workstations.items()):
             # Status
@@ -4489,8 +4772,13 @@ class ManualPlanningDialog(QDialog):
                     rem_work += op_state['remaining_work']
 
             # Compute ratios
-            prod_ratio = ws.busy_time / elapsed if hasattr(ws, "busy_time") else 0.0
-            setup_ratio = ws.setup_time / elapsed if hasattr(ws, "setup_time") else 0.0
+            prod_ratio = 0.0
+            if elapsed > 0:
+                prod_ratio = ws.busy_time / elapsed if hasattr(ws, "busy_time") else 0.0
+
+            setup_ratio = 0.0
+            if elapsed > 0:
+                setup_ratio = ws.setup_time / elapsed if hasattr(ws, "setup_time") else 0.0
 
             # Add values to time series
             # ws.utilization_history.append((self.production_system.timestamp, prod_ratio))
@@ -4576,7 +4864,12 @@ class ManualPlanningDialog(QDialog):
         html = SchedulePlotter.make_gantt_chart(
             production_system=self.production_system
         )
-        self.schedule_view.setHtml(html)
+        path_to_html = "gantt_chart.html"
+        with open(path_to_html, "w", encoding="utf-8") as f:
+           f.write(html)
+        #self.schedule_view.setHtml(html) - hits 2 MB content limit of Chromium...
+        url = QUrl.fromLocalFile(os.path.abspath(path_to_html))
+        self.schedule_view.load(url)
 
         '''
         # Clear the existing figure
@@ -4595,7 +4888,12 @@ class ManualPlanningDialog(QDialog):
             ylabel="Utilization",
             title="Workstation Utilization"
         )
-        self.utilization_view.setHtml(html)
+        path_to_html = "utilization.html"
+        with open(path_to_html, "w", encoding="utf-8") as f:
+           f.write(html)
+        #self.utilization_view.setHtml(html)
+        url = QUrl.fromLocalFile(os.path.abspath(path_to_html))
+        self.utilization_view.load(url)
 
         '''
         self.utilization_figure.clear()
@@ -4617,7 +4915,12 @@ class ManualPlanningDialog(QDialog):
             ylabel="Relative Fill Level",
             title="Buffer Fill Levels"
         )
-        self.buffers_view.setHtml(html)
+        path_to_html = "buffers.html"
+        with open(path_to_html, "w", encoding="utf-8") as f:
+           f.write(html)
+        #self.buffers_view.setHtml(html)
+        url = QUrl.fromLocalFile(os.path.abspath(path_to_html))
+        self.buffers_view.load(url)
 
     def get_action_explanation(self, production_system, action):
         '''
@@ -5189,13 +5492,17 @@ class AIOptimizationTab(QWidget):
         if algorithm == 'RL-MuZero':
             # Prepare MuZeroConfig to override the default config
             # Info can be taken from production system object
+            print('observation_dimension', observation_dimension)
+            print('action_dimension', action_dimension)
             muzero_config = {
                 'observation_shape': (1, 1, observation_dimension),
-                'action_space': list(range(action_dimension))
-            }
+                'action_space': list(range(action_dimension)),
+                'max_moves': 10000,
+                'training_steps': 1000
+            }  # further variable names are in simulation.py/MuZeroConfig class!
             # Call muzero.py train() method, don't forget to hack the __init__ of MuZero class to look for the "game" in simulation.py
             muzero = MuZero(game_name='PrOPPlan', production_system=production_system, config=muzero_config)
-            muzero.train() 
+            muzero.train()
 
         if algorithm == 'Only heuristics':
             raise NotImplementedError()
@@ -5562,6 +5869,19 @@ class ActionSpaceConfigPage(QWizardPage):
                 combo.setCurrentIndex(idx)
             self.table.setCellWidget(row, 2, combo)
 
+            # Checks whether "Direct" is checked and if so disables the selection of indirect and automatically choses the empty option ""
+            checkbox.stateChanged.connect(
+                lambda state, c=combo: (
+                    (
+                        c.setCurrentIndex(c.findText("")),  
+                        c.setDisabled(True)
+                    ) if state == Qt.Checked else (
+                        c.setDisabled(False),
+                        c.setCurrentIndex(c.findText("Random"))  
+                    )
+                )
+            )
+
         self.table.resizeColumnsToContents()
 
         # Add the table to the page layout
@@ -5632,6 +5952,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Propplan")
         self.setGeometry(200, 150, 1024, 768)
         self.showMaximized()
+        self.setWindowIcon(QIcon("images/RIFLOGO.png")) 
 
         self.use_case_file = None  # path to the use case file
 

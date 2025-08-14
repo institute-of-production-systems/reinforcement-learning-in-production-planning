@@ -15,6 +15,8 @@ class SchedulePlotter:
         """
         Returns HTML for a Plotly Gantt chart showing Workstation and Worker status histories.
         """
+        #print(f"plan_visualizer.py: plotting {title}...")
+
         local_tz = tzlocal.get_localzone()
         fig = go.Figure()
 
@@ -47,14 +49,14 @@ class SchedulePlotter:
                 s = ", ".join(stati) if stati else "UNKNOWN"
                 color = workstation_status_colors.get(s, "#cccccc")
                 # Gray outline
-                fig.add_trace(go.Scatter(
-                    x=[left, right],
-                    y=[ws_y, ws_y],
-                    mode='lines',
-                    line=dict(color='gray', width=18),  # slightly wider than main bar
-                    hoverinfo='skip',
-                    showlegend=False
-                ))
+                # fig.add_trace(go.Scatter(
+                #     x=[left, right],
+                #     y=[ws_y, ws_y],
+                #     mode='lines',
+                #     line=dict(color='gray', width=18),  # slightly wider than main bar
+                #     hoverinfo='skip',
+                #     showlegend=False
+                # ))
                 # Draw a horizontal line for the interval
                 fig.add_trace(go.Scatter(
                     x=[left, right],
@@ -88,14 +90,14 @@ class SchedulePlotter:
                 right = datetime.fromtimestamp(t_end, tz=local_tz)
                 color = worker_status_colors.get(s, "#cccccc")
                 # Gray outline
-                fig.add_trace(go.Scatter(
-                    x=[left, right],
-                    y=[wrk_y, wrk_y],
-                    mode='lines',
-                    line=dict(color='gray', width=18),  # slightly wider than main bar
-                    hoverinfo='skip',
-                    showlegend=False
-                ))
+                # fig.add_trace(go.Scatter(
+                #     x=[left, right],
+                #     y=[wrk_y, wrk_y],
+                #     mode='lines',
+                #     line=dict(color='gray', width=18),  # slightly wider than main bar
+                #     hoverinfo='skip',
+                #     showlegend=False
+                # ))
                 fig.add_trace(go.Scatter(
                     x=[left, right],
                     y=[wrk_y, wrk_y],
@@ -131,7 +133,13 @@ class SchedulePlotter:
             yaxis_title="",
         )
 
-        return pio.to_html(fig, full_html=False, include_plotlyjs='cdn')
+        #print(pio.to_html(fig, full_html=False, include_plotlyjs='cdn'))
+
+        # Figure abspeichern
+        #with open("gantt_chart.html", "w", encoding="utf-8") as f:
+        #    f.write(pio.to_html(fig, full_html=False, include_plotlyjs='cdn'))
+
+        return pio.to_html(fig, full_html=False, include_plotlyjs='cdn')  # full_html=False, include_plotlyjs='cdn'
 
 '''
 class SchedulePlotter:
@@ -292,6 +300,8 @@ class TimeSeriesPlotter:
         Returns:
             HTML string to embed in a QWebEngineView.
         """
+        #print(f"plan_visualizer.py: plotting {title}...")
+
         local_tz = tzlocal.get_localzone()  # Get the local timezone
 
         fig = go.Figure()

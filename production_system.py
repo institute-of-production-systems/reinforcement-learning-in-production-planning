@@ -1570,6 +1570,9 @@ class ProductionSystem():
 
         self.is_prepared = False  # To track whether make_simulatable() has been calledon this production system object
 
+        # Dev and test shortcuts
+        self.ignore_ws_skip = True  # If True, "skip" will not be included in workstation sequencing legal actions
+
     def get_int_seconds(self, time_value, time_unit):
         '''Converts any duration represented as combination of time value and unit into integer seconds, ceiling rounding.'''
         # TODO: If no time unit was selected, it is most likely that time input was ignored completely.
@@ -1790,16 +1793,18 @@ class ProductionSystem():
             self.tool_state_tracker.update({tool_id: prop_val_dict})
 
 
-    def prepare_order_tracker(self):
+    def prepare_order_tracker(self, reset=False):
         # Fill order tracker variables with data
+        print(f"ProductionSystem: prepare_order_tracker(reset={reset})")
         for order_id, order in self.order_list.order_list.items():
             single_order_data = {}
             product_progress = []
             for product_id, product in order.products.items():
                 # For each unique/distinct operation within a customer order reserve a row in the action space matrix
                 for operation in self.product_operations[product_id]:
-                    self.action_matrix_row_dict.update({operation.operation_name + '|' + product_id + '|' + order_id: self.action_matrix_n_rows})
-                    self.action_matrix_n_rows += 1
+                    if not reset:
+                        self.action_matrix_row_dict.update({operation.operation_name + '|' + product_id + '|' + order_id: self.action_matrix_n_rows})
+                        self.action_matrix_n_rows += 1  # for 'skip' option
                     
                 # Calculate critical path duration (idea is to use this as a reference for the flow time - a product cannot be made faster than its critical path)
                 id_edges = [(edge[0].operation_name, edge[1].operation_name) for edge in self.product_instructions.product_palette[product_id]]
@@ -1827,7 +1832,8 @@ class ProductionSystem():
                     single_instance_data.update({'operation_progress': operation_progress})
                     single_instance_data.update({'production_end_time': None})
                     single_instance_data.update({'productive_time': None})
-                    single_instance_data.update({'critical_path_duration': critical_path_duration})
+                    if not reset:
+                        single_instance_data.update({'critical_path_duration': critical_path_duration})
                     product_progress.append(single_instance_data)
             single_order_data.update({'product_progress': product_progress})
             single_order_data.update({'release_time': int(datetime.strptime(order.release_time, "%d.%m.%Y %H:%M").timestamp())})
@@ -1900,8 +1906,8 @@ class ProductionSystem():
         self.raw_observation_vector_sizes.update({'Input buffers: fill level': N_ib})  # relative to maximum capacity
         self.raw_observation_vector_sizes.update({'Output buffers: fill level': N_ob})  # relative to maximum capacity
         self.raw_observation_vector_sizes.update({'Operations: location (workstation)': N_op * N_ws})
-        self.raw_observation_vector_sizes.update({'Operations: remaining work': 0})  # encoded by replacing the 1 in location assignment by relative remaining work
-        self.raw_observation_vector_sizes.update({'Operations: timeliness': N_op * 3})  # start time, remaining time in order, order deadline
+        self.raw_observation_vector_sizes.update({'Operations: remaining work': N_op})
+        self.raw_observation_vector_sizes.update({'Orders: timeliness': N_ord * 2})  # remaining time till order deadline, order deadline
 
         self.agg_observation_vector_sizes.update({'Buffers: average fill level': N_ib + N_ob})  # from simulation start onwards
         self.agg_observation_vector_sizes.update({'Buffers: fill level variability': N_ib + N_ob})  # from simulation start onwards
@@ -1910,9 +1916,9 @@ class ProductionSystem():
         self.agg_observation_vector_sizes.update({'Workers: productive time ratio': N_w})  # from simulation start onwards: how much time status = BUSY (Haupttätigkeit)
         self.agg_observation_vector_sizes.update({'Workers: setup time ratio': N_w})  # from simulation start onwards: how much time status = SETTING_UP (Haupttätigkeit - Rüsten)
         self.agg_observation_vector_sizes.update({'Workers: walking time ratio': N_w})  # from simulation start onwards: how much time status = WALKING (Nebentätigkeit)
-        self.agg_observation_vector_sizes.update({'Transport machines: material flow time ratio': N_tm})  # from simulation start onwards: how much time status = EXECUTING_TRANSPORT
+        #self.agg_observation_vector_sizes.update({'Transport machines: material flow time ratio': N_tm})  # from simulation start onwards: how much time status = EXECUTING_TRANSPORT
         # Next KPI tells how short is the product's critical path compared to the time spent from the first operation till product is made
-        self.agg_observation_vector_sizes.update({'Products: critical path duration / flow time': N_P})  # from simulation start onwards: 1.0 if prod. time < CPD, afterwards CPD/PT
+        #self.agg_observation_vector_sizes.update({'Products: critical path duration / flow time': N_P})  # from simulation start onwards: 1.0 if prod. time < CPD, afterwards CPD/PT
 
 
     def make_simulatable(self):
@@ -2139,8 +2145,8 @@ class ProductionSystem():
         Applies a workstation sequencing heuristic and directly calls set_action(), bypassing get_legal_actions().
         Gets called from push_operation_downstream() if WORKSTATION_SEQUENCING is configured to be handled by a heuristic.
         '''
-        # To prevent any stochasticity here
-        op_triple_list = sorted(op_triple_list)
+        # Old: To prevent any stochasticity here
+        #op_triple_list = sorted(op_triple_list)
 
         # The "skip" option is not supported by heuristics.
         # Also note that postponed workstation sequencing doesn't provide "skip" as an option.
@@ -2347,9 +2353,22 @@ class ProductionSystem():
                             forced_alternative_found = True
                             break
 
-            operation_alternatives = sorted(list(set(operation_alternatives)))  # different product instances within the same order are treated the same (condensed)
-            self.required_action_type = ActionType.WORKSTATION_SEQUENCING
-            self.action_relevant_info = (eligible_workstations[0], operation_alternatives)
+            # Old: we were losing the FIFO order of queued operations!
+            #operation_alternatives_unique = sorted(list(set(operation_alternatives)))  # different product instances within the same order are treated the same (condensed)
+            
+            # Different product instances within the same order are treated the same (condensed)
+            op_alternatives_dedup = []
+            for op_alt in operation_alternatives:
+                if op_alt not in op_alternatives_dedup:
+                    op_alternatives_dedup.append(op_alt)
+
+            if len(op_alternatives_dedup) != 0:
+                self.required_action_type = ActionType.WORKSTATION_SEQUENCING
+                self.action_relevant_info = (eligible_workstations[0], op_alternatives_dedup)
+            else:
+                # No alternatives left - usually the case when the last operation in the planning period leaves the workstation
+                self.required_action_type = None
+                return True
 
             # Apply a heuristic if so configured
             if self.action_config['Workstation sequencing'][0] == False:  # indirect action
@@ -2390,7 +2409,11 @@ class ProductionSystem():
             machine_setup_matrix = machine.setup_matrix
             hardware_setup_time_unit = machine.hardware_setup_time_unit
             for current_tool in workstation.tools_in_use:
-                tool_removal_duration = self.get_int_seconds(machine_setup_matrix[current_tool]['No tool'], hardware_setup_time_unit)
+                try:
+                    tool_removal_duration = self.get_int_seconds(machine_setup_matrix[current_tool]['No tool'], hardware_setup_time_unit)
+                except KeyError:
+                    print(f"WARNING! No tool removal time specified for {current_tool}. Assuming 0.")
+                    tool_removal_duration = 0
                 self.event_queue.append(ToolReleaseEvent(timestamp=self.timestamp + tool_removal_duration,
                                                          workstation=workstation,
                                                          tool=self.tools[current_tool]))
@@ -3183,6 +3206,8 @@ class ProductionSystem():
                     if op[0] != 'skip':
                         row = op[0] + '|' + op[1] + '|' + op[2]
                     else:
+                        if self.ignore_ws_skip:
+                            continue
                         row = 'skip'
                     i = self.action_matrix_row_dict[row]
                     self.action_matrix[i][j] = 1
@@ -3622,6 +3647,7 @@ class ProductionSystem():
                 if earliest_timestamp >= self.end_timestamp:
                     # Simulation end time reached
                     self.timestamp = self.end_timestamp
+                    print('!!! Main simulation loop has processed all events in the event queue !!!')
                     break
                 else:
                     # Simulation end time not reached yet
@@ -3846,6 +3872,16 @@ class ProductionSystem():
 
                                 print(f'Removing operation {str(o)} from the WIP of workstation {workstation.workstation_id}')
                                 workstation.wip_operations.remove(o)
+
+                                # Record production_end_time of the product instance if all operations are DONE
+                                instance_ops_done = []
+                                for temp_op_id, temp_op in instance_data['operation_progress'].items():
+                                    if temp_op['status'] == OperationStatus.DONE:
+                                        instance_ops_done.append(True)
+                                    else:
+                                        instance_ops_done.append(False)
+                                if all(instance_ops_done):
+                                    instance_data['production_end_time'] = earliest_timestamp
 
                                 # See if any operations of this product instance have become available and push them downstream
                                 #all_successor_ops_routed = []  # flag to see whether the corresponding OperationFinishedEvent can be deleted
@@ -4129,6 +4165,7 @@ class ProductionSystem():
                                     print(f'    Found a pending ToolsRequest that requests tool {tool.tool_id}')
                                     _e.some_unavailable_tool_released = True
                                     break
+                    self.event_queue.remove(earliest_event)
 
                 elif isinstance(earliest_event, WorkerReleaseEvent):
                     workstation : Workstation = earliest_event.workstation
@@ -4395,7 +4432,7 @@ class ProductionSystem():
                     print(f'    destination: {destination}')
                     # Handle transport order, i.e. trigger TRANSPORT_ROUTING or TRANSPORT_SEQUENCING
                     self.event_queue.remove(earliest_event)
-                    return self.handle_transport_order(earliest_event.component_dict, source, destination, eligible_transport)
+                    self.handle_transport_order(earliest_event.component_dict, source, destination, eligible_transport)  # return?
                     
                 elif isinstance(earliest_event, LoadingFinishedEvent):
                     print(f'\nHandling LoadingFinishedEvent of transport machine {earliest_event.transport_machine.machine_id}')
@@ -4509,15 +4546,18 @@ class ProductionSystem():
                                     # Remove handled UnloadingFinishedEvent
                                     self.event_queue.remove(earliest_event)
                                     # Re-trigger a transport sequencing decision
-                                    return self.handle_transport_order(component_dict={},
+                                    self.handle_transport_order(component_dict={},
                                                                        source=None,
                                                                        destination=None,
                                                                        eligible_transport=[transport_machine.machine_id],
-                                                                       postponed=True)
-                        
+                                                                       postponed=True)  # return?
+                                    break  # needed?
                         
                     # Remove handled UnloadingFinishedEvent, no matter if there was a postponed transport sequencing pending or not
-                    self.event_queue.remove(earliest_event)
+                    try:
+                        self.event_queue.remove(earliest_event)
+                    except ValueError:
+                        print('    UnloadingFinishedEvent already deleted.')
 
                 elif isinstance(earliest_event, ToolsRequest):
                     target_workstation : Workstation = earliest_event.target_workstation
@@ -4706,23 +4746,482 @@ class ProductionSystem():
                 continue
 
 
+    def step(self, action):
+        '''
+        Skynet begins to learn rapidly and eventually becomes self-aware at 2:14 a.m., EDT, on August 29, 1997.
+        '''
+        
+        # Any action except -1 is set by RL here
+        self.set_action(action)
+
+        # Possible situation: all events have been processed,
+        # only action "-1" remains but the timestamp has not yet reached
+        # the end timestamp.
+        while self.get_legal_actions() == [-1]:
+            if self.timestamp < self.end_timestamp:
+                self.set_action(-1)
+            else:
+                # Simulation end time reached
+                break
+
+        done = self.is_done()
+
+        reward = 0.0
+
+        if done:
+            print('ProductionSystem: done')
+
+            self.event_queue.clear()  # doing so in reset() breaks the simulation for some reason
+
+            for kpi in self.reward_config.keys():
+                # reward_dict[kpi_name] = (goal, scale_value, unit)
+
+                if self.reward_config[kpi][0] != "Ignore":
+
+                    goal_factor = 0
+                    if self.reward_config[kpi][0] == "Reward":
+                        goal_factor = 1
+                    elif self.reward_config[kpi][0] == "Punish":
+                        goal_factor = -1
+
+                    scale_value = self.reward_config[kpi][1]
+                    unit = self.reward_config[kpi][2]
+
+                    points = 0.0
+
+                    if kpi == 'Mean order lead time':
+
+                        mean_order_lead_time = 0
+                        N_ord = len(self.order_list.order_list)
+
+                        for order_id, order_info in self.order_progress.items():
+                            # If all product instances within this order have non-None production end times,
+                            # then get the maximum production end time as order completion timestamp.
+                            # If some of product instances aren't completed before planning horizon,
+                            # sum their remaining work and add to planning horizon to punish such delays strongly
+                            # while still providing information on whether the algorithm gets closer to
+                            # squeezing all operations within the planning horizon
+                            latest_instance_completion = 0
+                            worst_delay_beyond_sim_end = 0
+                            order_incomplete = False
+                            for instance in order_info['product_progress']:
+                                if instance['production_end_time'] is not None:
+                                    if instance['production_end_time'] > latest_instance_completion:
+                                        latest_instance_completion = instance['production_end_time']
+                                else:
+                                    order_incomplete = True
+                                    worst_delay_beyond_sim_end += sum([instance['operation_progress'][oid]['remaining_work'] for oid in instance['operation_progress'].keys()])
+
+                            if not order_incomplete:
+                                mean_order_lead_time += latest_instance_completion - order_info['release_time']
+                            elif order_incomplete:
+                                mean_order_lead_time += self.end_timestamp + worst_delay_beyond_sim_end - order_info['release_time']
+
+                        mean_order_lead_time /= N_ord
+
+                        points = mean_order_lead_time / self.get_int_seconds(scale_value, unit)
+
+                    if kpi == 'Mean absolute order deadline deviation':
+
+                        ma_deadline_dev = 0
+                        N_ord = len(self.order_list.order_list)
+
+                        for order_id, order_info in self.order_progress.items():
+                            latest_instance_completion = 0
+                            worst_delay_beyond_sim_end = 0
+                            order_incomplete = False
+                            for instance in order_info['product_progress']:
+                                if instance['production_end_time'] is not None:
+                                    if instance['production_end_time'] > latest_instance_completion:
+                                        latest_instance_completion = instance['production_end_time']
+                                else:
+                                    order_incomplete = True
+                                    worst_delay_beyond_sim_end += sum([instance['operation_progress'][oid]['remaining_work'] for oid in instance['operation_progress'].keys()])
+
+                            if not order_incomplete:
+                                ma_deadline_dev += abs(latest_instance_completion - order_info['deadline'])
+                            elif order_incomplete:
+                                ma_deadline_dev += self.end_timestamp + worst_delay_beyond_sim_end - order_info['deadline']
+
+                        ma_deadline_dev /= N_ord
+
+                        points = ma_deadline_dev / self.get_int_seconds(scale_value, unit)
+
+                    if kpi == 'Mean productive time ratio of workstations':
+
+                        mean_ws_util = 0.0
+
+                        elapsed = self.end_timestamp - self.start_timestamp
+                        for ws in self.workstations.values():
+                            prod_ratio = 0.0
+                            if elapsed > 0:
+                                prod_ratio = ws.busy_time / elapsed if hasattr(ws, "busy_time") else 0.0
+                            mean_ws_util += prod_ratio
+
+                        mean_ws_util /= len(self.workstations)
+
+                        points = mean_ws_util / scale_value
+
+                    if kpi == 'Mean productive time ratio of workers':
+
+                        mean_worker_util = 0.0
+
+                        elapsed = self.end_timestamp - self.start_timestamp
+                        for worker in self.workers.values():
+                            prod_ratio = 0.0
+                            if elapsed > 0:
+                                prod_ratio = worker.busy_time / elapsed if hasattr(worker, "busy_time") else 0
+                            mean_worker_util += prod_ratio
+
+                        mean_worker_util /= len(self.workers)
+
+                        points = mean_worker_util / scale_value
+
+                    if kpi == 'Mean buffer fill variability factor':
+
+                        buffer_vars = []
+                        mean_buffer_var = 0.0
+
+                        for ws_id, ws in self.workstations.items():
+                            for buf_idx, buf in list(ws.physical_input_buffers.items()) + list(ws.physical_output_buffers.items()):
+                                buffer_vars.append(buf.get_fill_level_variability())
+
+                        mean_buffer_var = sum(buffer_vars) / len(buffer_vars)
+
+                        points = mean_buffer_var / scale_value
+
+                    reward += goal_factor * points                            
+
+        return self.get_obs(), reward, done, None
+
     def get_obs(self):
         '''Returns the observation of the production system at its current state.
         '''
-        raise NotImplementedError()
+        elements = []
+
+        # --- Raw state variables --- #
+
+        for var in self.raw_observation_vector_sizes.keys():
+
+            if self.observation_config[var][1]:
+
+                # Make sure these are the same as in prepare_observation_space_dimensions()
+                if var == 'Workers: location (workstation)':
+                    N_w = len(self.workers)
+                    N_ws = len(self.workstations)
+                    w_ws_mat = numpy.zeros((N_w, N_ws), dtype=numpy.float32)
+                    i = 0
+                    for w_id, w in self.workers.items():
+                        j = 0
+                        for ws_id, ws in self.workstations.items():
+                            if w.location == ws_id:
+                                w_ws_mat[i,j] = 1.0
+                            j = j + 1
+                        i = i + 1
+                    w_ws_flat = w_ws_mat.flatten()
+                    elements.append(w_ws_flat)
+
+                if var == 'Workers: location (transport)':
+                    N_w = len(self.workers)
+                    N_tm = len(self.transport_machines)
+                    w_tm_mat = numpy.zeros((N_w, N_tm), dtype=numpy.float32)
+                    i = 0
+                    for w_id, w in self.workers.items():
+                        j = 0
+                        for tm_id, tm in self.transport_machines.items():
+                            if w.location == tm_id:
+                                w_tm_mat[i,j] = 1.0
+                            j = j + 1
+                        i = i + 1
+                    w_tm_flat = w_tm_mat.flatten()
+                    elements.append(w_tm_flat)
+
+                if var == 'Workers: destination (workstation)':
+                    N_w = len(self.workers)
+                    N_ws = len(self.workstations)
+                    w_ws_dest_mat = numpy.zeros((N_w, N_ws), dtype=numpy.float32)
+                    i = 0
+                    for w_id, w in self.workers.items():
+                        j = 0
+                        for ws_id, ws in self.workstations.items():
+                            if w.destination == ws_id:
+                                w_ws_dest_mat[i,j] = 1.0
+                            j = j + 1
+                        i = i + 1
+                    w_ws_dest_flat = w_ws_dest_mat.flatten()
+                    elements.append(w_ws_dest_flat)
+
+                if var == 'Workers: destination (transport)':
+                    N_w = len(self.workers)
+                    N_tm = len(self.transport_machines)
+                    w_tm_dest_mat = numpy.zeros((N_w, N_tm), dtype=numpy.float32)
+                    i = 0
+                    for w_id, w in self.workers.items():
+                        j = 0
+                        for tm_id, tm in self.transport_machines.items():
+                            if w.destination == tm_id:
+                                w_tm_dest_mat[i,j] = 1.0
+                            j = j + 1
+                        i = i + 1
+                    w_tm_dest_flat = w_tm_dest_mat.flatten()
+                    elements.append(w_tm_dest_flat)
+
+                if var == 'Workers: status':
+                    N_w = len(self.workers)
+                    w_status_mat = numpy.zeros((N_w, 4), dtype=numpy.float32)
+                    i = 0
+                    for w_id, w in self.workers.items():
+                        w_status_mat[i,w.status-1] = 1.0
+                        i = i + 1
+                    w_status_flat = w_status_mat.flatten()
+                    elements.append(w_status_flat)
+
+                if var == 'Tools: location':
+                    N_t = len(self.tools)
+                    N_ws = len(self.workstations)
+                    tool_loc_mat = numpy.zeros((N_t, N_ws), dtype=numpy.float32)
+                    j = 0
+                    for ws_id, ws in self.workstations.items():
+                        i = 0
+                        for tool_id, tool in self.tool_state_tracker.items():
+                            if any([tool_id in ws.permanent_tools,
+                                    tool_id in ws.seized_tools,
+                                    tool_id in ws.tools_in_use]):
+                                tool_loc_mat[i,j] = 1.0
+                            i = i + 1
+                        j = j + 1
+                    tool_loc_flat = tool_loc_mat.flatten()
+                    elements.append(tool_loc_flat)
+
+                if var == 'Tools: status':
+                    N_t = len(self.tools)
+                    tool_status_mat = numpy.zeros((N_t, 3), dtype=numpy.float32)
+                    i = 0
+                    for tool_id, tool in self.tool_state_tracker.items():
+                        for ws_id, ws in self.workstations.items():
+                            if tool_id in ws.seized_tools:
+                                tool_status_mat[i,0] = 1.0
+                            if tool_id in ws.permanent_tools:
+                                tool_status_mat[i,1] = 1.0
+                            if tool_id in ws.tools_in_use:
+                                tool_status_mat[i,2] = 1.0
+                        i = i + 1
+                    tool_status_flat = tool_status_mat.flatten()
+                    elements.append(tool_status_flat)
+
+                if var == 'Workstations: status':
+                    N_ws = len(self.workstations)
+                    ws_status_mat = numpy.zeros((N_ws, 11), dtype=numpy.float32)
+                    i = 0
+                    for ws_id, ws in self.workstations.items():
+                        for s in ws.status:
+                            ws_status_mat[i,s-1] = 1.0
+                        i = i + 1
+                    ws_status_flat = ws_status_mat.flatten()
+                    elements.append(ws_status_flat)
+
+                if var == 'Input buffers: fill level':
+                    ib_fill_list = []
+                    for ws in self.workstations.values():
+                        for ib in ws.physical_input_buffers.values():
+                            ib_fill_list.append(ib.get_fill_level())
+                    elements.append(numpy.array(ib_fill_list))
+                
+                if var == 'Output buffers: fill level':
+                    ob_fill_list = []
+                    for ws in self.workstations.values():
+                        for ob in ws.physical_output_buffers.values():
+                            ob_fill_list.append(ob.get_fill_level())
+                    elements.append(numpy.array(ob_fill_list))
+
+                if var == 'Operations: location (workstation)':
+                    N_op = 0
+                    for order in self.order_list.order_list.values():
+                        for product_id, product_quantity in order.products.items():
+                            N_op += product_quantity * len(self.product_operations[product_id])
+                    N_ws = len(self.workstations)
+                    ws_idx_map = {key: m for m, key in enumerate(self.workstations)}
+                    op_loc_mat = numpy.zeros((N_op, N_ws), dtype=numpy.float32)
+                    i = 0
+                    for order in self.order_progress.values():
+                        for instance in order['product_progress']:
+                            for operation in instance['operation_progress'].values():
+                                j = ws_idx_map.get(operation['location'])
+                                if j is not None:
+                                    op_loc_mat[i,j] = 1.0
+                                i = i + 1
+                    op_loc_flat = op_loc_mat.flatten()
+                    elements.append(op_loc_flat)
+
+                if var == 'Operations: remaining work':
+                    rem_work = []
+                    for order in self.order_progress.values():
+                        for instance in order['product_progress']:
+                            product_id = instance['product_id']
+                            for operation_id, operation in instance['operation_progress'].items():
+                                pt_value = self.find_operation_by_name(operation_id, self.product_operations[product_id]).processing_time_value
+                                pt_unit = self.find_operation_by_name(operation_id, self.product_operations[product_id]).processing_time_unit
+                                operation_duration = self.get_int_seconds(pt_value, pt_unit)
+                                rem_work.append(operation['remaining_work']/operation_duration)
+                    elements.append(numpy.array(rem_work))
+
+                if var == 'Orders: timeliness':
+                    # 1. Remaining time till order deadline relative to planning period duration
+                    # 2. Order deadline relative to planning period duration
+                    N_ord = len(self.order_list.order_list)
+                    order_timeliness_mat = numpy.zeros((N_ord, 2), dtype=numpy.float32)
+                    planning_period_duration = self.end_timestamp - self.start_timestamp
+                    i = 0
+                    for order_id, order_data in self.order_progress.items():
+                        order_timeliness_mat[i,0] = (order_data['deadline'] - self.timestamp) / planning_period_duration
+                        order_timeliness_mat[i,1] = (order_data['deadline'] - self.start_timestamp) / planning_period_duration
+                        i = i + 1
+                    order_timeliness_flat = order_timeliness_mat.flatten()
+                    elements.append(order_timeliness_flat)
+
+        # --- Aggregated state variables --- #
+
+        for var in self.agg_observation_vector_sizes.keys():
+
+            if self.observation_config[var][1]:
+
+                if var == 'Buffers: average fill level':
+                    buf_avg_fill = []
+                    for ws_id, ws in self.workstations.items():
+                        for buf_idx, buf in list(ws.physical_input_buffers.items()) + list(ws.physical_output_buffers.items()):
+                            buf_avg_fill.append(buf.get_average_fill_level())
+                    elements.append(numpy.array(buf_avg_fill))
+
+                if var == 'Buffers: fill level variability':
+                    buf_fill_var = []
+                    for ws_id, ws in self.workstations.items():
+                        for buf_idx, buf in list(ws.physical_input_buffers.items()) + list(ws.physical_output_buffers.items()):
+                            buf_fill_var.append(buf.get_fill_level_variability())
+                    elements.append(numpy.array(buf_fill_var))
+
+                if var == 'Workstations: productive time ratio':
+                    ws_prod_time = []
+                    elapsed = self.timestamp - self.start_timestamp
+                    for ws in self.workstations.values():
+                        prod_ratio = 0.0
+                        if elapsed > 0:
+                            prod_ratio = ws.busy_time / elapsed if hasattr(ws, "busy_time") else 0.0
+                        ws_prod_time.append(prod_ratio)
+                    elements.append(numpy.array(ws_prod_time))
+
+                if var == 'Workstations: setup time ratio':
+                    ws_setup_time = []
+                    elapsed = self.timestamp - self.start_timestamp
+                    for ws in self.workstations.values():
+                        setup_ratio = 0.0
+                        if elapsed > 0:
+                            setup_ratio = ws.setup_time / elapsed if hasattr(ws, "setup_time") else 0.0
+                        ws_setup_time.append(setup_ratio)
+                    elements.append(numpy.array(ws_setup_time))
+
+                if var == 'Workers: productive time ratio':
+                    w_busy = []
+                    elapsed = self.timestamp - self.start_timestamp
+                    if elapsed <= 0:
+                        elapsed = 1
+                    for worker in self.workers.values():
+                        prod_ratio = worker.busy_time / elapsed if hasattr(worker, "busy_time") else 0
+                        w_busy.append(prod_ratio)
+                    elements.append(numpy.array(w_busy))
+
+                if var == 'Workers: setup time ratio':
+                    w_setup = []
+                    elapsed = self.timestamp - self.start_timestamp
+                    if elapsed <= 0:
+                        elapsed = 1
+                    for worker in self.workers.values():
+                        setup_ratio = worker.setup_time / elapsed if hasattr(worker, "setup_time") else 0
+                        w_setup.append(setup_ratio)
+                    elements.append(numpy.array(w_setup))
+
+                if var == 'Workers: walking time ratio':
+                    w_walk = []
+                    elapsed = self.timestamp - self.start_timestamp
+                    if elapsed <= 0:
+                        elapsed = 1
+                    for worker in self.workers.values():
+                        walk_ratio = worker.walking_time / elapsed if hasattr(worker, "walking_time") else 0
+                        w_walk.append(walk_ratio)
+                    elements.append(numpy.array(w_walk))
+
+
+        observation_vector = numpy.concatenate(elements).reshape(1, 1, -1)
+        return observation_vector
+
 
     def is_done(self):
-        '''Returns a boolean whether the current timestamp of the production system has reached the end timestamp as specified in the GUI.
         '''
-        if self.timestamp >= self.end_timestamp:
+        Returns a boolean whether the current timestamp of the production system has reached the end timestamp as specified in the GUI.
+        '''
+
+        # Deadlock situation: no actions available
+        if len(self.get_legal_actions()) == 0:
+            print('XXX Simulation has no more legal actions left (deadlock)!')
             return True
-        else:
-            return False
+
+        # Normal case: a game is finished when planning period end is reached
+        if self.timestamp >= self.end_timestamp:
+            print('XXX Simulation has reached the end timestamp.')
+            return True
+
         
     def reset(self):
-        '''Returns the production system object into its initial state.
         '''
-        raise NotImplementedError()
+        Returns the production system object into its initial state.
+        '''
+        print("ProductionSystem: reset()...")
+        # Reset time
+        self.timestamp = self.start_timestamp
+
+        # Empty the event queue
+        #self.event_queue.clear()
+
+        # Reset order trackers
+        self.prepare_order_tracker(reset=True)
+
+        # Major TODO: Implement warm start of the simulation
+        # (i.e. when the system does not start from an empty state)
+
+        # Reset worker states
+        for worker in self.workers.values():
+            worker.location = ''  # workstation / transport machine / worker pool / shopfloor
+            worker.destination = ''  # workstation / transport machine
+            worker.distance_to_destination = 0.0  # in meters
+            worker.status = WorkerStatus.IDLE
+            worker.busy_time = 0.0
+            worker.setup_time = 0.0
+            worker.walking_time = 0.0
+            worker.status_history = []  # List of tuples like (timestamp, status)
+
+        # Reset workstation states
+        for workstation in self.workstations.values():
+            workstation.seized_tools = []
+            workstation.input_operation_buffer = []
+            workstation.output_operation_buffer = []
+            workstation.wip_operations = []
+            workstation.wip_components = []
+            workstation.tools_in_use = []
+            # Reset buffers
+            for ib in workstation.physical_input_buffers.values():
+                ib.contents = {}
+                ib.fill_level_history = []
+            for ob in workstation.physical_output_buffers.values():
+                ob.contents = {}
+                ob.fill_level_history = []
+
+        # Reset tool states
+        self.prepare_tool_state_tracker()
+
+        # Empty the action_matrix
+        self.action_matrix = numpy.zeros((self.action_matrix_n_rows, self.action_matrix_n_cols), dtype="int32")
+
+        # Following the example from gomoku.py - Gomoku.reset()
+        return self.get_obs()
 
     def to_dict(self):
         return {

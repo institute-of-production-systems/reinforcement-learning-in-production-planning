@@ -2,7 +2,12 @@ import math
 import time
 
 import numpy
+
+import os
+os.environ["RAY_DEDUP_LOGS"] = "0"
+os.environ["RAY_COLOR_PREFIX"] = "1"
 import ray
+
 import torch
 
 from . import models
@@ -299,7 +304,7 @@ class MCTS:
             ), f"Legal actions should not be an empty array. Got {legal_actions}."
             assert set(legal_actions).issubset(
                 set(self.config.action_space)
-            ), "Legal actions should be a subset of the action space."
+            ), f"Legal actions should be a subset of the action space. Got legal actions: {legal_actions}"
             root.expand(
                 legal_actions,
                 to_play,

@@ -4,26 +4,34 @@ import gymnasium as gym
 from gymnasium.utils import seeding
 import numpy as np
 
-class PrOPPlanEnv(gym.Env):
+class PrOPPlanEnv():  #gym.Env
     '''
     Gym Environment of a production scheduling task that defines important functions
     such as get_obs(), step(), is_done(), compute_reward(), reset() etc.
     '''
 
     def __init__(self, production_system=None, **kwargs):
+
         print("PrOPPlanEnv: Started initializing...")
-        self.seed()
+
+        # Init Gym Env
+        #super().__init__()
+        #print("PrOPPlanEnv: gym.Env superclass initialized.")
+
+        #self.seed()
         
         # Prepare production system
-        super().__init__()
         self.production_system : ProductionSystem = production_system
         self._prepare_production_system()
+        print("PrOPPlanEnv: ProductionSystem object prepared.")
 
         # Define observation and action space dimensions here
-        observation_dimension = sum([entry[0] for entry in production_system.observation_config.values() if entry[1]])
-        action_dimension = production_system.action_matrix_n_rows * production_system.action_matrix_n_cols
+        observation_dimension = sum([entry[0] for entry in self.production_system.observation_config.values() if entry[1]])
+        action_dimension = self.production_system.action_matrix_n_rows * self.production_system.action_matrix_n_cols
+        print(f"PrOPPlanEnv: observation_dimension = {observation_dimension}")
+        print(f"PrOPPlanEnv: action_dimension = {action_dimension}")
 
-        self.observation_space = gym.spaces.Box(low=0.0, high=1.0, shape=(observation_dimension,), dtype=np.float32)
+        self.observation_space = gym.spaces.Box(low=0.0, high=1.0, shape=(1,1,observation_dimension), dtype=np.float32)
         self.action_space = gym.spaces.Discrete(action_dimension)
 
         # Init logging
@@ -112,7 +120,7 @@ class PrOPPlanEnv(gym.Env):
     def _get_obs(self):
         """Returns the observation.
         """
-        self.production_system.get_obs()
+        return self.production_system.get_obs()
 
     def _init_env_variables(self):
         """Inits variables needed to be initialised each time we reset at the start

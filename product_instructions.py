@@ -17,6 +17,20 @@ class OperationNodeClean():
         self.processing_time_unit = processing_time_unit
         self.output_name = output_name  # name of the part or subassembly that leaves the operation after processing
 
+    def to_dict(self):
+        return {
+            "node_type": self.node_type,
+            "operation_name": self.operation_name,
+            "display_pos": object_to_dict((self.display_pos.x(), self.display_pos.y())),
+            "node_uid": self.node_uid,
+            "components": object_to_dict(self.components),
+            "capabilities": object_to_dict(self.capabilities),
+            "tools": object_to_dict(self.tools),
+            "processing_time_value": self.processing_time_value,
+            "processing_time_unit": self.processing_time_unit,
+            "output_name": self.output_name
+        }
+
 class ProductPalette():
     '''
     The product palette of a company is stored as a dictionary with

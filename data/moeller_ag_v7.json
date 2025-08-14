@@ -1,0 +1,3262 @@
+{
+    "worker_capabilities": [],
+    "workers": {
+        "Drilling machine operator": {
+            "worker_id": "Drilling machine operator",
+            "provided_capabilities": []
+        },
+        "Turning machine operator": {
+            "worker_id": "Turning machine operator",
+            "provided_capabilities": []
+        },
+        "Milling machine operator": {
+            "worker_id": "Milling machine operator",
+            "provided_capabilities": []
+        },
+        "Sanding worker 1": {
+            "worker_id": "Sanding worker 1",
+            "provided_capabilities": []
+        },
+        "Sanding worker 2": {
+            "worker_id": "Sanding worker 2",
+            "provided_capabilities": []
+        },
+        "Sanding worker 3": {
+            "worker_id": "Sanding worker 3",
+            "provided_capabilities": []
+        },
+        "Sanding worker 4": {
+            "worker_id": "Sanding worker 4",
+            "provided_capabilities": []
+        },
+        "Sanding worker 5": {
+            "worker_id": "Sanding worker 5",
+            "provided_capabilities": []
+        },
+        "Painting machine operator": {
+            "worker_id": "Painting machine operator",
+            "provided_capabilities": []
+        },
+        "Assembler 1": {
+            "worker_id": "Assembler 1",
+            "provided_capabilities": []
+        },
+        "Assembler 2": {
+            "worker_id": "Assembler 2",
+            "provided_capabilities": []
+        }
+    },
+    "worker_pools": {
+        "Drilling operators": [
+            "Drilling machine operator"
+        ],
+        "Turning operators": [
+            "Turning machine operator"
+        ],
+        "Milling operators": [
+            "Milling machine operator"
+        ],
+        "Sanding workers": [
+            "Sanding worker 1",
+            "Sanding worker 2",
+            "Sanding worker 3",
+            "Sanding worker 4",
+            "Sanding worker 5"
+        ],
+        "Painting operators": [
+            "Painting machine operator"
+        ],
+        "Assemblers": [
+            "Assembler 1",
+            "Assembler 2"
+        ]
+    },
+    "tools": {
+        "drilling_toolset_A": {
+            "tool_id": "drilling_toolset_A",
+            "dynamic_properties": {},
+            "static_properties": {}
+        },
+        "drilling_toolset_B": {
+            "tool_id": "drilling_toolset_B",
+            "dynamic_properties": {},
+            "static_properties": {}
+        },
+        "drilling_toolset_C": {
+            "tool_id": "drilling_toolset_C",
+            "dynamic_properties": {},
+            "static_properties": {}
+        },
+        "drilling_toolset_D": {
+            "tool_id": "drilling_toolset_D",
+            "dynamic_properties": {},
+            "static_properties": {}
+        },
+        "turning_toolset_A": {
+            "tool_id": "turning_toolset_A",
+            "dynamic_properties": {},
+            "static_properties": {}
+        },
+        "turning_toolset_B": {
+            "tool_id": "turning_toolset_B",
+            "dynamic_properties": {},
+            "static_properties": {}
+        },
+        "turning_toolset_C": {
+            "tool_id": "turning_toolset_C",
+            "dynamic_properties": {},
+            "static_properties": {}
+        },
+        "turning_toolset_D": {
+            "tool_id": "turning_toolset_D",
+            "dynamic_properties": {},
+            "static_properties": {}
+        },
+        "milling_toolset_A": {
+            "tool_id": "milling_toolset_A",
+            "dynamic_properties": {},
+            "static_properties": {}
+        },
+        "milling_toolset_B": {
+            "tool_id": "milling_toolset_B",
+            "dynamic_properties": {},
+            "static_properties": {}
+        },
+        "milling_toolset_C": {
+            "tool_id": "milling_toolset_C",
+            "dynamic_properties": {},
+            "static_properties": {}
+        },
+        "milling_toolset_D": {
+            "tool_id": "milling_toolset_D",
+            "dynamic_properties": {},
+            "static_properties": {}
+        },
+        "sanding_toolset_A": {
+            "tool_id": "sanding_toolset_A",
+            "dynamic_properties": {},
+            "static_properties": {}
+        },
+        "sanding_toolset_B": {
+            "tool_id": "sanding_toolset_B",
+            "dynamic_properties": {},
+            "static_properties": {}
+        },
+        "sanding_toolset_C": {
+            "tool_id": "sanding_toolset_C",
+            "dynamic_properties": {},
+            "static_properties": {}
+        },
+        "sanding_toolset_D": {
+            "tool_id": "sanding_toolset_D",
+            "dynamic_properties": {},
+            "static_properties": {}
+        },
+        "painting_toolset_A": {
+            "tool_id": "painting_toolset_A",
+            "dynamic_properties": {},
+            "static_properties": {}
+        },
+        "painting_toolset_B": {
+            "tool_id": "painting_toolset_B",
+            "dynamic_properties": {},
+            "static_properties": {}
+        },
+        "painting_toolset_C": {
+            "tool_id": "painting_toolset_C",
+            "dynamic_properties": {},
+            "static_properties": {}
+        },
+        "painting_toolset_D": {
+            "tool_id": "painting_toolset_D",
+            "dynamic_properties": {},
+            "static_properties": {}
+        },
+        "assembly_toolset_A": {
+            "tool_id": "assembly_toolset_A",
+            "dynamic_properties": {},
+            "static_properties": {}
+        },
+        "assembly_toolset_B": {
+            "tool_id": "assembly_toolset_B",
+            "dynamic_properties": {},
+            "static_properties": {}
+        },
+        "assembly_toolset_C": {
+            "tool_id": "assembly_toolset_C",
+            "dynamic_properties": {},
+            "static_properties": {}
+        },
+        "assembly_toolset_D": {
+            "tool_id": "assembly_toolset_D",
+            "dynamic_properties": {},
+            "static_properties": {}
+        }
+    },
+    "tool_pools": {},
+    "machine_capabilities": [
+        "drilling",
+        "turning",
+        "turning_B",
+        "milling",
+        "milling_A",
+        "milling_C",
+        "sanding",
+        "sanding_B",
+        "sanding_D",
+        "painting",
+        "assembly",
+        "assembly_D"
+    ],
+    "machines": {
+        "Drilling machine 1": {
+            "machine_id": "Drilling machine 1",
+            "accepted_capabilities": [],
+            "provided_capabilities": [
+                "drilling"
+            ],
+            "compatible_tools": [
+                "drilling_toolset_A",
+                "drilling_toolset_B",
+                "drilling_toolset_C",
+                "drilling_toolset_D"
+            ],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {
+                "drilling_toolset_A": {
+                    "drilling_toolset_B": 24.0,
+                    "drilling_toolset_C": 32.0,
+                    "drilling_toolset_D": 28.0
+                },
+                "drilling_toolset_B": {
+                    "drilling_toolset_A": 32.0,
+                    "drilling_toolset_C": 30.0,
+                    "drilling_toolset_D": 32.0
+                },
+                "drilling_toolset_C": {
+                    "drilling_toolset_A": 24.0,
+                    "drilling_toolset_B": 28.0,
+                    "drilling_toolset_D": 28.0
+                },
+                "drilling_toolset_D": {
+                    "drilling_toolset_A": 24.0,
+                    "drilling_toolset_B": 22.0,
+                    "drilling_toolset_C": 32.0
+                },
+                "No tool": {}
+            },
+            "hardware_setup_time_unit": "min",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {
+                "drilling_toolset_A": "",
+                "drilling_toolset_B": "",
+                "drilling_toolset_C": "",
+                "drilling_toolset_D": ""
+            },
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "Drilling machine 2": {
+            "machine_id": "Drilling machine 2",
+            "accepted_capabilities": [],
+            "provided_capabilities": [
+                "drilling"
+            ],
+            "compatible_tools": [
+                "drilling_toolset_A",
+                "drilling_toolset_B",
+                "drilling_toolset_C",
+                "drilling_toolset_D"
+            ],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {
+                "drilling_toolset_A": {
+                    "drilling_toolset_B": 24.0,
+                    "drilling_toolset_C": 32.0,
+                    "drilling_toolset_D": 28.0
+                },
+                "drilling_toolset_B": {
+                    "drilling_toolset_A": 32.0,
+                    "drilling_toolset_C": 30.0,
+                    "drilling_toolset_D": 32.0
+                },
+                "drilling_toolset_C": {
+                    "drilling_toolset_A": 24.0,
+                    "drilling_toolset_B": 28.0,
+                    "drilling_toolset_D": 28.0
+                },
+                "drilling_toolset_D": {
+                    "drilling_toolset_A": 24.0,
+                    "drilling_toolset_B": 22.0,
+                    "drilling_toolset_C": 32.0
+                },
+                "No tool": {}
+            },
+            "hardware_setup_time_unit": "min",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {
+                "drilling_toolset_A": "",
+                "drilling_toolset_B": "",
+                "drilling_toolset_C": "",
+                "drilling_toolset_D": ""
+            },
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "Drilling machine 3": {
+            "machine_id": "Drilling machine 3",
+            "accepted_capabilities": [],
+            "provided_capabilities": [
+                "drilling"
+            ],
+            "compatible_tools": [
+                "drilling_toolset_A",
+                "drilling_toolset_B",
+                "drilling_toolset_C",
+                "drilling_toolset_D"
+            ],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {
+                "drilling_toolset_A": {
+                    "drilling_toolset_B": 24.0,
+                    "drilling_toolset_C": 32.0,
+                    "drilling_toolset_D": 28.0
+                },
+                "drilling_toolset_B": {
+                    "drilling_toolset_A": 32.0,
+                    "drilling_toolset_C": 30.0,
+                    "drilling_toolset_D": 32.0
+                },
+                "drilling_toolset_C": {
+                    "drilling_toolset_A": 24.0,
+                    "drilling_toolset_B": 28.0,
+                    "drilling_toolset_D": 28.0
+                },
+                "drilling_toolset_D": {
+                    "drilling_toolset_A": 24.0,
+                    "drilling_toolset_B": 22.0,
+                    "drilling_toolset_C": 32.0
+                },
+                "No tool": {}
+            },
+            "hardware_setup_time_unit": "min",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {
+                "drilling_toolset_A": "",
+                "drilling_toolset_B": "",
+                "drilling_toolset_C": "",
+                "drilling_toolset_D": ""
+            },
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "Turning machine 1": {
+            "machine_id": "Turning machine 1",
+            "accepted_capabilities": [],
+            "provided_capabilities": [
+                "turning",
+                "turning_B"
+            ],
+            "compatible_tools": [
+                "turning_toolset_A",
+                "turning_toolset_B",
+                "turning_toolset_C",
+                "turning_toolset_D"
+            ],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {
+                "turning_toolset_A": {
+                    "turning_toolset_B": 24.0,
+                    "turning_toolset_C": 32.0,
+                    "turning_toolset_D": 28.0
+                },
+                "turning_toolset_B": {
+                    "turning_toolset_A": 32.0,
+                    "turning_toolset_C": 30.0,
+                    "turning_toolset_D": 32.0
+                },
+                "turning_toolset_C": {
+                    "turning_toolset_A": 24.0,
+                    "turning_toolset_B": 28.0,
+                    "turning_toolset_D": 28.0
+                },
+                "turning_toolset_D": {
+                    "turning_toolset_A": 24.0,
+                    "turning_toolset_B": 22.0,
+                    "turning_toolset_C": 32.0
+                },
+                "No tool": {}
+            },
+            "hardware_setup_time_unit": "min",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {
+                "turning_toolset_A": "",
+                "turning_toolset_B": "",
+                "turning_toolset_C": "",
+                "turning_toolset_D": ""
+            },
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "Turning machine 2": {
+            "machine_id": "Turning machine 2",
+            "accepted_capabilities": [],
+            "provided_capabilities": [
+                "turning"
+            ],
+            "compatible_tools": [
+                "turning_toolset_A",
+                "turning_toolset_C",
+                "turning_toolset_D"
+            ],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {
+                "turning_toolset_A": {
+                    "turning_toolset_C": 32.0,
+                    "turning_toolset_D": 28.0
+                },
+                "turning_toolset_C": {
+                    "turning_toolset_A": 24.0,
+                    "turning_toolset_D": 28.0
+                },
+                "turning_toolset_D": {
+                    "turning_toolset_A": 24.0,
+                    "turning_toolset_C": 32.0
+                },
+                "No tool": {}
+            },
+            "hardware_setup_time_unit": "min",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {
+                "turning_toolset_A": "",
+                "turning_toolset_C": "",
+                "turning_toolset_D": ""
+            },
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "Milling machine 1": {
+            "machine_id": "Milling machine 1",
+            "accepted_capabilities": [],
+            "provided_capabilities": [
+                "milling",
+                "milling_A",
+                "milling_C"
+            ],
+            "compatible_tools": [
+                "milling_toolset_A",
+                "milling_toolset_B",
+                "milling_toolset_C",
+                "milling_toolset_D"
+            ],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {
+                "milling_toolset_A": {
+                    "milling_toolset_B": 24.0,
+                    "milling_toolset_C": 32.0,
+                    "milling_toolset_D": 28.0
+                },
+                "milling_toolset_B": {
+                    "milling_toolset_A": 32.0,
+                    "milling_toolset_C": 30.0,
+                    "milling_toolset_D": 32.0
+                },
+                "milling_toolset_C": {
+                    "milling_toolset_A": 24.0,
+                    "milling_toolset_B": 28.0,
+                    "milling_toolset_D": 28.0
+                },
+                "milling_toolset_D": {
+                    "milling_toolset_A": 24.0,
+                    "milling_toolset_B": 22.0,
+                    "milling_toolset_C": 32.0
+                },
+                "No tool": {}
+            },
+            "hardware_setup_time_unit": "min",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {
+                "milling_toolset_A": "",
+                "milling_toolset_B": "",
+                "milling_toolset_C": "",
+                "milling_toolset_D": ""
+            },
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "Milling machine 2": {
+            "machine_id": "Milling machine 2",
+            "accepted_capabilities": [],
+            "provided_capabilities": [
+                "milling",
+                "milling_A"
+            ],
+            "compatible_tools": [
+                "milling_toolset_A",
+                "milling_toolset_B",
+                "milling_toolset_D"
+            ],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {
+                "milling_toolset_A": {
+                    "milling_toolset_B": 24.0,
+                    "milling_toolset_D": 28.0
+                },
+                "milling_toolset_B": {
+                    "milling_toolset_A": 32.0,
+                    "milling_toolset_D": 32.0
+                },
+                "milling_toolset_D": {
+                    "milling_toolset_A": 24.0,
+                    "milling_toolset_B": 22.0
+                },
+                "No tool": {}
+            },
+            "hardware_setup_time_unit": "min",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {
+                "milling_toolset_A": "",
+                "milling_toolset_B": "",
+                "milling_toolset_D": ""
+            },
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "Milling machine 3": {
+            "machine_id": "Milling machine 3",
+            "accepted_capabilities": [],
+            "provided_capabilities": [
+                "milling",
+                "milling_C"
+            ],
+            "compatible_tools": [
+                "milling_toolset_B",
+                "milling_toolset_C",
+                "milling_toolset_D"
+            ],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {
+                "milling_toolset_B": {
+                    "milling_toolset_C": 30.0,
+                    "milling_toolset_D": 32.0
+                },
+                "milling_toolset_C": {
+                    "milling_toolset_B": 28.0,
+                    "milling_toolset_D": 28.0
+                },
+                "milling_toolset_D": {
+                    "milling_toolset_B": 22.0,
+                    "milling_toolset_C": 32.0
+                },
+                "No tool": {}
+            },
+            "hardware_setup_time_unit": "min",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {
+                "milling_toolset_B": "",
+                "milling_toolset_C": "",
+                "milling_toolset_D": ""
+            },
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "Sanding machine 1": {
+            "machine_id": "Sanding machine 1",
+            "accepted_capabilities": [],
+            "provided_capabilities": [
+                "sanding",
+                "sanding_B",
+                "sanding_D"
+            ],
+            "compatible_tools": [
+                "sanding_toolset_A",
+                "sanding_toolset_B",
+                "sanding_toolset_C",
+                "sanding_toolset_D"
+            ],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {
+                "sanding_toolset_A": {
+                    "sanding_toolset_B": 24.0,
+                    "sanding_toolset_C": 32.0,
+                    "sanding_toolset_D": 28.0
+                },
+                "sanding_toolset_B": {
+                    "sanding_toolset_A": 32.0,
+                    "sanding_toolset_C": 30.0,
+                    "sanding_toolset_D": 32.0
+                },
+                "sanding_toolset_C": {
+                    "sanding_toolset_A": 24.0,
+                    "sanding_toolset_B": 28.0,
+                    "sanding_toolset_D": 28.0
+                },
+                "sanding_toolset_D": {
+                    "sanding_toolset_A": 24.0,
+                    "sanding_toolset_B": 22.0,
+                    "sanding_toolset_C": 32.0
+                },
+                "No tool": {}
+            },
+            "hardware_setup_time_unit": "min",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {
+                "sanding_toolset_A": "",
+                "sanding_toolset_B": "",
+                "sanding_toolset_C": "",
+                "sanding_toolset_D": ""
+            },
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "Sanding machine 2": {
+            "machine_id": "Sanding machine 2",
+            "accepted_capabilities": [],
+            "provided_capabilities": [
+                "sanding",
+                "sanding_B"
+            ],
+            "compatible_tools": [
+                "sanding_toolset_A",
+                "sanding_toolset_B",
+                "sanding_toolset_C"
+            ],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {
+                "sanding_toolset_A": {
+                    "sanding_toolset_B": 24.0,
+                    "sanding_toolset_C": 32.0
+                },
+                "sanding_toolset_B": {
+                    "sanding_toolset_A": 32.0,
+                    "sanding_toolset_C": 30.0
+                },
+                "sanding_toolset_C": {
+                    "sanding_toolset_A": 24.0,
+                    "sanding_toolset_B": 28.0
+                },
+                "No tool": {}
+            },
+            "hardware_setup_time_unit": "min",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {
+                "sanding_toolset_A": "",
+                "sanding_toolset_B": "",
+                "sanding_toolset_C": ""
+            },
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "Sanding machine 3": {
+            "machine_id": "Sanding machine 3",
+            "accepted_capabilities": [],
+            "provided_capabilities": [
+                "sanding",
+                "sanding_B",
+                "sanding_D"
+            ],
+            "compatible_tools": [
+                "sanding_toolset_A",
+                "sanding_toolset_B",
+                "sanding_toolset_C",
+                "sanding_toolset_D"
+            ],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {
+                "sanding_toolset_A": {
+                    "sanding_toolset_B": 24.0,
+                    "sanding_toolset_C": 32.0,
+                    "sanding_toolset_D": 28.0
+                },
+                "sanding_toolset_B": {
+                    "sanding_toolset_A": 32.0,
+                    "sanding_toolset_C": 30.0,
+                    "sanding_toolset_D": 32.0
+                },
+                "sanding_toolset_C": {
+                    "sanding_toolset_A": 24.0,
+                    "sanding_toolset_B": 28.0,
+                    "sanding_toolset_D": 28.0
+                },
+                "sanding_toolset_D": {
+                    "sanding_toolset_A": 24.0,
+                    "sanding_toolset_B": 22.0,
+                    "sanding_toolset_C": 32.0
+                },
+                "No tool": {}
+            },
+            "hardware_setup_time_unit": "min",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {
+                "sanding_toolset_A": "",
+                "sanding_toolset_B": "",
+                "sanding_toolset_C": "",
+                "sanding_toolset_D": ""
+            },
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "Sanding machine 4": {
+            "machine_id": "Sanding machine 4",
+            "accepted_capabilities": [],
+            "provided_capabilities": [
+                "sanding",
+                "sanding_D"
+            ],
+            "compatible_tools": [
+                "sanding_toolset_A",
+                "sanding_toolset_C",
+                "sanding_toolset_D"
+            ],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {
+                "sanding_toolset_A": {
+                    "sanding_toolset_C": 32.0,
+                    "sanding_toolset_D": 28.0
+                },
+                "sanding_toolset_C": {
+                    "sanding_toolset_A": 24.0,
+                    "sanding_toolset_D": 28.0
+                },
+                "sanding_toolset_D": {
+                    "sanding_toolset_A": 24.0,
+                    "sanding_toolset_C": 32.0
+                },
+                "No tool": {}
+            },
+            "hardware_setup_time_unit": "min",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {
+                "sanding_toolset_A": "",
+                "sanding_toolset_C": "",
+                "sanding_toolset_D": ""
+            },
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "Sanding machine 5": {
+            "machine_id": "Sanding machine 5",
+            "accepted_capabilities": [],
+            "provided_capabilities": [
+                "sanding",
+                "sanding_B",
+                "sanding_D"
+            ],
+            "compatible_tools": [
+                "sanding_toolset_A",
+                "sanding_toolset_B",
+                "sanding_toolset_C",
+                "sanding_toolset_D"
+            ],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {
+                "sanding_toolset_A": {
+                    "sanding_toolset_B": 24.0,
+                    "sanding_toolset_C": 32.0,
+                    "sanding_toolset_D": 28.0
+                },
+                "sanding_toolset_B": {
+                    "sanding_toolset_A": 32.0,
+                    "sanding_toolset_C": 30.0,
+                    "sanding_toolset_D": 32.0
+                },
+                "sanding_toolset_C": {
+                    "sanding_toolset_A": 24.0,
+                    "sanding_toolset_B": 28.0,
+                    "sanding_toolset_D": 28.0
+                },
+                "sanding_toolset_D": {
+                    "sanding_toolset_A": 24.0,
+                    "sanding_toolset_B": 22.0,
+                    "sanding_toolset_C": 32.0
+                },
+                "No tool": {}
+            },
+            "hardware_setup_time_unit": "min",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {
+                "sanding_toolset_A": "",
+                "sanding_toolset_B": "",
+                "sanding_toolset_C": "",
+                "sanding_toolset_D": ""
+            },
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "Painting machine": {
+            "machine_id": "Painting machine",
+            "accepted_capabilities": [],
+            "provided_capabilities": [
+                "painting"
+            ],
+            "compatible_tools": [
+                "painting_toolset_A",
+                "painting_toolset_B",
+                "painting_toolset_C",
+                "painting_toolset_D"
+            ],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {
+                "painting_toolset_A": {
+                    "painting_toolset_B": 24.0,
+                    "painting_toolset_C": 32.0,
+                    "painting_toolset_D": 28.0
+                },
+                "painting_toolset_B": {
+                    "painting_toolset_A": 32.0,
+                    "painting_toolset_C": 30.0,
+                    "painting_toolset_D": 32.0
+                },
+                "painting_toolset_C": {
+                    "painting_toolset_A": 24.0,
+                    "painting_toolset_B": 28.0,
+                    "painting_toolset_D": 28.0
+                },
+                "painting_toolset_D": {
+                    "painting_toolset_A": 24.0,
+                    "painting_toolset_B": 22.0,
+                    "painting_toolset_C": 32.0
+                },
+                "No tool": {}
+            },
+            "hardware_setup_time_unit": "min",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {
+                "painting_toolset_A": "",
+                "painting_toolset_B": "",
+                "painting_toolset_C": "",
+                "painting_toolset_D": ""
+            },
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "Assembly 1": {
+            "machine_id": "Assembly 1",
+            "accepted_capabilities": [],
+            "provided_capabilities": [
+                "assembly",
+                "assembly_D"
+            ],
+            "compatible_tools": [
+                "assembly_toolset_A",
+                "assembly_toolset_B",
+                "assembly_toolset_C",
+                "assembly_toolset_D"
+            ],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {
+                "assembly_toolset_A": {
+                    "assembly_toolset_B": 24.0,
+                    "assembly_toolset_C": 32.0,
+                    "assembly_toolset_D": 28.0
+                },
+                "assembly_toolset_B": {
+                    "assembly_toolset_A": 32.0,
+                    "assembly_toolset_C": 30.0,
+                    "assembly_toolset_D": 32.0
+                },
+                "assembly_toolset_C": {
+                    "assembly_toolset_A": 24.0,
+                    "assembly_toolset_B": 28.0,
+                    "assembly_toolset_D": 28.0
+                },
+                "assembly_toolset_D": {
+                    "assembly_toolset_A": 24.0,
+                    "assembly_toolset_B": 22.0,
+                    "assembly_toolset_C": 32.0
+                },
+                "No tool": {}
+            },
+            "hardware_setup_time_unit": "min",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {
+                "assembly_toolset_A": "",
+                "assembly_toolset_B": "",
+                "assembly_toolset_C": "",
+                "assembly_toolset_D": ""
+            },
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "Assembly 2": {
+            "machine_id": "Assembly 2",
+            "accepted_capabilities": [],
+            "provided_capabilities": [
+                "assembly"
+            ],
+            "compatible_tools": [
+                "assembly_toolset_A",
+                "assembly_toolset_B",
+                "assembly_toolset_C"
+            ],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {
+                "assembly_toolset_A": {
+                    "assembly_toolset_B": 24.0,
+                    "assembly_toolset_C": 32.0
+                },
+                "assembly_toolset_B": {
+                    "assembly_toolset_A": 32.0,
+                    "assembly_toolset_C": 30.0
+                },
+                "assembly_toolset_C": {
+                    "assembly_toolset_A": 24.0,
+                    "assembly_toolset_B": 28.0
+                },
+                "No tool": {}
+            },
+            "hardware_setup_time_unit": "min",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {
+                "assembly_toolset_A": "",
+                "assembly_toolset_B": "",
+                "assembly_toolset_C": ""
+            },
+            "batch_processing": false,
+            "batch_size": {},
+            "diff_comp_batch": false,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": false,
+            "power_consumption": 0.0
+        },
+        "Transport Inv1-Drilling": {
+            "machine_id": "Transport Inv1-Drilling",
+            "accepted_capabilities": [],
+            "provided_capabilities": [],
+            "compatible_tools": [],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {},
+            "hardware_setup_time_unit": "",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {},
+            "batch_processing": true,
+            "batch_size": {
+                "blank_*": [
+                    1,
+                    100,
+                    1,
+                    ""
+                ]
+            },
+            "diff_comp_batch": true,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": true,
+            "power_consumption": 0.0
+        },
+        "Transport Drilling-Turning": {
+            "machine_id": "Transport Drilling-Turning",
+            "accepted_capabilities": [],
+            "provided_capabilities": [],
+            "compatible_tools": [],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {},
+            "hardware_setup_time_unit": "",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {},
+            "batch_processing": true,
+            "batch_size": {
+                "drilled_*": [
+                    1,
+                    100,
+                    1,
+                    ""
+                ]
+            },
+            "diff_comp_batch": true,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": true,
+            "power_consumption": 0.0
+        },
+        "Transport Turning-Milling": {
+            "machine_id": "Transport Turning-Milling",
+            "accepted_capabilities": [],
+            "provided_capabilities": [],
+            "compatible_tools": [],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {},
+            "hardware_setup_time_unit": "",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {},
+            "batch_processing": true,
+            "batch_size": {
+                "turned_*": [
+                    1,
+                    100,
+                    1,
+                    ""
+                ]
+            },
+            "diff_comp_batch": true,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": true,
+            "power_consumption": 0.0
+        },
+        "Transport Milling-Sanding": {
+            "machine_id": "Transport Milling-Sanding",
+            "accepted_capabilities": [],
+            "provided_capabilities": [],
+            "compatible_tools": [],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {},
+            "hardware_setup_time_unit": "",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {},
+            "batch_processing": true,
+            "batch_size": {
+                "milled_*": [
+                    1,
+                    100,
+                    1,
+                    ""
+                ]
+            },
+            "diff_comp_batch": true,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": true,
+            "power_consumption": 0.0
+        },
+        "Transport Sanding-Painting/Assembly": {
+            "machine_id": "Transport Sanding-Painting/Assembly",
+            "accepted_capabilities": [],
+            "provided_capabilities": [],
+            "compatible_tools": [],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {},
+            "hardware_setup_time_unit": "",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {},
+            "batch_processing": true,
+            "batch_size": {
+                "sanded_*": [
+                    1,
+                    100,
+                    1,
+                    ""
+                ]
+            },
+            "diff_comp_batch": true,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": true,
+            "power_consumption": 0.0
+        },
+        "Transport Painting-Assembly": {
+            "machine_id": "Transport Painting-Assembly",
+            "accepted_capabilities": [],
+            "provided_capabilities": [],
+            "compatible_tools": [],
+            "software_setup_time_value": 0.0,
+            "software_setup_time_unit": "",
+            "software_setup_parallel_to_operation": false,
+            "setup_matrix": {},
+            "hardware_setup_time_unit": "",
+            "hardware_setup_parallel_to_operation": false,
+            "tool_slots": {},
+            "batch_processing": true,
+            "batch_size": {
+                "painted_*": [
+                    1,
+                    100,
+                    1,
+                    ""
+                ]
+            },
+            "diff_comp_batch": true,
+            "speed_factor": 1.0,
+            "mtbf_value": Infinity,
+            "mtbf_unit": "",
+            "mttr_value": 0.0,
+            "mttr_unit": "",
+            "is_transport": true,
+            "power_consumption": 0.0
+        }
+    },
+    "workstations": {
+        "Drilling 1": {
+            "workstation_id": "Drilling 1",
+            "machine": "Drilling machine 1",
+            "permanent_tools": [
+                "drilling_toolset_A",
+                "drilling_toolset_B",
+                "drilling_toolset_C",
+                "drilling_toolset_D"
+            ],
+            "seized_tools": [],
+            "tools_in_use": [
+                "drilling_toolset_B"
+            ],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {
+                "1": {
+                    "buffer_location": 1,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "blank_*": {
+                            "Max. quantity": 100,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "physical_output_buffers": {
+                "1": {
+                    "buffer_location": 2,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "drilled_*": {
+                            "Max. quantity": 20,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "wip_components": [
+                {
+                    "Component": "drilled_B",
+                    "Quantity": 0
+                },
+                {
+                    "Component": "blank_B",
+                    "Quantity": 0
+                }
+            ],
+            "allowed_worker_pools": [
+                "Drilling operators"
+            ],
+            "seized_worker": "",
+            "permanent_worker_assignment": false
+        },
+        "Drilling 2": {
+            "workstation_id": "Drilling 2",
+            "machine": "Drilling machine 2",
+            "permanent_tools": [
+                "drilling_toolset_A",
+                "drilling_toolset_B",
+                "drilling_toolset_C",
+                "drilling_toolset_D"
+            ],
+            "seized_tools": [],
+            "tools_in_use": [
+                "drilling_toolset_B"
+            ],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {
+                "1": {
+                    "buffer_location": 1,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "blank_*": {
+                            "Max. quantity": 100,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "physical_output_buffers": {
+                "1": {
+                    "buffer_location": 2,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "drilled_*": {
+                            "Max. quantity": 20,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "wip_components": [
+                {
+                    "Component": "drilled_B",
+                    "Quantity": 0
+                },
+                {
+                    "Component": "blank_B",
+                    "Quantity": 0
+                }
+            ],
+            "allowed_worker_pools": [
+                "Drilling operators"
+            ],
+            "seized_worker": "",
+            "permanent_worker_assignment": false
+        },
+        "Drilling 3": {
+            "workstation_id": "Drilling 3",
+            "machine": "Drilling machine 3",
+            "permanent_tools": [
+                "drilling_toolset_A",
+                "drilling_toolset_B",
+                "drilling_toolset_C",
+                "drilling_toolset_D"
+            ],
+            "seized_tools": [],
+            "tools_in_use": [
+                "drilling_toolset_B"
+            ],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {
+                "1": {
+                    "buffer_location": 1,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "blank_*": {
+                            "Max. quantity": 100,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "physical_output_buffers": {
+                "1": {
+                    "buffer_location": 2,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "drilled_*": {
+                            "Max. quantity": 20,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "wip_components": [
+                {
+                    "Component": "drilled_B",
+                    "Quantity": 0
+                },
+                {
+                    "Component": "blank_B",
+                    "Quantity": 0
+                }
+            ],
+            "allowed_worker_pools": [
+                "Drilling operators"
+            ],
+            "seized_worker": "",
+            "permanent_worker_assignment": false
+        },
+        "Turning 1": {
+            "workstation_id": "Turning 1",
+            "machine": "Turning machine 1",
+            "permanent_tools": [
+                "turning_toolset_A",
+                "turning_toolset_B",
+                "turning_toolset_C",
+                "turning_toolset_D"
+            ],
+            "seized_tools": [],
+            "tools_in_use": [
+                "turning_toolset_B"
+            ],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {
+                "1": {
+                    "buffer_location": 1,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "drilled_*": {
+                            "Max. quantity": 20,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "physical_output_buffers": {
+                "1": {
+                    "buffer_location": 2,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "turned_*": {
+                            "Max. quantity": 20,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "wip_components": [
+                {
+                    "Component": "drilled_B",
+                    "Quantity": 0
+                },
+                {
+                    "Component": "turned_B",
+                    "Quantity": 0
+                }
+            ],
+            "allowed_worker_pools": [
+                "Turning operators"
+            ],
+            "seized_worker": "",
+            "permanent_worker_assignment": false
+        },
+        "Turning 2": {
+            "workstation_id": "Turning 2",
+            "machine": "Turning machine 2",
+            "permanent_tools": [
+                "turning_toolset_A",
+                "turning_toolset_C",
+                "turning_toolset_D"
+            ],
+            "seized_tools": [],
+            "tools_in_use": [
+                "turning_toolset_D"
+            ],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {
+                "1": {
+                    "buffer_location": 1,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "drilled_*": {
+                            "Max. quantity": 20,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "physical_output_buffers": {
+                "1": {
+                    "buffer_location": 2,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "turned_*": {
+                            "Max. quantity": 20,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "wip_components": [
+                {
+                    "Component": "drilled_D",
+                    "Quantity": 0
+                },
+                {
+                    "Component": "turned_D",
+                    "Quantity": 0
+                }
+            ],
+            "allowed_worker_pools": [
+                "Turning operators"
+            ],
+            "seized_worker": "",
+            "permanent_worker_assignment": false
+        },
+        "Milling 1": {
+            "workstation_id": "Milling 1",
+            "machine": "Milling machine 1",
+            "permanent_tools": [
+                "milling_toolset_A",
+                "milling_toolset_B",
+                "milling_toolset_C",
+                "milling_toolset_D"
+            ],
+            "seized_tools": [],
+            "tools_in_use": [
+                "milling_toolset_B"
+            ],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {
+                "1": {
+                    "buffer_location": 1,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "turned_*": {
+                            "Max. quantity": 20,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "physical_output_buffers": {
+                "1": {
+                    "buffer_location": 2,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "milled_*": {
+                            "Max. quantity": 20,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "wip_components": [
+                {
+                    "Component": "milled_B",
+                    "Quantity": 0
+                },
+                {
+                    "Component": "turned_B",
+                    "Quantity": 0
+                }
+            ],
+            "allowed_worker_pools": [
+                "Milling operators"
+            ],
+            "seized_worker": "",
+            "permanent_worker_assignment": false
+        },
+        "Milling 2": {
+            "workstation_id": "Milling 2",
+            "machine": "Milling machine 2",
+            "permanent_tools": [
+                "milling_toolset_A",
+                "milling_toolset_B",
+                "milling_toolset_D"
+            ],
+            "seized_tools": [],
+            "tools_in_use": [
+                "milling_toolset_B"
+            ],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {
+                "1": {
+                    "buffer_location": 1,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "turned_*": {
+                            "Max. quantity": 20,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "physical_output_buffers": {
+                "1": {
+                    "buffer_location": 2,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "milled_*": {
+                            "Max. quantity": 20,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "wip_components": [
+                {
+                    "Component": "milled_B",
+                    "Quantity": 0
+                },
+                {
+                    "Component": "turned_B",
+                    "Quantity": 0
+                }
+            ],
+            "allowed_worker_pools": [
+                "Milling operators"
+            ],
+            "seized_worker": "",
+            "permanent_worker_assignment": false
+        },
+        "Milling 3": {
+            "workstation_id": "Milling 3",
+            "machine": "Milling machine 3",
+            "permanent_tools": [
+                "milling_toolset_B",
+                "milling_toolset_C",
+                "milling_toolset_D"
+            ],
+            "seized_tools": [],
+            "tools_in_use": [
+                "milling_toolset_C"
+            ],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {
+                "1": {
+                    "buffer_location": 1,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "turned_*": {
+                            "Max. quantity": 20,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "physical_output_buffers": {
+                "1": {
+                    "buffer_location": 2,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "milled_*": {
+                            "Max. quantity": 20,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "wip_components": [
+                {
+                    "Component": "milled_C",
+                    "Quantity": 0
+                },
+                {
+                    "Component": "turned_C",
+                    "Quantity": 0
+                }
+            ],
+            "allowed_worker_pools": [
+                "Milling operators"
+            ],
+            "seized_worker": "",
+            "permanent_worker_assignment": false
+        },
+        "Sanding 1": {
+            "workstation_id": "Sanding 1",
+            "machine": "Sanding machine 1",
+            "permanent_tools": [
+                "sanding_toolset_A",
+                "sanding_toolset_B",
+                "sanding_toolset_C",
+                "sanding_toolset_D"
+            ],
+            "seized_tools": [],
+            "tools_in_use": [
+                "sanding_toolset_B"
+            ],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {
+                "1": {
+                    "buffer_location": 1,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "milled_*": {
+                            "Max. quantity": 20,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "physical_output_buffers": {
+                "1": {
+                    "buffer_location": 2,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "sanded_*": {
+                            "Max. quantity": 20,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "wip_components": [
+                {
+                    "Component": "milled_B",
+                    "Quantity": 0
+                },
+                {
+                    "Component": "sanded_B",
+                    "Quantity": 0
+                }
+            ],
+            "allowed_worker_pools": [
+                "Sanding workers"
+            ],
+            "seized_worker": "",
+            "permanent_worker_assignment": false
+        },
+        "Sanding 2": {
+            "workstation_id": "Sanding 2",
+            "machine": "Sanding machine 2",
+            "permanent_tools": [
+                "sanding_toolset_A",
+                "sanding_toolset_B",
+                "sanding_toolset_C"
+            ],
+            "seized_tools": [],
+            "tools_in_use": [
+                "sanding_toolset_B"
+            ],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {
+                "1": {
+                    "buffer_location": 1,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "milled_*": {
+                            "Max. quantity": 20,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "physical_output_buffers": {
+                "1": {
+                    "buffer_location": 2,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "sanded_*": {
+                            "Max. quantity": 20,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "wip_components": [
+                {
+                    "Component": "milled_B",
+                    "Quantity": 0
+                },
+                {
+                    "Component": "sanded_B",
+                    "Quantity": 0
+                }
+            ],
+            "allowed_worker_pools": [
+                "Sanding workers"
+            ],
+            "seized_worker": "",
+            "permanent_worker_assignment": false
+        },
+        "Sanding 3": {
+            "workstation_id": "Sanding 3",
+            "machine": "Sanding machine 3",
+            "permanent_tools": [
+                "sanding_toolset_A",
+                "sanding_toolset_B",
+                "sanding_toolset_C",
+                "sanding_toolset_D"
+            ],
+            "seized_tools": [],
+            "tools_in_use": [
+                "sanding_toolset_D"
+            ],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {
+                "1": {
+                    "buffer_location": 1,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "milled_*": {
+                            "Max. quantity": 20,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "physical_output_buffers": {
+                "1": {
+                    "buffer_location": 2,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "sanded_*": {
+                            "Max. quantity": 20,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "wip_components": [
+                {
+                    "Component": "sanded_D",
+                    "Quantity": 0
+                },
+                {
+                    "Component": "milled_D",
+                    "Quantity": 0
+                }
+            ],
+            "allowed_worker_pools": [
+                "Sanding workers"
+            ],
+            "seized_worker": "",
+            "permanent_worker_assignment": false
+        },
+        "Sanding 4": {
+            "workstation_id": "Sanding 4",
+            "machine": "Sanding machine 4",
+            "permanent_tools": [
+                "sanding_toolset_A",
+                "sanding_toolset_C",
+                "sanding_toolset_D"
+            ],
+            "seized_tools": [],
+            "tools_in_use": [
+                "sanding_toolset_C"
+            ],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {
+                "1": {
+                    "buffer_location": 1,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "milled_*": {
+                            "Max. quantity": 20,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "physical_output_buffers": {
+                "1": {
+                    "buffer_location": 2,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "sanded_*": {
+                            "Max. quantity": 20,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "wip_components": [
+                {
+                    "Component": "milled_C",
+                    "Quantity": 0
+                },
+                {
+                    "Component": "sanded_C",
+                    "Quantity": 0
+                }
+            ],
+            "allowed_worker_pools": [
+                "Sanding workers"
+            ],
+            "seized_worker": "",
+            "permanent_worker_assignment": false
+        },
+        "Sanding 5": {
+            "workstation_id": "Sanding 5",
+            "machine": "Sanding machine 5",
+            "permanent_tools": [
+                "sanding_toolset_A",
+                "sanding_toolset_B",
+                "sanding_toolset_C",
+                "sanding_toolset_D"
+            ],
+            "seized_tools": [],
+            "tools_in_use": [
+                "sanding_toolset_C"
+            ],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {
+                "1": {
+                    "buffer_location": 1,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "milled_*": {
+                            "Max. quantity": 20,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "physical_output_buffers": {
+                "1": {
+                    "buffer_location": 2,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "sanded_*": {
+                            "Max. quantity": 20,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "wip_components": [
+                {
+                    "Component": "milled_C",
+                    "Quantity": 0
+                },
+                {
+                    "Component": "sanded_C",
+                    "Quantity": 0
+                }
+            ],
+            "allowed_worker_pools": [
+                "Sanding workers"
+            ],
+            "seized_worker": "",
+            "permanent_worker_assignment": false
+        },
+        "Painting": {
+            "workstation_id": "Painting",
+            "machine": "Painting machine",
+            "permanent_tools": [
+                "painting_toolset_A",
+                "painting_toolset_B",
+                "painting_toolset_C",
+                "painting_toolset_D"
+            ],
+            "seized_tools": [],
+            "tools_in_use": [
+                "painting_toolset_B"
+            ],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {
+                "1": {
+                    "buffer_location": 1,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "sanded_*": {
+                            "Max. quantity": 20,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "physical_output_buffers": {
+                "1": {
+                    "buffer_location": 2,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "painted_*": {
+                            "Max. quantity": 20,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "wip_components": [
+                {
+                    "Component": "painted_B",
+                    "Quantity": 0
+                },
+                {
+                    "Component": "sanded_B",
+                    "Quantity": 0
+                }
+            ],
+            "allowed_worker_pools": [
+                "Painting operators"
+            ],
+            "seized_worker": "",
+            "permanent_worker_assignment": false
+        },
+        "Assembly station 1": {
+            "workstation_id": "Assembly station 1",
+            "machine": "Assembly 1",
+            "permanent_tools": [
+                "assembly_toolset_A",
+                "assembly_toolset_B",
+                "assembly_toolset_C",
+                "assembly_toolset_D"
+            ],
+            "seized_tools": [],
+            "tools_in_use": [
+                "assembly_toolset_B"
+            ],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {
+                "1": {
+                    "buffer_location": 1,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "*": {
+                            "Max. quantity": 20,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "physical_output_buffers": {
+                "1": {
+                    "buffer_location": 2,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "*": {
+                            "Max. quantity": 200,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "wip_components": [
+                {
+                    "Component": "painted_B",
+                    "Quantity": 0
+                },
+                {
+                    "Component": "Pump B",
+                    "Quantity": 0
+                }
+            ],
+            "allowed_worker_pools": [
+                "Assemblers"
+            ],
+            "seized_worker": "",
+            "permanent_worker_assignment": false
+        },
+        "Assembly station 2": {
+            "workstation_id": "Assembly station 2",
+            "machine": "Assembly 2",
+            "permanent_tools": [
+                "assembly_toolset_A",
+                "assembly_toolset_B",
+                "assembly_toolset_C"
+            ],
+            "seized_tools": [],
+            "tools_in_use": [
+                "assembly_toolset_B"
+            ],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {
+                "1": {
+                    "buffer_location": 1,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "*": {
+                            "Max. quantity": 20,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "physical_output_buffers": {
+                "1": {
+                    "buffer_location": 2,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "*": {
+                            "Max. quantity": 200,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "wip_components": [
+                {
+                    "Component": "painted_B",
+                    "Quantity": 0
+                },
+                {
+                    "Component": "Pump B",
+                    "Quantity": 0
+                }
+            ],
+            "allowed_worker_pools": [
+                "Assemblers"
+            ],
+            "seized_worker": "",
+            "permanent_worker_assignment": false
+        }
+    },
+    "product_instructions": {
+        "product_palette": {
+            "Pump A": [
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Drilling",
+                        "display_pos": [
+                            48,
+                            54
+                        ],
+                        "node_uid": 0,
+                        "components": {
+                            "blank_A": 1
+                        },
+                        "capabilities": [
+                            "drilling"
+                        ],
+                        "tools": {
+                            "drilling_toolset_A": {}
+                        },
+                        "processing_time_value": 8.0,
+                        "processing_time_unit": "min",
+                        "output_name": "drilled_A"
+                    },
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Turning",
+                        "display_pos": [
+                            214,
+                            55
+                        ],
+                        "node_uid": 1,
+                        "components": {
+                            "drilled_A": 1
+                        },
+                        "capabilities": [
+                            "turning"
+                        ],
+                        "tools": {
+                            "turning_toolset_A": {}
+                        },
+                        "processing_time_value": 12.0,
+                        "processing_time_unit": "min",
+                        "output_name": "turned_A"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Turning",
+                        "display_pos": [
+                            214,
+                            55
+                        ],
+                        "node_uid": 1,
+                        "components": {
+                            "drilled_A": 1
+                        },
+                        "capabilities": [
+                            "turning"
+                        ],
+                        "tools": {
+                            "turning_toolset_A": {}
+                        },
+                        "processing_time_value": 12.0,
+                        "processing_time_unit": "min",
+                        "output_name": "turned_A"
+                    },
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Milling",
+                        "display_pos": [
+                            388,
+                            55
+                        ],
+                        "node_uid": 2,
+                        "components": {
+                            "turned_A": 1
+                        },
+                        "capabilities": [
+                            "milling_A"
+                        ],
+                        "tools": {
+                            "milling_toolset_A": {}
+                        },
+                        "processing_time_value": 10.0,
+                        "processing_time_unit": "min",
+                        "output_name": "milled_A"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Milling",
+                        "display_pos": [
+                            388,
+                            55
+                        ],
+                        "node_uid": 2,
+                        "components": {
+                            "turned_A": 1
+                        },
+                        "capabilities": [
+                            "milling_A"
+                        ],
+                        "tools": {
+                            "milling_toolset_A": {}
+                        },
+                        "processing_time_value": 10.0,
+                        "processing_time_unit": "min",
+                        "output_name": "milled_A"
+                    },
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Sanding",
+                        "display_pos": [
+                            555,
+                            55
+                        ],
+                        "node_uid": 3,
+                        "components": {
+                            "milled_A": 1
+                        },
+                        "capabilities": [
+                            "sanding"
+                        ],
+                        "tools": {
+                            "sanding_toolset_A": {}
+                        },
+                        "processing_time_value": 9.0,
+                        "processing_time_unit": "min",
+                        "output_name": "sanded_A"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Sanding",
+                        "display_pos": [
+                            555,
+                            55
+                        ],
+                        "node_uid": 3,
+                        "components": {
+                            "milled_A": 1
+                        },
+                        "capabilities": [
+                            "sanding"
+                        ],
+                        "tools": {
+                            "sanding_toolset_A": {}
+                        },
+                        "processing_time_value": 9.0,
+                        "processing_time_unit": "min",
+                        "output_name": "sanded_A"
+                    },
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Painting",
+                        "display_pos": [
+                            725,
+                            55
+                        ],
+                        "node_uid": 4,
+                        "components": {
+                            "sanded_A": 1
+                        },
+                        "capabilities": [
+                            "painting"
+                        ],
+                        "tools": {
+                            "painting_toolset_A": {}
+                        },
+                        "processing_time_value": 5.0,
+                        "processing_time_unit": "min",
+                        "output_name": "painted_A"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Painting",
+                        "display_pos": [
+                            725,
+                            55
+                        ],
+                        "node_uid": 4,
+                        "components": {
+                            "sanded_A": 1
+                        },
+                        "capabilities": [
+                            "painting"
+                        ],
+                        "tools": {
+                            "painting_toolset_A": {}
+                        },
+                        "processing_time_value": 5.0,
+                        "processing_time_unit": "min",
+                        "output_name": "painted_A"
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "Assembly",
+                        "display_pos": [
+                            911,
+                            55
+                        ],
+                        "node_uid": 5,
+                        "components": {
+                            "painted_A": 1
+                        },
+                        "capabilities": [
+                            "assembly"
+                        ],
+                        "tools": {
+                            "assembly_toolset_A": {}
+                        },
+                        "processing_time_value": 20.0,
+                        "processing_time_unit": "min",
+                        "output_name": "Pump A"
+                    }
+                ]
+            ],
+            "Pump B": [
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Drilling",
+                        "display_pos": [
+                            55,
+                            58
+                        ],
+                        "node_uid": 6,
+                        "components": {
+                            "blank_B": 1
+                        },
+                        "capabilities": [
+                            "drilling"
+                        ],
+                        "tools": {
+                            "drilling_toolset_B": {}
+                        },
+                        "processing_time_value": 9.0,
+                        "processing_time_unit": "min",
+                        "output_name": "drilled_B"
+                    },
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Turning",
+                        "display_pos": [
+                            229,
+                            59
+                        ],
+                        "node_uid": 7,
+                        "components": {
+                            "drilled_B": 1
+                        },
+                        "capabilities": [
+                            "turning_B"
+                        ],
+                        "tools": {
+                            "turning_toolset_B": {}
+                        },
+                        "processing_time_value": 14.0,
+                        "processing_time_unit": "min",
+                        "output_name": "turned_B"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Turning",
+                        "display_pos": [
+                            229,
+                            59
+                        ],
+                        "node_uid": 7,
+                        "components": {
+                            "drilled_B": 1
+                        },
+                        "capabilities": [
+                            "turning_B"
+                        ],
+                        "tools": {
+                            "turning_toolset_B": {}
+                        },
+                        "processing_time_value": 14.0,
+                        "processing_time_unit": "min",
+                        "output_name": "turned_B"
+                    },
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Milling",
+                        "display_pos": [
+                            399,
+                            60
+                        ],
+                        "node_uid": 8,
+                        "components": {
+                            "turned_B": 1
+                        },
+                        "capabilities": [
+                            "milling"
+                        ],
+                        "tools": {
+                            "milling_toolset_B": {}
+                        },
+                        "processing_time_value": 11.0,
+                        "processing_time_unit": "min",
+                        "output_name": "milled_B"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Milling",
+                        "display_pos": [
+                            399,
+                            60
+                        ],
+                        "node_uid": 8,
+                        "components": {
+                            "turned_B": 1
+                        },
+                        "capabilities": [
+                            "milling"
+                        ],
+                        "tools": {
+                            "milling_toolset_B": {}
+                        },
+                        "processing_time_value": 11.0,
+                        "processing_time_unit": "min",
+                        "output_name": "milled_B"
+                    },
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Sanding",
+                        "display_pos": [
+                            571,
+                            61
+                        ],
+                        "node_uid": 9,
+                        "components": {
+                            "milled_B": 1
+                        },
+                        "capabilities": [
+                            "sanding_B"
+                        ],
+                        "tools": {
+                            "sanding_toolset_B": {}
+                        },
+                        "processing_time_value": 10.0,
+                        "processing_time_unit": "min",
+                        "output_name": "sanded_B"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Sanding",
+                        "display_pos": [
+                            571,
+                            61
+                        ],
+                        "node_uid": 9,
+                        "components": {
+                            "milled_B": 1
+                        },
+                        "capabilities": [
+                            "sanding_B"
+                        ],
+                        "tools": {
+                            "sanding_toolset_B": {}
+                        },
+                        "processing_time_value": 10.0,
+                        "processing_time_unit": "min",
+                        "output_name": "sanded_B"
+                    },
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Painting",
+                        "display_pos": [
+                            749,
+                            61
+                        ],
+                        "node_uid": 10,
+                        "components": {
+                            "sanded_B": 1
+                        },
+                        "capabilities": [
+                            "painting"
+                        ],
+                        "tools": {
+                            "painting_toolset_B": {}
+                        },
+                        "processing_time_value": 4.0,
+                        "processing_time_unit": "min",
+                        "output_name": "painted_B"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Painting",
+                        "display_pos": [
+                            749,
+                            61
+                        ],
+                        "node_uid": 10,
+                        "components": {
+                            "sanded_B": 1
+                        },
+                        "capabilities": [
+                            "painting"
+                        ],
+                        "tools": {
+                            "painting_toolset_B": {}
+                        },
+                        "processing_time_value": 4.0,
+                        "processing_time_unit": "min",
+                        "output_name": "painted_B"
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "Assembly",
+                        "display_pos": [
+                            936,
+                            64
+                        ],
+                        "node_uid": 11,
+                        "components": {
+                            "painted_B": 1
+                        },
+                        "capabilities": [
+                            "assembly"
+                        ],
+                        "tools": {
+                            "assembly_toolset_B": {}
+                        },
+                        "processing_time_value": 22.0,
+                        "processing_time_unit": "min",
+                        "output_name": "Pump B"
+                    }
+                ]
+            ],
+            "Pump C": [
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Drilling",
+                        "display_pos": [
+                            76,
+                            151
+                        ],
+                        "node_uid": 12,
+                        "components": {
+                            "blank_C": 1
+                        },
+                        "capabilities": [
+                            "drilling"
+                        ],
+                        "tools": {
+                            "drilling_toolset_C": {}
+                        },
+                        "processing_time_value": 8.0,
+                        "processing_time_unit": "min",
+                        "output_name": "drilled_C"
+                    },
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Turning",
+                        "display_pos": [
+                            241,
+                            151
+                        ],
+                        "node_uid": 14,
+                        "components": {
+                            "drilled_C": 1
+                        },
+                        "capabilities": [
+                            "turning"
+                        ],
+                        "tools": {
+                            "turning_toolset_C": {}
+                        },
+                        "processing_time_value": 13.0,
+                        "processing_time_unit": "min",
+                        "output_name": "turned_C"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Turning",
+                        "display_pos": [
+                            241,
+                            151
+                        ],
+                        "node_uid": 14,
+                        "components": {
+                            "drilled_C": 1
+                        },
+                        "capabilities": [
+                            "turning"
+                        ],
+                        "tools": {
+                            "turning_toolset_C": {}
+                        },
+                        "processing_time_value": 13.0,
+                        "processing_time_unit": "min",
+                        "output_name": "turned_C"
+                    },
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Milling",
+                        "display_pos": [
+                            405,
+                            151
+                        ],
+                        "node_uid": 15,
+                        "components": {
+                            "turned_C": 1
+                        },
+                        "capabilities": [
+                            "milling_C"
+                        ],
+                        "tools": {
+                            "milling_toolset_C": {}
+                        },
+                        "processing_time_value": 12.0,
+                        "processing_time_unit": "min",
+                        "output_name": "milled_C"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Milling",
+                        "display_pos": [
+                            405,
+                            151
+                        ],
+                        "node_uid": 15,
+                        "components": {
+                            "turned_C": 1
+                        },
+                        "capabilities": [
+                            "milling_C"
+                        ],
+                        "tools": {
+                            "milling_toolset_C": {}
+                        },
+                        "processing_time_value": 12.0,
+                        "processing_time_unit": "min",
+                        "output_name": "milled_C"
+                    },
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Sanding",
+                        "display_pos": [
+                            571,
+                            151
+                        ],
+                        "node_uid": 16,
+                        "components": {
+                            "milled_C": 1
+                        },
+                        "capabilities": [
+                            "sanding"
+                        ],
+                        "tools": {
+                            "sanding_toolset_C": {}
+                        },
+                        "processing_time_value": 10.0,
+                        "processing_time_unit": "min",
+                        "output_name": "sanded_C"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Sanding",
+                        "display_pos": [
+                            571,
+                            151
+                        ],
+                        "node_uid": 16,
+                        "components": {
+                            "milled_C": 1
+                        },
+                        "capabilities": [
+                            "sanding"
+                        ],
+                        "tools": {
+                            "sanding_toolset_C": {}
+                        },
+                        "processing_time_value": 10.0,
+                        "processing_time_unit": "min",
+                        "output_name": "sanded_C"
+                    },
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Painting",
+                        "display_pos": [
+                            741,
+                            151
+                        ],
+                        "node_uid": 17,
+                        "components": {
+                            "sanded_C": 1
+                        },
+                        "capabilities": [
+                            "painting"
+                        ],
+                        "tools": {
+                            "painting_toolset_C": {}
+                        },
+                        "processing_time_value": 4.0,
+                        "processing_time_unit": "min",
+                        "output_name": "painted_C"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Painting",
+                        "display_pos": [
+                            741,
+                            151
+                        ],
+                        "node_uid": 17,
+                        "components": {
+                            "sanded_C": 1
+                        },
+                        "capabilities": [
+                            "painting"
+                        ],
+                        "tools": {
+                            "painting_toolset_C": {}
+                        },
+                        "processing_time_value": 4.0,
+                        "processing_time_unit": "min",
+                        "output_name": "painted_C"
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "Assembly",
+                        "display_pos": [
+                            933,
+                            150
+                        ],
+                        "node_uid": 18,
+                        "components": {
+                            "painted_C": 1
+                        },
+                        "capabilities": [
+                            "assembly"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 21.0,
+                        "processing_time_unit": "min",
+                        "output_name": "Pump C"
+                    }
+                ]
+            ],
+            "Pump D": [
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Drilling",
+                        "display_pos": [
+                            27,
+                            164
+                        ],
+                        "node_uid": 19,
+                        "components": {
+                            "blank_D": 1
+                        },
+                        "capabilities": [
+                            "drilling"
+                        ],
+                        "tools": {
+                            "drilling_toolset_D": {}
+                        },
+                        "processing_time_value": 8.0,
+                        "processing_time_unit": "min",
+                        "output_name": "drilled_D"
+                    },
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Turning",
+                        "display_pos": [
+                            208,
+                            164
+                        ],
+                        "node_uid": 20,
+                        "components": {
+                            "drilled_D": 1
+                        },
+                        "capabilities": [
+                            "turning"
+                        ],
+                        "tools": {
+                            "turning_toolset_D": {}
+                        },
+                        "processing_time_value": 12.0,
+                        "processing_time_unit": "min",
+                        "output_name": "turned_D"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Turning",
+                        "display_pos": [
+                            208,
+                            164
+                        ],
+                        "node_uid": 20,
+                        "components": {
+                            "drilled_D": 1
+                        },
+                        "capabilities": [
+                            "turning"
+                        ],
+                        "tools": {
+                            "turning_toolset_D": {}
+                        },
+                        "processing_time_value": 12.0,
+                        "processing_time_unit": "min",
+                        "output_name": "turned_D"
+                    },
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Milling",
+                        "display_pos": [
+                            394,
+                            165
+                        ],
+                        "node_uid": 21,
+                        "components": {
+                            "turned_D": 1
+                        },
+                        "capabilities": [
+                            "milling"
+                        ],
+                        "tools": {
+                            "milling_toolset_D": {}
+                        },
+                        "processing_time_value": 10.0,
+                        "processing_time_unit": "min",
+                        "output_name": "milled_D"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Milling",
+                        "display_pos": [
+                            394,
+                            165
+                        ],
+                        "node_uid": 21,
+                        "components": {
+                            "turned_D": 1
+                        },
+                        "capabilities": [
+                            "milling"
+                        ],
+                        "tools": {
+                            "milling_toolset_D": {}
+                        },
+                        "processing_time_value": 10.0,
+                        "processing_time_unit": "min",
+                        "output_name": "milled_D"
+                    },
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Sanding",
+                        "display_pos": [
+                            578,
+                            165
+                        ],
+                        "node_uid": 22,
+                        "components": {
+                            "milled_D": 1
+                        },
+                        "capabilities": [
+                            "sanding_D"
+                        ],
+                        "tools": {
+                            "sanding_toolset_D": {}
+                        },
+                        "processing_time_value": 9.0,
+                        "processing_time_unit": "min",
+                        "output_name": "sanded_D"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Manufacture",
+                        "operation_name": "Sanding",
+                        "display_pos": [
+                            578,
+                            165
+                        ],
+                        "node_uid": 22,
+                        "components": {
+                            "milled_D": 1
+                        },
+                        "capabilities": [
+                            "sanding_D"
+                        ],
+                        "tools": {
+                            "sanding_toolset_D": {}
+                        },
+                        "processing_time_value": 9.0,
+                        "processing_time_unit": "min",
+                        "output_name": "sanded_D"
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "Assembly",
+                        "display_pos": [
+                            580,
+                            304
+                        ],
+                        "node_uid": 23,
+                        "components": {
+                            "sanded_D": 1
+                        },
+                        "capabilities": [
+                            "assembly_D"
+                        ],
+                        "tools": {
+                            "assembly_toolset_D": {}
+                        },
+                        "processing_time_value": 20.0,
+                        "processing_time_unit": "min",
+                        "output_name": "Pump D"
+                    }
+                ]
+            ]
+        }
+    },
+    "supply_behaviours": {
+        "blank_A": {
+            "component_id": "blank_A",
+            "allocation_type": 2,
+            "time_unit": "h",
+            "immediate_probability": 1.0,
+            "min": 1,
+            "alpha": 1,
+            "beta": 0.5
+        },
+        "blank_D": {
+            "component_id": "blank_D",
+            "allocation_type": 2,
+            "time_unit": "h",
+            "immediate_probability": 1.0,
+            "min": 1,
+            "alpha": 1,
+            "beta": 0.5
+        },
+        "blank_C": {
+            "component_id": "blank_C",
+            "allocation_type": 2,
+            "time_unit": "h",
+            "immediate_probability": 1.0,
+            "min": 1,
+            "alpha": 1,
+            "beta": 0.5
+        },
+        "blank_B": {
+            "component_id": "blank_B",
+            "allocation_type": 2,
+            "time_unit": "h",
+            "immediate_probability": 1.0,
+            "min": 1,
+            "alpha": 1,
+            "beta": 0.5
+        }
+    },
+    "inventories": {
+        "Inventory 1": {
+            "inventory_id": "Inventory 1",
+            "diff_comp_comb": true,
+            "generation_type": 2,
+            "sequence_type": 3,
+            "comp_specific_sizes": {
+                "blank_*": {
+                    "Max. quantity": 1000,
+                    "Quantity step": 1,
+                    "Group": ""
+                }
+            },
+            "identical_buffer": ""
+        }
+    },
+    "conveyors": {},
+    "distance_matrix": {},
+    "order_list": {
+        "order_list": {
+            "A001": {
+                "order_id": "A001",
+                "products": {
+                    "Pump A": 30,
+                    "Pump B": 15,
+                    "Pump C": 24
+                },
+                "release_time": "01.05.2025 00:00",
+                "deadline": "10.05.2025 00:00"
+            },
+            "A002": {
+                "order_id": "A002",
+                "products": {
+                    "Pump A": 21,
+                    "Pump C": 36,
+                    "Pump D": 12
+                },
+                "release_time": "02.05.2025 00:00",
+                "deadline": "12.05.2025 00:00"
+            },
+            "A003": {
+                "order_id": "A003",
+                "products": {
+                    "Pump A": 15,
+                    "Pump B": 24,
+                    "Pump D": 18
+                },
+                "release_time": "03.05.2025 00:00",
+                "deadline": "13.05.2025 00:00"
+            },
+            "A004": {
+                "order_id": "A004",
+                "products": {
+                    "Pump A": 30,
+                    "Pump B": 9,
+                    "Pump C": 21,
+                    "Pump D": 6
+                },
+                "release_time": "04.05.2025 00:00",
+                "deadline": "14.05.2025 00:00"
+            },
+            "A005": {
+                "order_id": "A005",
+                "products": {
+                    "Pump B": 40
+                },
+                "release_time": "05.05.2025 00:00",
+                "deadline": "08.05.2025 00:00"
+            },
+            "A006": {
+                "order_id": "A006",
+                "products": {
+                    "Pump B": 40
+                },
+                "release_time": "05.05.2025 00:00",
+                "deadline": "08.05.2025 00:00"
+            }
+        }
+    },
+    "start_timestamp": 1746050400,
+    "end_timestamp": 1747173600,
+    "walking_speed": 1.4,
+    "energy_costs": 20.0
+}
