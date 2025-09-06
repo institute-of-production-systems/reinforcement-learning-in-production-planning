@@ -17,22 +17,13 @@ The program is developed using __Python 3.12.7__. Please create a virtual enviro
 Requirements:
 
 ```
-json
-numpy
-matplotlib
-PyQt5
-gymnasium
-torch
-nevergrad
-ray
-seaborn
-tensorboard
+pip install -r requirements.txt
 ```
 
 Once the requirements are installed, you should be able to run the main user interface from your IDE:
 
 ```
-user_interface.py
+python user_interface.py
 ```
 
 ## Main idea ##

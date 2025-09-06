@@ -1,0 +1,70 @@
+{
+    "worker_capabilities": [],
+    "workers": {},
+    "worker_pools": {},
+    "tools": {},
+    "tool_pools": {},
+    "machine_capabilities": [],
+    "machines": {},
+    "workstations": {},
+    "product_instructions": {
+        "product_palette": {
+            "Product 1": [
+                [
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "",
+                        "display_pos": [
+                            109,
+                            55
+                        ],
+                        "node_uid": 0,
+                        "components": {
+                            "abc": 1
+                        },
+                        "capabilities": [],
+                        "tools": {},
+                        "processing_time_value": 5.0,
+                        "processing_time_unit": "s",
+                        "output_name": "xyz"
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "",
+                        "display_pos": [
+                            288,
+                            54
+                        ],
+                        "node_uid": 1,
+                        "components": {},
+                        "capabilities": [],
+                        "tools": {},
+                        "processing_time_value": 0.0,
+                        "processing_time_unit": "",
+                        "output_name": ""
+                    }
+                ]
+            ]
+        }
+    },
+    "supply_behaviours": {},
+    "inventories": {},
+    "conveyors": {},
+    "distance_matrix": {},
+    "order_list": {
+        "order_list": {
+            "Order 1": {
+                "order_id": "Order 1",
+                "products": {
+                    "Product 1": 1
+                },
+                "release_time": "06.09.2025 06:03",
+                "deadline": "06.09.2025 06:03"
+            }
+        }
+    },
+    "start_timestamp": 1757131260,
+    "end_timestamp": 1757131260,
+    "walking_speed": 1.4,
+    "energy_costs": 20.0
+}

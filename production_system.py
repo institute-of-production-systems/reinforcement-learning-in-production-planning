@@ -4773,126 +4773,124 @@ class ProductionSystem():
 
             self.event_queue.clear()  # doing so in reset() breaks the simulation for some reason
 
-            for kpi in self.reward_config.keys():
+            reward = self.calculate_reward()                            
+
+        return self.get_obs(), reward, done, None
+
+    def calculate_reward(self):
+        reward = 0.0
+        for kpi in self.reward_config.keys():
                 # reward_dict[kpi_name] = (goal, scale_value, unit)
+            if self.reward_config[kpi][0] != "Ignore":
+                goal_factor = 0
+                if self.reward_config[kpi][0] == "Reward":
+                    goal_factor = 1
+                elif self.reward_config[kpi][0] == "Punish":
+                    goal_factor = -1
 
-                if self.reward_config[kpi][0] != "Ignore":
+                scale_value = self.reward_config[kpi][1]
+                unit = self.reward_config[kpi][2]
 
-                    goal_factor = 0
-                    if self.reward_config[kpi][0] == "Reward":
-                        goal_factor = 1
-                    elif self.reward_config[kpi][0] == "Punish":
-                        goal_factor = -1
+                points = 0.0
 
-                    scale_value = self.reward_config[kpi][1]
-                    unit = self.reward_config[kpi][2]
+                if kpi == 'Mean order lead time':
+                    mean_order_lead_time = 0
+                    N_ord = len(self.order_list.order_list)
 
-                    points = 0.0
-
-                    if kpi == 'Mean order lead time':
-
-                        mean_order_lead_time = 0
-                        N_ord = len(self.order_list.order_list)
-
-                        for order_id, order_info in self.order_progress.items():
+                    for order_id, order_info in self.order_progress.items():
                             # If all product instances within this order have non-None production end times,
                             # then get the maximum production end time as order completion timestamp.
                             # If some of product instances aren't completed before planning horizon,
                             # sum their remaining work and add to planning horizon to punish such delays strongly
                             # while still providing information on whether the algorithm gets closer to
                             # squeezing all operations within the planning horizon
-                            latest_instance_completion = 0
-                            worst_delay_beyond_sim_end = 0
-                            order_incomplete = False
-                            for instance in order_info['product_progress']:
-                                if instance['production_end_time'] is not None:
-                                    if instance['production_end_time'] > latest_instance_completion:
-                                        latest_instance_completion = instance['production_end_time']
-                                else:
-                                    order_incomplete = True
-                                    worst_delay_beyond_sim_end += sum([instance['operation_progress'][oid]['remaining_work'] for oid in instance['operation_progress'].keys()])
+                        latest_instance_completion = 0
+                        worst_delay_beyond_sim_end = 0
+                        order_incomplete = False
+                        for instance in order_info['product_progress']:
+                            if instance['production_end_time'] is not None:
+                                if instance['production_end_time'] > latest_instance_completion:
+                                    latest_instance_completion = instance['production_end_time']
+                            else:
+                                order_incomplete = True
+                                worst_delay_beyond_sim_end += sum([instance['operation_progress'][oid]['remaining_work'] for oid in instance['operation_progress'].keys()])
 
-                            if not order_incomplete:
-                                mean_order_lead_time += latest_instance_completion - order_info['release_time']
-                            elif order_incomplete:
-                                mean_order_lead_time += self.end_timestamp + worst_delay_beyond_sim_end - order_info['release_time']
+                        if not order_incomplete:
+                            mean_order_lead_time += latest_instance_completion - order_info['release_time']
+                        elif order_incomplete:
+                            mean_order_lead_time += self.end_timestamp + worst_delay_beyond_sim_end - order_info['release_time']
 
-                        mean_order_lead_time /= N_ord
+                    mean_order_lead_time /= N_ord
 
-                        points = mean_order_lead_time / self.get_int_seconds(scale_value, unit)
+                    points = mean_order_lead_time / self.get_int_seconds(scale_value, unit)
 
-                    if kpi == 'Mean absolute order deadline deviation':
+                if kpi == 'Mean absolute order deadline deviation':
+                    ma_deadline_dev = 0
+                    N_ord = len(self.order_list.order_list)
 
-                        ma_deadline_dev = 0
-                        N_ord = len(self.order_list.order_list)
+                    for order_id, order_info in self.order_progress.items():
+                        latest_instance_completion = 0
+                        worst_delay_beyond_sim_end = 0
+                        order_incomplete = False
+                        for instance in order_info['product_progress']:
+                            if instance['production_end_time'] is not None:
+                                if instance['production_end_time'] > latest_instance_completion:
+                                    latest_instance_completion = instance['production_end_time']
+                            else:
+                                order_incomplete = True
+                                worst_delay_beyond_sim_end += sum([instance['operation_progress'][oid]['remaining_work'] for oid in instance['operation_progress'].keys()])
 
-                        for order_id, order_info in self.order_progress.items():
-                            latest_instance_completion = 0
-                            worst_delay_beyond_sim_end = 0
-                            order_incomplete = False
-                            for instance in order_info['product_progress']:
-                                if instance['production_end_time'] is not None:
-                                    if instance['production_end_time'] > latest_instance_completion:
-                                        latest_instance_completion = instance['production_end_time']
-                                else:
-                                    order_incomplete = True
-                                    worst_delay_beyond_sim_end += sum([instance['operation_progress'][oid]['remaining_work'] for oid in instance['operation_progress'].keys()])
+                        if not order_incomplete:
+                            ma_deadline_dev += abs(latest_instance_completion - order_info['deadline'])
+                        elif order_incomplete:
+                            ma_deadline_dev += self.end_timestamp + worst_delay_beyond_sim_end - order_info['deadline']
 
-                            if not order_incomplete:
-                                ma_deadline_dev += abs(latest_instance_completion - order_info['deadline'])
-                            elif order_incomplete:
-                                ma_deadline_dev += self.end_timestamp + worst_delay_beyond_sim_end - order_info['deadline']
+                    ma_deadline_dev /= N_ord
 
-                        ma_deadline_dev /= N_ord
+                    points = ma_deadline_dev / self.get_int_seconds(scale_value, unit)
 
-                        points = ma_deadline_dev / self.get_int_seconds(scale_value, unit)
+                if kpi == 'Mean productive time ratio of workstations':
+                    mean_ws_util = 0.0
 
-                    if kpi == 'Mean productive time ratio of workstations':
+                    elapsed = self.end_timestamp - self.start_timestamp
+                    for ws in self.workstations.values():
+                        prod_ratio = 0.0
+                        if elapsed > 0:
+                            prod_ratio = ws.busy_time / elapsed if hasattr(ws, "busy_time") else 0.0
+                        mean_ws_util += prod_ratio
 
-                        mean_ws_util = 0.0
+                    mean_ws_util /= len(self.workstations)
 
-                        elapsed = self.end_timestamp - self.start_timestamp
-                        for ws in self.workstations.values():
-                            prod_ratio = 0.0
-                            if elapsed > 0:
-                                prod_ratio = ws.busy_time / elapsed if hasattr(ws, "busy_time") else 0.0
-                            mean_ws_util += prod_ratio
+                    points = mean_ws_util / scale_value
 
-                        mean_ws_util /= len(self.workstations)
+                if kpi == 'Mean productive time ratio of workers':
+                    mean_worker_util = 0.0
 
-                        points = mean_ws_util / scale_value
+                    elapsed = self.end_timestamp - self.start_timestamp
+                    for worker in self.workers.values():
+                        prod_ratio = 0.0
+                        if elapsed > 0:
+                            prod_ratio = worker.busy_time / elapsed if hasattr(worker, "busy_time") else 0
+                        mean_worker_util += prod_ratio
 
-                    if kpi == 'Mean productive time ratio of workers':
+                    mean_worker_util /= len(self.workers)
 
-                        mean_worker_util = 0.0
+                    points = mean_worker_util / scale_value
 
-                        elapsed = self.end_timestamp - self.start_timestamp
-                        for worker in self.workers.values():
-                            prod_ratio = 0.0
-                            if elapsed > 0:
-                                prod_ratio = worker.busy_time / elapsed if hasattr(worker, "busy_time") else 0
-                            mean_worker_util += prod_ratio
+                if kpi == 'Mean buffer fill variability factor':
+                    buffer_vars = []
+                    mean_buffer_var = 0.0
 
-                        mean_worker_util /= len(self.workers)
+                    for ws_id, ws in self.workstations.items():
+                        for buf_idx, buf in list(ws.physical_input_buffers.items()) + list(ws.physical_output_buffers.items()):
+                            buffer_vars.append(buf.get_fill_level_variability())
 
-                        points = mean_worker_util / scale_value
+                    mean_buffer_var = sum(buffer_vars) / len(buffer_vars)
 
-                    if kpi == 'Mean buffer fill variability factor':
+                    points = mean_buffer_var / scale_value
 
-                        buffer_vars = []
-                        mean_buffer_var = 0.0
-
-                        for ws_id, ws in self.workstations.items():
-                            for buf_idx, buf in list(ws.physical_input_buffers.items()) + list(ws.physical_output_buffers.items()):
-                                buffer_vars.append(buf.get_fill_level_variability())
-
-                        mean_buffer_var = sum(buffer_vars) / len(buffer_vars)
-
-                        points = mean_buffer_var / scale_value
-
-                    reward += goal_factor * points                            
-
-        return self.get_obs(), reward, done, None
+                reward += goal_factor * points
+        return reward
 
     def get_obs(self):
         '''Returns the observation of the production system at its current state.
@@ -5169,6 +5167,10 @@ class ProductionSystem():
             print('XXX Simulation has reached the end timestamp.')
             return True
 
+
+    def close(self):
+        pass
+    
         
     def reset(self):
         '''

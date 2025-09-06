@@ -136,7 +136,7 @@ class ProductPalette():
             # Get all successor operations
             successors = [precedence[1] for precedence in precedence_list]
             # Get the union of these two sets
-            all_operations = list(set(predecessors).union(successors))
+            all_operations = sorted(list(set(predecessors).union(successors)), key=lambda opnode: opnode.operation_name)
 
             # Important for Ray serialization: strip OperationNode objects of all Qt functions!
             all_clean_operations = []

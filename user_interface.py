@@ -3780,6 +3780,9 @@ class SimulationTab(QWidget):
         supply1_scroll_area.setWidget(supply1_scroll_content)
         step1_layout.addWidget(supply1_scroll_area)
 
+        # Read out top-level inputs without dedicated save buttons
+        main_window.read_out_unsaved_inputs()
+
         # Each line is for a raw material/ component that is an input of operation nodes without incoming edges
         raw_material_name_list = main_window.product_instructions_tab.product_palette.get_raw_material_names()
         #raw_material_name_list = ['a', 'b', 'c']  # for testing
@@ -4400,7 +4403,8 @@ class ManualPlanningDialog(QDialog):
         super().__init__(parent)
         self.production_system = production_system
         self.step_count = step_count
-        self.setWindowTitle(f"Simulation control ({run_id})")
+        self.run_id = run_id
+        self.setWindowTitle(f"Simulation control ({self.run_id})")
         self.setMinimumSize(1200, 800)
         self.showMaximized()
         self.setWindowIcon(QIcon("images/RIFLOGO.png")) 
@@ -4637,8 +4641,10 @@ class ManualPlanningDialog(QDialog):
         
         self.setLayout(self.main_layout)
 
+        self.closeEvent = self.on_close_event
+
         # Build the initial actions view
-        self.update_dialog()
+        self.update_dialog() 
 
     def advance_simulation_until_decision(self):
         """
@@ -4684,6 +4690,27 @@ class ManualPlanningDialog(QDialog):
         self.update_schedule()
         self.update_utilization_plot()
         self.update_buffer_plot()
+
+        # If the simulation has reached the end, show a dialog message with a short result summary
+        # and options to inspect the generated plan or close this simulation run.
+        if self.production_system.is_done():
+            # Calculate reward to display and to set in the result table
+            reward = self.production_system.calculate_reward()
+
+            sim_end_dialog = QMessageBox()
+            sim_end_dialog.setWindowTitle("Simulation end")
+            sim_end_dialog.setIcon(QMessageBox.Information)
+            sim_end_dialog.setText(f"The simulation is finished with the final result {reward:.2f}.")
+
+            button = sim_end_dialog.exec()
+
+            if button == QMessageBox.Ok:
+                # Save reward in optimization run datastructure
+                main_window.optimization_tab.optimization_runs[self.run_id]['reward'] = reward
+                # Write reward in the table widget
+                row_position = list(main_window.optimization_tab.optimization_runs.keys()).index(self.run_id)
+                main_window.optimization_tab.runs_table.setItem(row_position, 6, QTableWidgetItem(f"{reward:.2f}"))
+
 
     def update_dialog(self):
         """
@@ -4942,6 +4969,10 @@ class ManualPlanningDialog(QDialog):
             # transport machine --> workstation/inventory or 'skip'
             explanation = production_system.action_matrix_reverse_row_dict[i] + ' --> ' + production_system.action_matrix_reverse_col_dict[j]
         return explanation
+    
+    def on_close_event(self, event):
+        self.production_system.reset()
+        self.production_system.event_queue.clear()
 
 class AIOptimizationTab(QWidget):
     def __init__(self):
@@ -5498,7 +5529,7 @@ class AIOptimizationTab(QWidget):
                 'observation_shape': (1, 1, observation_dimension),
                 'action_space': list(range(action_dimension)),
                 'max_moves': 10000,
-                'training_steps': 1000
+                'training_steps': 25000
             }  # further variable names are in simulation.py/MuZeroConfig class!
             # Call muzero.py train() method, don't forget to hack the __init__ of MuZero class to look for the "game" in simulation.py
             muzero = MuZero(game_name='PrOPPlan', production_system=production_system, config=muzero_config)
@@ -6360,7 +6391,15 @@ class MainWindow(QMainWindow):
 
 def main():
     global main_window
+
+    #QApplication.setDesktopSettingsAware(False)
+    fixed_font = QApplication.font()
+    fixed_font.setFamily("Helvetica")
+    fixed_font.setPointSize(8)
+    #print(fixed_font.toString())
+    
     app = QApplication(sys.argv)
+    app.setFont(fixed_font)
     main_window = MainWindow()
     main_window.show()
     sys.exit(app.exec_())
