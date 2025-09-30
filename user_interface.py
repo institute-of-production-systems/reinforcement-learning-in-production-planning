@@ -1273,6 +1273,7 @@ class OrderDataTab(QWidget):
         products_column = QVBoxLayout()
         release_column = QVBoxLayout()
         deadline_column = QVBoxLayout()
+        delete_column = QVBoxLayout()
 
         self.col_label_h = 20
 
@@ -1304,10 +1305,17 @@ class OrderDataTab(QWidget):
         deadline_col_label.setFixedHeight(self.col_label_h)
         deadline_column.addWidget(deadline_col_label)
 
+        delete_col_label = QLabel("")              # empty label for delete column
+        self.delete_col_label_w = 115
+        delete_col_label.setFixedWidth(self.delete_col_label_w)
+        delete_col_label.setFixedHeight(self.col_label_h)
+        delete_column.addWidget(delete_col_label)
+
         column_names_layout.addLayout(order_id_column)
         column_names_layout.addLayout(products_column)
         column_names_layout.addLayout(release_column)
         column_names_layout.addLayout(deadline_column)
+        column_names_layout.addLayout(delete_column)
         column_names_layout.setAlignment(Qt.AlignTop)
 
         self.order_grid_layout.setAlignment(Qt.AlignTop)
@@ -1330,6 +1338,7 @@ class OrderDataTab(QWidget):
         self.order_list.add_order(order_display_name, Order(order_id=order_display_name) if not provided_order else provided_order)  # add empty order
         self.temp_order_ids.append(order_display_name)
         order_id_field = QLineEdit(order_display_name)
+        order_id_field.setProperty("orig_id", order_display_name)  # <- alte ID am Widget merken
         
         order_id_field.editingFinished.connect(self.editingFinished)
         order_id_field.editingFinished.connect(self.rename_order)
@@ -1345,13 +1354,20 @@ class OrderDataTab(QWidget):
 
         release_time = QtCore.QDateTime.currentDateTime() if not provided_order else QtCore.QDateTime.fromString(provided_order.release_time, 'dd.MM.yyyy HH:mm')
         order_release_field = QDateTimeEdit(release_time)
+        order_release_field.setDisplayFormat("dd.MM.yyyy HH:mm")
         order_release_field.setFixedWidth(self.rel_col_label_w)
         order_release_field.setAlignment(Qt.AlignTop)
 
         deadline = QtCore.QDateTime.currentDateTime() if not provided_order else QtCore.QDateTime.fromString(provided_order.deadline, 'dd.MM.yyyy HH:mm')
         order_deadline_field = QDateTimeEdit(deadline)
+        order_deadline_field.setDisplayFormat("dd.MM.yyyy HH:mm")
         order_deadline_field.setFixedWidth(self.dl_col_label_w)
         order_deadline_field.setAlignment(Qt.AlignTop)
+
+        delete_button = QPushButton("Delete")
+        delete_button.setFixedWidth(self.delete_col_label_w)
+        delete_button.clicked.connect(self.buttonClicked)
+        delete_button.clicked.connect(self.delete_order_function)
 
         i = self.order_grid_layout.rowCount()
         j = self.order_grid_layout.columnCount()
@@ -1359,6 +1375,7 @@ class OrderDataTab(QWidget):
         self.order_grid_layout.addWidget(edit_prod_list_button, i, 1)
         self.order_grid_layout.addWidget(order_release_field, i, 2)
         self.order_grid_layout.addWidget(order_deadline_field, i, 3)
+        self.order_grid_layout.addWidget(delete_button, i, 4)
 
     def show_order_details_dialog(self):
         # Get order id by the edited row idx
@@ -1380,21 +1397,227 @@ class OrderDataTab(QWidget):
         self.currently_edited_row = location[0]
         #print(self.currently_edited_row)
 
-    def rename_order(self):
+    def _grid_ids(self):
+        ids = []
+        g = self.order_grid_layout
+        for r in range(1, g.rowCount()):
+            it = g.itemAtPosition(r, 0)
+            if it and it.widget():
+                t = it.widget().text().strip()
+                if t:
+                    ids.append(t)
+        return ids
+    
+
+    def sync_model_to_grid(self):
+        """Synchronizes model to grid"""
+        ids = self._grid_ids()
+        old = self.order_list.order_list
+        self.order_list.order_list = {oid: old[oid] for oid in ids if oid in old}
+
+ 
+    '''         
+    def rename_order(self):             # ursprüngliche Version
         order = self.order_list.order_list[self.temp_order_ids[self.currently_edited_row - 1]]
         order_id_after = self.order_grid_layout.itemAtPosition(self.currently_edited_row, 0).widget().text()
         order.order_id = order_id_after
         self.temp_order_ids[self.currently_edited_row - 1] = order_id_after
         self.order_list.add_order(order_id_after, order)
         self.clean_up_order_list()
+    '''
 
-    def clean_up_order_list(self):
+    def rename_order(self):
+        # Get the currently edited row. If it's invalid (None or < 1), exit the function
+        row = getattr(self, "currently_edited_row", -1)
+        if row is None or row < 1:
+            return
+
+        # Get the widget in the first column of the current row
+        item = self.order_grid_layout.itemAtPosition(row, 0)
+        if not item or not item.widget():
+            return
+        field = item.widget()
+
+        # Retrieve the new and old order IDs from the widget
+        new_id = (field.text() or "").strip()
+        old_id = (field.property("orig_id") or "").strip()
+
+        # If the new ID is empty, reset the field to the old ID and exit
+        if not new_id:
+            field.setText(old_id)
+            return
+
+        # If the new ID is the same as the old ID, no changes are needed, so exit
+        if new_id == old_id:
+            return
+
+        # Check for duplicate IDs in other rows of the grid
+        for i in range(1, self.order_grid_layout.rowCount()):
+            if i == row:  # Skip the current row being edited
+                continue
+            it = self.order_grid_layout.itemAtPosition(i, 0)
+            if it and it.widget() and it.widget().text().strip() == new_id:
+                # If a duplicate is found, reset the field to the old ID and exit
+                field.setText(old_id)
+                QMessageBox.warning(
+                    self,
+                    "Duplicate Order ID",
+                    f"The order ID '{new_id}' is already in use. Please choose a different name.",
+                    QMessageBox.Ok
+                )
+                print(f"[WARN] Rename aborted: '{new_id}' already exists (grid).")
+                return
+
+        # Remove the old order ID from the order list and update it with the new ID
+        order = self.order_list.order_list.pop(old_id, None)
+        if order:
+            # If the order exists, update its ID and re-add it to the order list
+            order.order_id = new_id
+            self.order_list.order_list[new_id] = order
+        else:
+            # If the order is not found, search for it in the order list and update its ID
+            for k, odr in list(self.order_list.order_list.items()):
+                if getattr(odr, "order_id", None) == old_id:
+                    order = self.order_list.order_list.pop(k)
+                    order.order_id = new_id
+                    self.order_list.order_list[new_id] = order
+                    break
+
+        # Update the temporary order IDs list with the new ID
+        idx = row - 1
+        if 0 <= idx < len(self.temp_order_ids):
+            self.temp_order_ids[idx] = new_id
+
+        # Update the widget's property to store the new ID as the original ID
+        field.setProperty("orig_id", new_id)
+
+        # Clean up the order list to ensure consistency
+        self.clean_up_order_list()
+
+        # Log the renaming action
+        print(f"--> Renamed order {old_id} -> {new_id}")
+
+        # Synchronize the model with the grid and print debug information
+        self.sync_model_to_grid()
+        self._debug_print_orders()
+
+    
+    def _debug_print_orders(self):      # debug function
+        # grid content
+        grid_orders = []
+        for i in range(1, self.order_grid_layout.rowCount()):
+            item = self.order_grid_layout.itemAtPosition(i, 0)
+            if item and item.widget():
+                grid_orders.append(item.widget().text())
+
+        # model content
+        model_orders = list(self.order_list.order_list.keys())
+
+        print(f"[DEBUG] Visible orders (grid): {grid_orders}")
+        print(f"[DEBUG] Model orders (dict):  {model_orders}")
+    
+
+    def delete_order_function(self):
+        row = getattr(self, "currently_edited_row", -1)
+        if row is None or row < 1:
+            return  # only real orders from row 1 on (row 0 is header)
+
+        grid = self.order_grid_layout
+        cols = grid.columnCount()
+        last_row = grid.rowCount() - 1
+
+        # read order id for confirmation and model deletion
+        order_id = None
+        it0 = grid.itemAtPosition(row, 0)
+        if it0 and it0.widget():
+            order_id = it0.widget().text().strip()
+
+        # confirmation message
+        msg = (f"Delete order '{order_id}'?\n\nThis action cannot be undone!"
+            if order_id else
+            "Delete this order?\n\nThis action cannot be undone!")
+        reply = QMessageBox.question(
+            self, "Delete Order", msg,
+            QMessageBox.Yes | QMessageBox.Cancel, QMessageBox.Cancel
+        )
+        if reply != QMessageBox.Yes:
+            return
+
+        # Delete row from grid
+        for c in range(cols):
+            item = grid.itemAtPosition(row, c)
+            if item and item.widget():
+                w = item.widget()
+                grid.removeWidget(w)
+                w.deleteLater()
+
+        # Next row goes one up
+        for r in range(row + 1, last_row + 1):
+            for c in range(cols):
+                item = grid.itemAtPosition(r, c)
+                if item and item.widget():
+                    w = item.widget()
+                    grid.removeWidget(w)
+                    grid.addWidget(w, r - 1, c)
+
+        # clear last row 
+        for c in range(cols):
+            item = grid.itemAtPosition(last_row, c)
+            if item and item.widget():
+                w = item.widget()
+                grid.removeWidget(w)
+                w.deleteLater()
+
+        # adjust temp_order_ids
+        idx = row - 1
+        if 0 <= idx < len(self.temp_order_ids):
+            del self.temp_order_ids[idx]
+
+        # also delete from model
+        if order_id:
+            try:
+                self.order_list.delete_order(order_id)  # deine vorhandene Methode
+            except Exception:
+                # if OrderList.delete_order is not exisiting: still fall back 
+                if order_id in self.order_list.order_list:
+                    del self.order_list.order_list[order_id]
+                    print(f"--> Deleted order {order_id}")
+
+        # Clean up order list
+        self.clean_up_order_list()
+
+        # reset status
+        self.currently_edited_row = -1
+
+        self.sync_model_to_grid()
+        self._debug_print_orders()
+
+
+    '''
+    def clean_up_order_list(self):                                                  # old version
         """Removes all orders whose IDs are not displayed from order list"""
         visible_orders = [self.order_grid_layout.itemAtPosition(i, 0).widget().text() for i in range(1, self.order_grid_layout.rowCount())]
         keep_orders = [(id, ordr) for (id, ordr) in self.order_list.order_list.items() if id in visible_orders]
         self.order_list = OrderList(dict(keep_orders))
+    '''
 
-    def complete_order_data(self):
+    def clean_up_order_list(self):                         
+        """Keep only IDs visible in the grid"""
+        visible_ids = []
+        grid = self.order_grid_layout
+        for i in range(1, grid.rowCount()):
+            it = grid.itemAtPosition(i, 0)
+            w = it.widget() if it else None
+            t = (w.text().strip() if w and hasattr(w, "text") else None)
+            if t:
+                visible_ids.append(t)
+
+        kept = {oid: self.order_list.order_list[oid]
+                for oid in visible_ids if oid in self.order_list.order_list}
+        self.order_list = OrderList(order_list=kept)
+
+    '''     
+    def complete_order_data(self):                      # old version
         """Reads order release dates and order deadlines to complete the OrderList to be used by other tabs"""
         orders = {}
         #print(self.order_grid_layout.rowCount())
@@ -1409,6 +1632,49 @@ class OrderDataTab(QWidget):
             orders.update({order_id: order_obj})
         self.order_list = OrderList(order_list=orders)
         return self.order_list
+    '''
+
+    def complete_order_data(self):
+        """Reads order data from the grid and rebuilds OrderList"""
+        orders = {}
+        grid = self.order_grid_layout
+        rows = grid.rowCount()
+
+        for i in range(1, rows):  # row 0 = head
+            # read order id
+            it0 = grid.itemAtPosition(i, 0)
+            w0 = it0.widget() if it0 else None
+            order_id = (w0.text().strip() if w0 and hasattr(w0, "text") else None)
+            if not order_id:
+                continue  # skip empty/invisible rows
+
+            # release time
+            it_rel = grid.itemAtPosition(i, 2)
+            w_rel = it_rel.widget() if it_rel else None
+            release_time = (w_rel.dateTime().toString(w_rel.displayFormat())
+                            if w_rel else None)
+
+            # deadline
+            it_dl = grid.itemAtPosition(i, 3)
+            w_dl = it_dl.widget() if it_dl else None
+            deadline = (w_dl.dateTime().toString(w_dl.displayFormat())
+                        if w_dl else None)
+
+            # get products from exisiting model 
+            existing = self.order_list.order_list.get(order_id)
+            products = dict(getattr(existing, "products", {}) or {})
+
+            orders[order_id] = Order(
+                order_id=order_id,
+                products=products,
+                release_time=release_time,
+                deadline=deadline,
+            )
+
+        self.order_list = OrderList(order_list=orders)
+        return self.order_list
+
+    
 
 class CheckableComboBox(QComboBox):
 
@@ -1687,7 +1953,7 @@ class ProductionResourcesTab(QWidget):
         container_layout.setContentsMargins(0, 0, 0, 0)  # Remove default margins
         workers_label = QLabel("Workers")
         workers_label.setFixedWidth(200)
-        icon_path = "images/Worker_production_icon.png"
+        icon_path = "images/Worker_Production_icon.png"
         icon_label = QtWidgets.QLabel()
         pixmap = QtGui.QPixmap(icon_path).scaled(32, 32, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
         icon_label.setPixmap(pixmap)
@@ -3727,6 +3993,7 @@ class SimulationTab(QWidget):
         start_time_lbl.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         controls_layout.addWidget(start_time_lbl)
         self.start_time_input = QDateTimeEdit(QtCore.QDateTime.currentDateTime())
+        self.start_time_input.setDisplayFormat("dd.MM.yyyy HH:mm")
         self.start_time_input.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         #self.start_time_input = QLineEdit()
         #self.start_time_input.setPlaceholderText("YYYY-MM-DD")
@@ -3736,6 +4003,7 @@ class SimulationTab(QWidget):
         end_time_lbl.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         controls_layout.addWidget(end_time_lbl)
         self.end_time_input = QDateTimeEdit(QtCore.QDateTime.currentDateTime())
+        self.end_time_input.setDisplayFormat("dd.MM.yyyy HH:mm")
         self.end_time_input.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         controls_layout.addWidget(self.end_time_input)
 

@@ -946,10 +946,20 @@ class Workstation():
 
     def log_status_change(self, change_timestamp, op_quadruple=None):
         if self.status:
+            # If this Workstation's status is not empty...
             if self.status[-1] == WorkstationStatus.BUSY and op_quadruple is not None:
+                # If it has been BUSY up to this moment, but a new operation is to be started...
                 display_op_name = op_quadruple[0]+' | '+op_quadruple[1]+' | '+op_quadruple[2]+' | '+str(op_quadruple[3])
+                # ...simply write the new operation as the Workstation's singular status
                 self.status_history.append((change_timestamp, [display_op_name]))
             else:
+                # If the Workstation is not BUSY or no new operation is to be started,
+                # just record current status list in status history of the Workstation
+                # but remove IDLE if it overlaps with other stati.
+                # Although it is kind of true that a Workstation is IDLE while being SETUP or WAITING_FOR_...
+                # it is better for readability to just say "SETUP" instead of "IDLE, SETUP".
+                if len(self.status) > 1 and WorkstationStatus.IDLE in self.status:
+                    self.status.remove(WorkstationStatus.IDLE)
                 self.status_history.append((change_timestamp, [s.name for s in self.status]))
         else:
             self.status_history.append((change_timestamp, [WorkstationStatus.IDLE.name]))
@@ -963,7 +973,7 @@ class Workstation():
         # Add values to time series
         self.utilization_history.append((change_timestamp, prod_ratio))
 
-    def move_objects_to_physical_output_buffer(self, objects_to_move : list, production_system):
+    def move_objects_to_physical_output_buffer(self, objects_to_move : list, production_system, test=False):
         '''
         Moves specified quantities of objects from the workstation's wip_components to the first
         compatible physical output buffer with enough capacity.
@@ -999,8 +1009,10 @@ class Workstation():
                     # TODO check this for batched operations
                     #assert wip_dict['Quantity'] - quantity >= 0
                     # Find compatible physical output buffer with enough space
-                    buffer : Buffer = self.find_physical_output_buffer((component, quantity), production_system)
+                    buffer : Buffer = self.find_physical_output_buffer((component, quantity), production_system, test)
                     if buffer is not None:
+                        if test:
+                            return True, buffer.idx1, objects_to_move
                         wip_dict['Quantity'] -= min(quantity, wip_dict['Quantity'])
                         # if wip_dict['Quantity'] == 0:
                         #     self.wip_components.remove(wip_dict)
@@ -1043,7 +1055,7 @@ class Workstation():
             return False
 
 
-    def find_physical_output_buffer(self, objects_to_move : tuple, production_system):
+    def find_physical_output_buffer(self, objects_to_move : tuple, production_system, test=False):
         '''
         Returns a Buffer that is technically fit to contain the specified quantity of a component.
         Also generates a MaterialsArrivalEvent at that Buffer's identical input buffer of another
@@ -1051,6 +1063,7 @@ class Workstation():
 
         Args:
             objects_to_move (tuple): (component_name, quantity)
+            test (boolean): whether this function is used just to check buffer capacities, False by default
         '''
         for buffer in self.physical_output_buffers.values():
             # Check for identical buffers (i.e. input buffers of other workstations)
@@ -1059,15 +1072,17 @@ class Workstation():
                 is_identical_buffer = True
                 identical_buffer_str_split = buffer.identical_buffer.split(' : ')
                 other_workstation_id = identical_buffer_str_split[0]
-                buffer_idx1 = int(identical_buffer_str_split[2])
+                buffer_idx1 = identical_buffer_str_split[2]
                 other_workstation = production_system.workstations[other_workstation_id]
                 buffer = other_workstation.physical_input_buffers[buffer_idx1]
             if buffer.accepts_objects(objects_to_move):
                 if is_identical_buffer:
-                    # Generate MaterialsArrivalEvent for the workstation connected via identical buffer
-                    production_system.event_queue.append(MaterialsArrivalEvent(timestamp=production_system.timestamp,
-                                                                workstation=other_workstation,
-                                                                component_dict={objects_to_move[0]: objects_to_move[1]}))
+                    if not test:
+                        # Generate MaterialsArrivalEvent for the workstation connected via identical buffer
+                        production_system.event_queue.append(MaterialsArrivalEvent(timestamp=production_system.timestamp,
+                                                                    workstation=other_workstation,
+                                                                    component_dict={objects_to_move[0]: objects_to_move[1]},
+                                                                    in_identical_buffer=True))
                 else:
                     # Operation products will then be moved into the workstation's physical output buffer and need to be transported
                     # to further workstations. A PickupRequest is generated in the event handling loop of run_until_decision_point().
@@ -1157,6 +1172,7 @@ class MaterialsRequest(Event):
         self.component_dict = component_dict  # {component_name (str): quantity (int)}
         self.target_workstation = target_workstation
         self.order_id = order_id  # Necessary for order-specific material requests
+        self.redundant = False  # Whether this MaterialsRequest stems from a workstation that gets materials pushed via identical buffers anyway
         print(f'??? New MaterialsRequest for components {str(self.component_dict)}')
 
 
@@ -1281,11 +1297,12 @@ class WorkerReleaseEvent(Event):
 class MaterialsArrivalEvent(Event):
     '''Whenever a certain quantity of components/materials arrives at a workstation.
     '''
-    def __init__(self, timestamp : int, workstation : Workstation, component_dict : dict):
+    def __init__(self, timestamp : int, workstation : Workstation, component_dict : dict, in_identical_buffer=False):
         super().__init__(timestamp)
         self.workstation = workstation
         self.component_dict = component_dict  # {component_name (str): quantity (int)}
         self.buffer_overflow = False
+        self.in_identical_buffer = in_identical_buffer  # whether this Event was generated for an identical buffer, no transport required
         print('>>> New MaterialsArrivalEvent:')
         print(f'    materials: {str(self.component_dict)}')
         print(f'    workstation: {self.workstation.workstation_id}')
@@ -2298,6 +2315,12 @@ class ProductionSystem():
                         self.required_action_type = None
                         self.event_queue.appendleft(WorkstationSequencingPostponed(timestamp=self.timestamp, workstation=ws))
                         return True
+                elif not ws.machine:
+                    # The only difference for fully manual workstations is that batch processing is not modelled.
+                    # Because to process multiple objects at once you definitely need some kind of machine.
+                    self.required_action_type = None
+                    self.event_queue.appendleft(WorkstationSequencingPostponed(timestamp=self.timestamp, workstation=ws))
+                    return True
 
             # Make a list of alternative operations to choose from - including "skip" option if not postponed
             if not postponed:
@@ -3752,6 +3775,7 @@ class ProductionSystem():
                             # TODO: This seems to be the right approach for finished batch operations
                             workstation.status.remove(WorkstationStatus.BUSY)
                             print('    Removed BUSY from the workstation status list.')
+                            workstation.status.append(WorkstationStatus.IDLE)
                             workstation.log_status_change(self.timestamp)
                         
                         # Retrigger postponed workstation sequencing
@@ -3804,10 +3828,12 @@ class ProductionSystem():
                     clone_workstation_1 = deepcopy(workstation)
                     clone_workstation_2 = deepcopy(workstation)
 
-                    obj_single_move_results = [clone_workstation_1.move_objects_to_physical_output_buffer(objects_to_move=[_op_prod], production_system=self) for _op_prod in _operation_products]
+                    obj_single_move_results = [clone_workstation_1.move_objects_to_physical_output_buffer(
+                        objects_to_move=[_op_prod], production_system=self, test=True) for _op_prod in _operation_products]
 
                     # Need to bundle same components in case of quantity steps >1 in the physical output buffer
-                    obj_bundle_move_results = [clone_workstation_2.move_objects_to_physical_output_buffer(objects_to_move=[_op_prod], production_system=self) for _op_prod in _bundled_op_prods]
+                    obj_bundle_move_results = [clone_workstation_2.move_objects_to_physical_output_buffer(
+                        objects_to_move=[_op_prod], production_system=self, test=True) for _op_prod in _bundled_op_prods]
 
                     # Rewrite products_moved_to_output (first entry) of obj_single_move_results to iterate over it later
                     for bmr in obj_bundle_move_results:
@@ -3816,7 +3842,7 @@ class ProductionSystem():
                             _comp = bmr[2][0]['Component']
                             _qty = bmr[2][0]['Quantity']
                             # This bundle has been moved to output successfully
-                            workstation.move_objects_to_physical_output_buffer(bmr[2], self)
+                            workstation.move_objects_to_physical_output_buffer(objects_to_move=bmr[2], production_system=self)
                             _rewrite_counter = _qty
                             for s, smr in enumerate(obj_single_move_results):
                                 if smr[2][0]['Component'] == _comp and _rewrite_counter > 0:
@@ -3932,8 +3958,11 @@ class ProductionSystem():
                         if len(workstation.wip_operations) > 0:
                             continue
 
-                        # With empty O-WIP the workstation is not BUSY anymore.
+                        # With empty O-WIP the workstation is not BUSY anymore, it is IDLE
                         workstation.status.remove(WorkstationStatus.BUSY)
+                        workstation.status.append(WorkstationStatus.IDLE)
+                        # And it needs to be logged
+                        workstation.log_status_change(self.timestamp)
                         
                         # Retrigger postponed workstation sequencing
                         for wsp_event in self.event_queue:
@@ -4076,6 +4105,13 @@ class ProductionSystem():
                     if material_put_in_buffer:
                         print('    Finally moving a fitting quantity into physical input buffers...')
                         workstation.take_objects_into_physical_input_buffers([{'Component': c, 'Quantity': q * req_num} for c, q in earliest_event.component_dict.items()], self.timestamp)
+                        # If materials arrived in an identical buffer, mark corresponding MaterialsRequest as redundant
+                        if earliest_event.in_identical_buffer:
+                            for _e in self.event_queue:
+                                if isinstance(_e, MaterialsRequest):
+                                    if _e.target_workstation == workstation and set(earliest_event.component_dict.keys()).issubset(_e.component_dict.keys()):
+                                        _e.redundant = True
+                                        break  # Just one corresponding MaterialsRequest
                         handled = False
                         # Get operation(s) with status COMMITTED in the workstation's O-WIP
                         for operation in workstation.wip_operations:
@@ -4104,6 +4140,17 @@ class ProductionSystem():
                                     print('    Removed MaterialsArrivalEvent from event queue.')
                                 except ValueError:
                                     print('Warning: Tried to remove a MaterialsArrivalEvent that is not there.')
+
+                        # If the workstation's operation WIP is empty but we are handling a MaterialsArrivalEvent,
+                        # then it's a push system, i.e. an operation from the previous station is finished and
+                        # output is moved into the identical input buffer of the next station
+                        # although the next operation has not even been "assigned" to the workstation yet.
+                        if len(workstation.wip_operations) == 0:
+                            try:
+                                self.event_queue.remove(earliest_event)
+                                print('    Removed MaterialsArrivalEvent from event queue.')
+                            except ValueError:
+                                print('Warning: Tried to remove a MaterialsArrivalEvent that is not there.')
 
                 elif isinstance(earliest_event, RawMaterialArrivalEvent):
                     inventory : Inventory = earliest_event.inventory
@@ -4379,19 +4426,79 @@ class ProductionSystem():
                                 print(f'\n### Removed an empty MaterialsRequest from {earliest_event.target_workstation.workstation_id}')
 
                         if material not in self.raw_material_names:
+                            # Internally created materials:
+                            # First check whether the requested materials are available in the workstation's input buffers
+                            material_in_input_buffers = False
 
-                            # In case of internally created materials, search for any pending PickupRequests with components matching MaterialsRequest
-                            for e in self.event_queue:
-                                if e.timestamp <= earliest_event.timestamp and isinstance(e, PickupRequest):
-                                    if e.objects[0]['Component'] == material and e.objects[0]['Quantity'] >= component_dict[material]:
-                                        # Create TransportOrder (in case of identical buffers a MaterialsArrivalEvent is directly created, and no PickupRequests)
-                                        self.event_queue.appendleft(TransportOrder(timestamp=self.timestamp,
-                                                                               component_dict={material: deepcopy(component_dict[material])},
-                                                                               source=(e.workstation, e.workstation.physical_output_buffers[e.output_buffer_idx1]),
-                                                                               destination=earliest_event.target_workstation))
-                                        e.objects[0]['Quantity'] -= component_dict[material]
-                                        self.event_queue.remove(earliest_event)
+                            # Similar to work_on_operation()
+                            available_components = {}  # key: component name, value: quantity
+                            components_available_in_phib = {}
+
+                            for phib in target_workstation.physical_input_buffers.values():
+                                # If empty, no need to check
+                                buffer_empty = True
+                                for k, v in phib.contents.items():
+                                    if v > 0:
+                                        buffer_empty = False
                                         break
+                                if buffer_empty:
+                                    continue
+                                if phib.sequence_type == BufferSequenceType.FIFO:
+                                    next_forced_component = list(phib.contents.items())[0][0]
+                                    next_forced_quantity = list(phib.contents.items())[0][1]
+                                if phib.sequence_type == BufferSequenceType.LIFO:
+                                    next_forced_component = list(phib.contents.items())[-1][0]
+                                    next_forced_quantity = list(phib.contents.items())[-1][1]
+                                if phib.sequence_type == BufferSequenceType.FIFO or phib.sequence_type == BufferSequenceType.LIFO:
+                                    if next_forced_component not in available_components.keys():
+                                        available_components.update({next_forced_component: next_forced_quantity})
+                                        components_available_in_phib.update({next_forced_component: next_forced_quantity})
+                                    else:
+                                        available_components[next_forced_component] += next_forced_quantity
+                                        components_available_in_phib[next_forced_component] += next_forced_quantity
+                                if phib.sequence_type == BufferSequenceType.SOLID_RAW_MATERIAL:
+                                    raise NotImplementedError()
+                                if phib.sequence_type == BufferSequenceType.FREE:
+                                    for k,v in phib.contents.items():
+                                        if k not in available_components.keys():
+                                            available_components.update({k: v})
+                                            components_available_in_phib.update({k: v})
+                                        else:
+                                            available_components[k] += v
+                                            components_available_in_phib[k] += v
+
+                            # Handle unnecessary MaterialsRequests in case of workstations connected by identical buffers:
+                            if earliest_event.redundant:
+
+                                # If the name of requested material is present in PhIBs of the workstation...
+                                if material in components_available_in_phib.keys():
+                                    # If the available quantity is larger or equals requested quantity...
+                                    if components_available_in_phib[material] >= component_dict[material]:
+                                        # Trigger MaterialsRequest deletion
+                                        earliest_event.component_dict.pop(material)
+                                        # Avoid TransportOrder creation
+                                        material_in_input_buffers = True
+
+                                # Remove MaterialsRequest event if no components left unhandled
+                                if earliest_event.component_dict == {}:
+                                    self.event_queue.remove(earliest_event)
+                                    print(f'\n### Removed an empty MaterialsRequest from {earliest_event.target_workstation.workstation_id}')
+
+                            ###
+
+                            if not material_in_input_buffers:
+                                # Search for any pending PickupRequests with components matching MaterialsRequest
+                                for e in self.event_queue:
+                                    if e.timestamp <= earliest_event.timestamp and isinstance(e, PickupRequest):
+                                        if e.objects[0]['Component'] == material and e.objects[0]['Quantity'] >= component_dict[material]:
+                                            # Create TransportOrder (in case of identical buffers a MaterialsArrivalEvent is directly created, and no PickupRequests)
+                                            self.event_queue.appendleft(TransportOrder(timestamp=self.timestamp,
+                                                                                component_dict={material: deepcopy(component_dict[material])},
+                                                                                source=(e.workstation, e.workstation.physical_output_buffers[e.output_buffer_idx1]),
+                                                                                destination=earliest_event.target_workstation))
+                                            e.objects[0]['Quantity'] -= component_dict[material]
+                                            self.event_queue.remove(earliest_event)
+                                            break
                 
                 elif isinstance(earliest_event, TransportOrder):
                     print(f'\nHandling TransportOrder')

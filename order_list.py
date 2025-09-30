@@ -13,6 +13,15 @@ class OrderList():
         self.order_list.update({copy(order_id): copy(order)})
         #print(self.order_list)
 
+    def delete_order(self, order_id: str):
+        if order_id in self.order_list:
+            del self.order_list[order_id]
+            print(f"--> Deleted order {order_id}")
+        else:
+            print(f"--> Delete skipped, unknown order_id '{order_id}'")
+
+    
+
     def to_dict(self):
         return {
             "order_list": object_to_dict(self.order_list)

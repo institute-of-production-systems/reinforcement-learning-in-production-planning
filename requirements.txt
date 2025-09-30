@@ -1,4 +1,4 @@
-json
+json5
 numpy
 matplotlib
 PyQt5
