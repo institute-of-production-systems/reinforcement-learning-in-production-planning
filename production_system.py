@@ -2646,7 +2646,7 @@ class ProductionSystem():
         # Request worker capabilities
         #if all([operation_is_fully_manual, not worker_at_workstation]) or all([not operation_is_fully_manual, all_tools_in_use, not worker_at_workstation]):
         if not worker_at_workstation:
-            print('    No worker is currently present at the workstation.')
+            print('    No worker is currently seized by the workstation.')
             # Workers are required for operation execution or tool setup.
             # In case of operation execution, certain worker capabilities will be requested (non-empty list).
             # In case of tool setup the assumption is to get any worker from allowed worker pools.
@@ -2730,7 +2730,7 @@ class ProductionSystem():
                         try:
                             tool_exchange_duration += self.get_int_seconds(machine_setup_matrix[tool_to_exchange][tool_id], hardware_setup_time_unit)
                         except KeyError:
-                            print('Warning: unknown setup duration, defaulting to 0.')
+                            print('    Warning: unknown setup duration, defaulting to 0.')
                     # For the case that some tool slot is currently occupied but gets empty after setup
                     currently_occupied_tool_slots = [machine_tool_slots[t] for t in workstation.tools_in_use]
                     tool_slots_to_be_used = [machine_tool_slots[t] for t in operation_node.tools.keys()]
@@ -3865,7 +3865,7 @@ class ProductionSystem():
                         if products_moved_to_output:
                             # Do the actual moving of products, not testing on "cloned" workstations like above anymore.
                             #workstation.move_objects_to_physical_output_buffer(objects_to_move=moved_objects, production_system=self)
-                            print(f'Moved objects {str(moved_objects)} to the output buffer {str(output_idx1)}')
+                            print(f'    Moved objects {str(moved_objects)} to the output buffer {str(output_idx1)}')
 
                             # Every time an operation is finished and its product is moved to a physical output buffer,
                             # a PickupRequest for this product should be generated.
@@ -3873,7 +3873,7 @@ class ProductionSystem():
                             
                             # If the product was moved to an "identical" output buffer, no PickupRequest is needed
                             if workstation.physical_output_buffers[output_idx1].identical_buffer == '':
-                                print('There are no buffers identical to it, creating PickupRequests')
+                                print('    There are no buffers identical to it, creating PickupRequests')
 
                                 # Always create separate PickupRequests for components
                                 #for x in range(len(_finished_ops)):
@@ -3896,8 +3896,28 @@ class ProductionSystem():
                                 instance_data['operation_progress'][o[0]]['status'] = OperationStatus.DONE
                                 instance_data['operation_progress'][o[0]]['remaining_work'] = 0
 
-                                print(f'Removing operation {str(o)} from the WIP of workstation {workstation.workstation_id}')
+                                print(f'    Removing operation {str(o)} from the WIP of workstation {workstation.workstation_id}')
                                 workstation.wip_operations.remove(o)
+
+                                # Tools currently in use are removed from tools_in_use
+                                # if workstation.machine:
+                                #     machine = self.stationary_machines[workstation.machine]
+                                #     machine_setup_matrix = machine.setup_matrix
+                                #     hardware_setup_time_unit = machine.hardware_setup_time_unit
+                                #     for current_tool in workstation.tools_in_use:
+                                #         try:
+                                #             tool_removal_duration = self.get_int_seconds(machine_setup_matrix[current_tool]['No tool'], hardware_setup_time_unit)
+                                #         except KeyError:
+                                #             print(f"    WARNING! No tool removal time specified for {current_tool}. Assuming 0.")
+                                #             tool_removal_duration = 0
+                                #         if current_tool in workstation.permanent_tools:
+                                #             # Assuming 0 tool removal duration for permanent tools of a workstation
+                                #             workstation.tools_in_use.remove(current_tool)
+                                #             print(f'    Removed {current_tool} from workstation tools in use.')
+                                #         else:
+                                #             self.event_queue.append(ToolReleaseEvent(timestamp=self.timestamp + tool_removal_duration,
+                                #                                                     workstation=workstation,
+                                #                                                     tool=self.tools[current_tool]))
 
                                 # Record production_end_time of the product instance if all operations are DONE
                                 instance_ops_done = []
@@ -4196,22 +4216,23 @@ class ProductionSystem():
                     workstation : Workstation = earliest_event.workstation
                     tool : Tool = earliest_event.tool
                     print(f'\nHandling ToolReleaseEvent of tool {tool.tool_id} from workstation {workstation.workstation_id}')
-                    # If it is a permanent tool of this workstation, nothing needs to be done as that list isn't manipulated, just read.
                     # If it is not a permanently assigned tool, put it back to its tool pool of origin.
                     if tool.tool_id not in workstation.permanent_tools:
                         tool_pool_of_origin = [tp for tp in workstation.allowed_tool_pools if tool.tool_id in self.tool_pools[tp]][0]
                         self.tool_pool_tracker[tool_pool_of_origin].append(tool.tool_id)
-                        workstation.tools_in_use.remove(tool.tool_id)
-                        print(f'    Removed {tool.tool_id} from workstation tools in use.')
-                        # This will trigger re-handling of the first pending ToolsRequest that wants this tool
-                        # by setting its some_unavailable_tool_released flag to True
-                        # which will then be detected in the beginning of the main event loop.
-                        for _e in self.event_queue():
-                            if isinstance(_e, ToolsRequest):
-                                if tool.tool_id in _e.tools.keys():
-                                    print(f'    Found a pending ToolsRequest that requests tool {tool.tool_id}')
-                                    _e.some_unavailable_tool_released = True
-                                    break
+                    # For both permanent and not permanent tools of a workstation:
+                    workstation.tools_in_use.remove(tool.tool_id)
+                    print(f'    Removed {tool.tool_id} from workstation tools in use.')
+                    # This will trigger re-handling of the first pending ToolsRequest that wants this tool
+                    # by setting its some_unavailable_tool_released flag to True
+                    # which will then be detected in the beginning of the main event loop.
+                    for _e in self.event_queue:
+                        if isinstance(_e, ToolsRequest):
+                            if tool.tool_id in _e.tools.keys():
+                                print(f'    Found a pending ToolsRequest that requests tool {tool.tool_id}')
+                                _e.some_unavailable_tool_released = True
+                                break
+
                     self.event_queue.remove(earliest_event)
 
                 elif isinstance(earliest_event, WorkerReleaseEvent):
@@ -5315,6 +5336,14 @@ class ProductionSystem():
             workstation.wip_operations = []
             workstation.wip_components = []
             workstation.tools_in_use = []
+            workstation.remaining_setup_time = 0
+            workstation.remaining_maintenance_time = 0
+            workstation.remaining_repair_time = 0
+            workstation.busy_time = 0.0  # cumulative time in status BUSY
+            workstation.setup_time = 0.0  # cumulative time in status SETUP
+            workstation.status = []
+            workstation.status_history = []
+            workstation.utilization_history = []
             # Reset buffers
             for ib in workstation.physical_input_buffers.values():
                 ib.contents = {}

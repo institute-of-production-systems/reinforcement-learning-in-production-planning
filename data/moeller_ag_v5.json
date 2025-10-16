@@ -1275,7 +1275,7 @@
             "physical_input_buffers": {
                 "1": {
                     "buffer_location": 1,
-                    "idx1": 1,
+                    "idx1": "1",
                     "diff_comp_comb": true,
                     "sequence_type": 3,
                     "comp_specific_sizes": {
@@ -1291,7 +1291,7 @@
             "physical_output_buffers": {
                 "1": {
                     "buffer_location": 2,
-                    "idx1": 1,
+                    "idx1": "1",
                     "diff_comp_comb": true,
                     "sequence_type": 3,
                     "comp_specific_sizes": {
@@ -1329,7 +1329,7 @@
             "physical_input_buffers": {
                 "1": {
                     "buffer_location": 1,
-                    "idx1": 1,
+                    "idx1": "1",
                     "diff_comp_comb": true,
                     "sequence_type": 3,
                     "comp_specific_sizes": {
@@ -1345,7 +1345,7 @@
             "physical_output_buffers": {
                 "1": {
                     "buffer_location": 2,
-                    "idx1": 1,
+                    "idx1": "1",
                     "diff_comp_comb": true,
                     "sequence_type": 3,
                     "comp_specific_sizes": {
@@ -1383,7 +1383,7 @@
             "physical_input_buffers": {
                 "1": {
                     "buffer_location": 1,
-                    "idx1": 1,
+                    "idx1": "1",
                     "diff_comp_comb": true,
                     "sequence_type": 3,
                     "comp_specific_sizes": {
@@ -1399,7 +1399,7 @@
             "physical_output_buffers": {
                 "1": {
                     "buffer_location": 2,
-                    "idx1": 1,
+                    "idx1": "1",
                     "diff_comp_comb": true,
                     "sequence_type": 3,
                     "comp_specific_sizes": {
@@ -1437,7 +1437,7 @@
             "physical_input_buffers": {
                 "1": {
                     "buffer_location": 1,
-                    "idx1": 1,
+                    "idx1": "1",
                     "diff_comp_comb": true,
                     "sequence_type": 3,
                     "comp_specific_sizes": {
@@ -1453,7 +1453,7 @@
             "physical_output_buffers": {
                 "1": {
                     "buffer_location": 2,
-                    "idx1": 1,
+                    "idx1": "1",
                     "diff_comp_comb": true,
                     "sequence_type": 3,
                     "comp_specific_sizes": {
@@ -1490,7 +1490,7 @@
             "physical_input_buffers": {
                 "1": {
                     "buffer_location": 1,
-                    "idx1": 1,
+                    "idx1": "1",
                     "diff_comp_comb": true,
                     "sequence_type": 3,
                     "comp_specific_sizes": {
@@ -1506,7 +1506,7 @@
             "physical_output_buffers": {
                 "1": {
                     "buffer_location": 2,
-                    "idx1": 1,
+                    "idx1": "1",
                     "diff_comp_comb": true,
                     "sequence_type": 3,
                     "comp_specific_sizes": {
@@ -1544,7 +1544,7 @@
             "physical_input_buffers": {
                 "1": {
                     "buffer_location": 1,
-                    "idx1": 1,
+                    "idx1": "1",
                     "diff_comp_comb": true,
                     "sequence_type": 3,
                     "comp_specific_sizes": {
@@ -1560,7 +1560,7 @@
             "physical_output_buffers": {
                 "1": {
                     "buffer_location": 2,
-                    "idx1": 1,
+                    "idx1": "1",
                     "diff_comp_comb": true,
                     "sequence_type": 3,
                     "comp_specific_sizes": {
@@ -1597,7 +1597,7 @@
             "physical_input_buffers": {
                 "1": {
                     "buffer_location": 1,
-                    "idx1": 1,
+                    "idx1": "1",
                     "diff_comp_comb": true,
                     "sequence_type": 3,
                     "comp_specific_sizes": {
@@ -1613,7 +1613,7 @@
             "physical_output_buffers": {
                 "1": {
                     "buffer_location": 2,
-                    "idx1": 1,
+                    "idx1": "1",
                     "diff_comp_comb": true,
                     "sequence_type": 3,
                     "comp_specific_sizes": {
@@ -1650,7 +1650,7 @@
             "physical_input_buffers": {
                 "1": {
                     "buffer_location": 1,
-                    "idx1": 1,
+                    "idx1": "1",
                     "diff_comp_comb": true,
                     "sequence_type": 3,
                     "comp_specific_sizes": {
@@ -1666,7 +1666,7 @@
             "physical_output_buffers": {
                 "1": {
                     "buffer_location": 2,
-                    "idx1": 1,
+                    "idx1": "1",
                     "diff_comp_comb": true,
                     "sequence_type": 3,
                     "comp_specific_sizes": {
@@ -1704,7 +1704,7 @@
             "physical_input_buffers": {
                 "1": {
                     "buffer_location": 1,
-                    "idx1": 1,
+                    "idx1": "1",
                     "diff_comp_comb": true,
                     "sequence_type": 3,
                     "comp_specific_sizes": {
@@ -1720,7 +1720,7 @@
             "physical_output_buffers": {
                 "1": {
                     "buffer_location": 2,
-                    "idx1": 1,
+                    "idx1": "1",
                     "diff_comp_comb": true,
                     "sequence_type": 3,
                     "comp_specific_sizes": {
@@ -1757,7 +1757,7 @@
             "physical_input_buffers": {
                 "1": {
                     "buffer_location": 1,
-                    "idx1": 1,
+                    "idx1": "1",
                     "diff_comp_comb": true,
                     "sequence_type": 3,
                     "comp_specific_sizes": {
@@ -1773,7 +1773,7 @@
             "physical_output_buffers": {
                 "1": {
                     "buffer_location": 2,
-                    "idx1": 1,
+                    "idx1": "1",
                     "diff_comp_comb": true,
                     "sequence_type": 3,
                     "comp_specific_sizes": {
@@ -1811,7 +1811,7 @@
             "physical_input_buffers": {
                 "1": {
                     "buffer_location": 1,
-                    "idx1": 1,
+                    "idx1": "1",
                     "diff_comp_comb": true,
                     "sequence_type": 3,
                     "comp_specific_sizes": {
@@ -1827,7 +1827,7 @@
             "physical_output_buffers": {
                 "1": {
                     "buffer_location": 2,
-                    "idx1": 1,
+                    "idx1": "1",
                     "diff_comp_comb": true,
                     "sequence_type": 3,
                     "comp_specific_sizes": {
@@ -1864,7 +1864,7 @@
             "physical_input_buffers": {
                 "1": {
                     "buffer_location": 1,
-                    "idx1": 1,
+                    "idx1": "1",
                     "diff_comp_comb": true,
                     "sequence_type": 3,
                     "comp_specific_sizes": {
@@ -1880,7 +1880,7 @@
             "physical_output_buffers": {
                 "1": {
                     "buffer_location": 2,
-                    "idx1": 1,
+                    "idx1": "1",
                     "diff_comp_comb": true,
                     "sequence_type": 3,
                     "comp_specific_sizes": {
@@ -1918,7 +1918,7 @@
             "physical_input_buffers": {
                 "1": {
                     "buffer_location": 1,
-                    "idx1": 1,
+                    "idx1": "1",
                     "diff_comp_comb": true,
                     "sequence_type": 3,
                     "comp_specific_sizes": {
@@ -1934,7 +1934,7 @@
             "physical_output_buffers": {
                 "1": {
                     "buffer_location": 2,
-                    "idx1": 1,
+                    "idx1": "1",
                     "diff_comp_comb": true,
                     "sequence_type": 3,
                     "comp_specific_sizes": {
@@ -1972,7 +1972,7 @@
             "physical_input_buffers": {
                 "1": {
                     "buffer_location": 1,
-                    "idx1": 1,
+                    "idx1": "1",
                     "diff_comp_comb": true,
                     "sequence_type": 3,
                     "comp_specific_sizes": {
@@ -1988,7 +1988,7 @@
             "physical_output_buffers": {
                 "1": {
                     "buffer_location": 2,
-                    "idx1": 1,
+                    "idx1": "1",
                     "diff_comp_comb": true,
                     "sequence_type": 3,
                     "comp_specific_sizes": {
@@ -2026,7 +2026,7 @@
             "physical_input_buffers": {
                 "1": {
                     "buffer_location": 1,
-                    "idx1": 1,
+                    "idx1": "1",
                     "diff_comp_comb": true,
                     "sequence_type": 3,
                     "comp_specific_sizes": {
@@ -2042,7 +2042,7 @@
             "physical_output_buffers": {
                 "1": {
                     "buffer_location": 2,
-                    "idx1": 1,
+                    "idx1": "1",
                     "diff_comp_comb": true,
                     "sequence_type": 3,
                     "comp_specific_sizes": {
@@ -2079,7 +2079,7 @@
             "physical_input_buffers": {
                 "1": {
                     "buffer_location": 1,
-                    "idx1": 1,
+                    "idx1": "1",
                     "diff_comp_comb": true,
                     "sequence_type": 3,
                     "comp_specific_sizes": {
@@ -2095,7 +2095,7 @@
             "physical_output_buffers": {
                 "1": {
                     "buffer_location": 2,
-                    "idx1": 1,
+                    "idx1": "1",
                     "diff_comp_comb": true,
                     "sequence_type": 3,
                     "comp_specific_sizes": {
@@ -2775,7 +2775,9 @@
                         "capabilities": [
                             "assembly"
                         ],
-                        "tools": {},
+                        "tools": {
+                            "assembly_toolset_C": {}
+                        },
                         "processing_time_value": 21.0,
                         "processing_time_unit": "min",
                         "output_name": "Pump C"

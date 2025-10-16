@@ -5347,7 +5347,7 @@ class AIOptimizationTab(QWidget):
         # Algorithm selection
         algo_layout = QFormLayout()
         algo_combo = QComboBox()
-        algo_combo.addItems(["Manual planning", "RL-MuZero", "Only heuristics"])
+        algo_combo.addItems(["Manual planning", "RL-MuZero"])
 
         # Set current algorithm if it exists in optimization_runs
         if run_id in self.optimization_runs:
@@ -5371,78 +5371,61 @@ class AIOptimizationTab(QWidget):
         # RL-MuZero parameters
         muzero_widget = QWidget()
         muzero_layout = QFormLayout()
+
+        muzero_es = QLineEdit()
+        muzero_fc_repr_layers = QLineEdit()
+        muzero_fc_dyn_layers = QLineEdit()
+        muzero_fc_rew_layers = QLineEdit()
+        muzero_fc_val_layers = QLineEdit()
+        muzero_fc_pol_layers = QLineEdit()
+        muzero_ts = QLineEdit()
+        muzero_ns = QLineEdit()
         muzero_lr = QLineEdit()
-        muzero_df = QLineEdit()
-        muzero_na = QLineEdit()
+
         if run_id in self.optimization_runs and 'parameters' in self.optimization_runs[run_id] and self.optimization_runs[run_id]['algorithm'] == "RL-MuZero":
             saved = self.optimization_runs[run_id]['parameters']
-            muzero_lr.setText(saved.get('learning_rate', "0.001"))
-            muzero_df.setText(saved.get('discount_factor', "0.99"))
-            muzero_na.setText(saved.get('network_architecture', "Default"))
+            muzero_es.setText(saved.get('encoding_size', "100"))
+            muzero_fc_repr_layers.setText(saved.get('fc_representation_layers', "[]"))
+            muzero_fc_dyn_layers.setText(saved.get('fc_dynamics_layers', "[64]"))
+            muzero_fc_rew_layers.setText(saved.get('fc_reward_layers', "[64]"))
+            muzero_fc_val_layers.setText(saved.get('fc_value_layers', "[64]"))
+            muzero_fc_pol_layers.setText(saved.get('fc_policy_layers', "[64]"))
+            muzero_ts.setText(saved.get('training_steps', "100000"))
+            muzero_ns.setText(saved.get('num_simulations', "100"))
+            muzero_lr.setText(saved.get('lr_init', "0.01"))
         else:
-            muzero_lr.setText("0.001")
-            muzero_df.setText("0.99")
-            muzero_na.setText("Default")
+            # Fresh config
+            muzero_es.setText("100")
+            muzero_fc_repr_layers.setText("[]")
+            muzero_fc_dyn_layers.setText("[64]")
+            muzero_fc_rew_layers.setText("[64]")
+            muzero_fc_val_layers.setText("[64]")
+            muzero_fc_pol_layers.setText("[64]")
+            muzero_ts.setText("100000")
+            muzero_ns.setText("100")
+            muzero_lr.setText("0.01")
+
+        muzero_layout.addRow("Encoding size:", muzero_es)
+        muzero_layout.addRow("Representation layers:", muzero_fc_repr_layers)
+        muzero_layout.addRow("Dynamics layers:", muzero_fc_dyn_layers)
+        muzero_layout.addRow("Reward layers:", muzero_fc_rew_layers)
+        muzero_layout.addRow("Value layers:", muzero_fc_val_layers)
+        muzero_layout.addRow("Policy layers:", muzero_fc_pol_layers)
+        muzero_layout.addRow("Training steps:", muzero_ts)
+        muzero_layout.addRow("Hypothetical steps (K):", muzero_ns)
         muzero_layout.addRow("Learning rate:", muzero_lr)
-        muzero_layout.addRow("Discount factor:", muzero_df)
-        muzero_layout.addRow("Network architecture:", muzero_na)
+
         muzero_widget.setLayout(muzero_layout)
-        param_widgets.append(('RL-MuZero', muzero_widget, {'learning_rate': muzero_lr,
-                                                            'discount_factor': muzero_df,
-                                                            'network_architecture': muzero_na}))
+        param_widgets.append(('RL-MuZero', muzero_widget, {'encoding_size': muzero_es,
+                                                            'representation_layers': muzero_fc_repr_layers,
+                                                            'dynamics_layers': muzero_fc_dyn_layers,
+                                                            'reward_layers': muzero_fc_rew_layers,
+                                                            'value_layers': muzero_fc_val_layers,
+                                                            'policy_layers': muzero_fc_pol_layers,
+                                                            'training_steps': muzero_ts,
+                                                            'hypothetical_steps_(k)': muzero_ns,
+                                                            'learning_rate': muzero_lr}))
         param_stack.addWidget(muzero_widget)
-        
-        # RL-DQN parameters
-        dqn_widget = QWidget()
-        dqn_layout = QFormLayout()
-        dqn_lr = QLineEdit()
-        dqn_epsilon = QLineEdit()
-        dqn_buffer = QLineEdit()
-        if run_id in self.optimization_runs and 'parameters' in self.optimization_runs[run_id] and self.optimization_runs[run_id]['algorithm'] == "RL-DQN":
-            saved = self.optimization_runs[run_id]['parameters']
-            dqn_lr.setText(saved.get('learning_rate', "0.001"))
-            dqn_epsilon.setText(saved.get('epsilon', "0.1"))
-            dqn_buffer.setText(saved.get('buffer_size', "10000"))
-        else:
-            dqn_lr.setText("0.001")
-            dqn_epsilon.setText("0.1")
-            dqn_buffer.setText("10000")
-        dqn_layout.addRow("Learning rate:", dqn_lr)
-        dqn_layout.addRow("Epsilon:", dqn_epsilon)
-        dqn_layout.addRow("Buffer size:", dqn_buffer)
-        dqn_widget.setLayout(dqn_layout)
-        param_widgets.append(('RL-DQN', dqn_widget, {'learning_rate': dqn_lr,
-                                                    'epsilon': dqn_epsilon,
-                                                    'buffer_size': dqn_buffer}))
-        param_stack.addWidget(dqn_widget)
-        
-        # Heuristic-EDF parameters
-        edf_widget = QWidget()
-        edf_layout = QFormLayout()
-        edf_time = QLineEdit()
-        if run_id in self.optimization_runs and 'parameters' in self.optimization_runs[run_id] and self.optimization_runs[run_id]['algorithm'] == "Heuristic-EDF":
-            saved = self.optimization_runs[run_id]['parameters']
-            edf_time.setText(saved.get('time_window', "24"))
-        else:
-            edf_time.setText("24")
-        edf_layout.addRow("Time window:", edf_time)
-        edf_widget.setLayout(edf_layout)
-        param_widgets.append(('Heuristic-EDF', edf_widget, {'time_window': edf_time}))
-        param_stack.addWidget(edf_widget)
-        
-        # Heuristic-SPT parameters
-        spt_widget = QWidget()
-        spt_layout = QFormLayout()
-        spt_lookahead = QLineEdit()
-        if run_id in self.optimization_runs and 'parameters' in self.optimization_runs[run_id] and self.optimization_runs[run_id]['algorithm'] == "Heuristic-SPT":
-            saved = self.optimization_runs[run_id]['parameters']
-            spt_lookahead.setText(saved.get('look_ahead', "5"))
-        else:
-            spt_lookahead.setText("5")
-        spt_layout.addRow("Look-ahead:", spt_lookahead)
-        spt_widget.setLayout(spt_layout)
-        param_widgets.append(('Heuristic-SPT', spt_widget, {'look_ahead': spt_lookahead}))
-        param_stack.addWidget(spt_widget)
         
         param_stack.setCurrentIndex(algo_combo.currentIndex())
 
@@ -5793,11 +5776,20 @@ class AIOptimizationTab(QWidget):
             # Info can be taken from production system object
             print('observation_dimension', observation_dimension)
             print('action_dimension', action_dimension)
+
             muzero_config = {
                 'observation_shape': (1, 1, observation_dimension),
                 'action_space': list(range(action_dimension)),
                 'max_moves': 10000,
-                'training_steps': 25000
+                'encoding_size': int(production_system.algorithm_parameters['encoding_size']),
+                'fc_representation_layers': eval(production_system.algorithm_parameters['representation_layers']),
+                'fc_dynamics_layers': eval(production_system.algorithm_parameters['dynamics_layers']),
+                'fc_reward_layers': eval(production_system.algorithm_parameters['reward_layers']),
+                'fc_value_layers': eval(production_system.algorithm_parameters['value_layers']),
+                'fc_policy_layers': eval(production_system.algorithm_parameters['policy_layers']),
+                'training_steps': int(production_system.algorithm_parameters['training_steps']),
+                'num_simulations': int(production_system.algorithm_parameters['hypothetical_steps_(k)']),
+                'lr_init': float(production_system.algorithm_parameters['learning_rate'])
             }  # further variable names are in simulation.py/MuZeroConfig class!
             # Call muzero.py train() method, don't forget to hack the __init__ of MuZero class to look for the "game" in simulation.py
             muzero = MuZero(game_name='PrOPPlan', production_system=production_system, config=muzero_config)
@@ -5957,7 +5949,7 @@ class AlgorithmConfigPage(QWizardPage):
         algo_layout = QHBoxLayout()
         algo_label = QLabel("Algorithm:")
         self.algo_combo = QComboBox()
-        self.algo_combo.addItems(["Manual planning", "RL-MuZero", "Only heuristics"])
+        self.algo_combo.addItems(["Manual planning", "RL-MuZero"])
         self.registerField("algorithm", self.algo_combo, "currentText")
         self.algo_combo.currentTextChanged.connect(self.on_algorithm_changed)
         algo_layout.addWidget(algo_label)
@@ -5967,26 +5959,54 @@ class AlgorithmConfigPage(QWizardPage):
         # Stacked widget for different algorithm parameters
         self.param_stack = QStackedWidget()
 
+        # Create parameter widgets with saved values
+        self.param_widgets = []  # List of tuples: (algorithm name, widget, {parameter_name: QLineEdit})
+
         # Manual planning
         manual_widget = QWidget()
         manual_layout = QFormLayout()
         manual_widget.setLayout(manual_layout)
         self.param_stack.addWidget(manual_widget)
+
+        self.param_widgets.append(('Manual planning', manual_widget, {}))
         
         # MuZero parameters
         muzero_widget = QWidget()
         muzero_layout = QFormLayout()
-        muzero_layout.addRow("Learning rate:", QLineEdit("0.001"))
-        muzero_layout.addRow("Discount factor:", QLineEdit("0.99"))
-        muzero_layout.addRow("Network architecture:", QLineEdit("Default"))
-        muzero_widget.setLayout(muzero_layout)
-        self.param_stack.addWidget(muzero_widget)
 
-        # Heuristics
-        heuristic_widget = QWidget()
-        heuristic_layout = QFormLayout()
-        heuristic_widget.setLayout(heuristic_layout)
-        self.param_stack.addWidget(heuristic_widget)
+        muzero_es = QLineEdit("100")
+        muzero_fc_repr_layers = QLineEdit("[]")
+        muzero_fc_dyn_layers = QLineEdit("[64]")
+        muzero_fc_rew_layers = QLineEdit("[64]")
+        muzero_fc_val_layers = QLineEdit("[64]")
+        muzero_fc_pol_layers = QLineEdit("[64]")
+        muzero_ts = QLineEdit("100000")
+        muzero_ns = QLineEdit("100")
+        muzero_lr = QLineEdit("0.01")
+
+        muzero_layout.addRow("Encoding size:", muzero_es)
+        muzero_layout.addRow("Representation layers:", muzero_fc_repr_layers)
+        muzero_layout.addRow("Dynamics layers:", muzero_fc_dyn_layers)
+        muzero_layout.addRow("Reward layers:", muzero_fc_rew_layers)
+        muzero_layout.addRow("Value layers:", muzero_fc_val_layers)
+        muzero_layout.addRow("Policy layers:", muzero_fc_pol_layers)
+        muzero_layout.addRow("Training steps:", muzero_ts)
+        muzero_layout.addRow("Hypothetical steps (K):", muzero_ns)
+        muzero_layout.addRow("Learning rate:", muzero_lr)
+
+        muzero_widget.setLayout(muzero_layout)
+
+        self.param_widgets.append(('RL-MuZero', muzero_widget, {'encoding_size': muzero_es,
+                                                            'representation_layers': muzero_fc_repr_layers,
+                                                            'dynamics_layers': muzero_fc_dyn_layers,
+                                                            'reward_layers': muzero_fc_rew_layers,
+                                                            'value_layers': muzero_fc_val_layers,
+                                                            'policy_layers': muzero_fc_pol_layers,
+                                                            'training_steps': muzero_ts,
+                                                            'hypothetical_steps_(k)': muzero_ns,
+                                                            'learning_rate': muzero_lr}))
+
+        self.param_stack.addWidget(muzero_widget)
 
         layout.addWidget(self.param_stack)
         self.setLayout(layout)
@@ -5997,9 +6017,6 @@ class AlgorithmConfigPage(QWizardPage):
             self.param_stack.setCurrentIndex(0)
         elif value == "RL-MuZero":
             self.param_stack.setCurrentIndex(1)
-        elif value == "Only heuristics":
-            self.param_stack.setCurrentIndex(2)
-
 
 class ObservationSpaceConfigPage(QWizardPage):
     def __init__(self, production_system, parent=None):
