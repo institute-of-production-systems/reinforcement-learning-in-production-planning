@@ -1297,12 +1297,13 @@ class WorkerReleaseEvent(Event):
 class MaterialsArrivalEvent(Event):
     '''Whenever a certain quantity of components/materials arrives at a workstation.
     '''
-    def __init__(self, timestamp : int, workstation : Workstation, component_dict : dict, in_identical_buffer=False):
+    def __init__(self, timestamp : int, workstation : Workstation, component_dict : dict, in_identical_buffer=False, after_operation=True):
         super().__init__(timestamp)
         self.workstation = workstation
         self.component_dict = component_dict  # {component_name (str): quantity (int)}
         self.buffer_overflow = False
         self.in_identical_buffer = in_identical_buffer  # whether this Event was generated for an identical buffer, no transport required
+        self.after_operation = after_operation  # whether this MaterialsArrivalEvent was created while handling OperationFinishedEvent as opposed to source inventory arrival
         print('>>> New MaterialsArrivalEvent:')
         print(f'    materials: {str(self.component_dict)}')
         print(f'    workstation: {self.workstation.workstation_id}')
@@ -2143,6 +2144,12 @@ class ProductionSystem():
                 operation_product = (operation.output_name, out_qty)
 
         for phob in workstation.physical_output_buffers.values():
+            if phob.identical_buffer != '':
+                identical_buffer_str_split = phob.identical_buffer.split(' : ')
+                other_workstation_id = identical_buffer_str_split[0]
+                buffer_idx1 = identical_buffer_str_split[2]
+                other_workstation = self.workstations[other_workstation_id]
+                phob = other_workstation.physical_input_buffers[buffer_idx1]
             if phob.accepts_objects(operation_product):
                 fits = True
                 break
@@ -2603,6 +2610,17 @@ class ProductionSystem():
                             ms = to['Source']
                             break
                     self.execute_transport_order(material_source=ms, transport_machine=tm)
+
+            # Since some components have been moved from PhIB to Ph-WIP,
+            # this is also a good point to signal to any upstream station connected via
+            # identical buffers that they should check unblocking and retry
+            for upstream_ws in self.workstations.values():
+                for out_buf in upstream_ws.physical_output_buffers.values():
+                    if out_buf.identical_buffer == '':
+                        continue
+                    else:
+                        if out_buf.identical_buffer.split(" : ")[0] == workstation.workstation_id:
+                            self.event_queue.append(WorkstationPickupEvent(self.timestamp, upstream_ws))                            
 
             if WorkstationStatus.WAITING_FOR_MATERIAL in workstation.status:
                 # Retrigger any pending RawMaterialArrivalEvents and MaterialsArrivalEvents at this workstation
@@ -4086,11 +4104,21 @@ class ProductionSystem():
                     print(f'    current WIP operations: {str(workstation.wip_operations)}')
                     print(f'    current physical input buffer contents: {str([b.contents for b in workstation.physical_input_buffers.values()])}')
                     print(f'    current physical WIP components: {str(workstation.wip_components)}')
+                    print(f'    via identical buffer: {earliest_event.in_identical_buffer}')
+                    print(f'    after operation: {earliest_event.after_operation}')
+
+                    # if earliest_event.in_identical_buffer:
+                    #     self.event_queue.remove(earliest_event)
+                    #     print('    Removed MaterialsArrivalEvent from event queue (materials already put into identical buffer).')
+                    #     continue
 
                     # Idea: check whether the workstation can take the delivered components using a "test clone"
                     test_clone_ws = deepcopy(workstation)
                     material_put_in_buffer = test_clone_ws.take_objects_into_physical_input_buffers([{'Component': c, 'Quantity': q} for c, q in earliest_event.component_dict.items()])
                     req_num = 1
+
+                    if earliest_event.in_identical_buffer:
+                        material_put_in_buffer = True
 
                     if not material_put_in_buffer:
                         print('    Materials could not be taken in by the workstation input buffers.')
@@ -4123,8 +4151,9 @@ class ProductionSystem():
                             earliest_event.buffer_overflow = True
                     
                     if material_put_in_buffer:
-                        print('    Finally moving a fitting quantity into physical input buffers...')
-                        workstation.take_objects_into_physical_input_buffers([{'Component': c, 'Quantity': q * req_num} for c, q in earliest_event.component_dict.items()], self.timestamp)
+                        if not earliest_event.in_identical_buffer or not earliest_event.after_operation:
+                            print('    Finally moving a fitting quantity into physical input buffers...')
+                            workstation.take_objects_into_physical_input_buffers([{'Component': c, 'Quantity': q * req_num} for c, q in earliest_event.component_dict.items()], self.timestamp)
                         # If materials arrived in an identical buffer, mark corresponding MaterialsRequest as redundant
                         if earliest_event.in_identical_buffer:
                             for _e in self.event_queue:
@@ -4358,7 +4387,8 @@ class ProductionSystem():
                                             other_workstation = self.workstations[other_workstation_id]
                                             self.event_queue.append(MaterialsArrivalEvent(timestamp=self.timestamp,
                                                                     workstation=other_workstation,
-                                                                    component_dict={material: component_dict[material]}))
+                                                                    component_dict={material: component_dict[material]},
+                                                                    after_operation=False))
                                             
                                         # Trigger MaterialsRequest deletion
                                         earliest_event.component_dict.pop(material)
@@ -4499,6 +4529,12 @@ class ProductionSystem():
                                         earliest_event.component_dict.pop(material)
                                         # Avoid TransportOrder creation
                                         material_in_input_buffers = True
+
+                                # If the requested material has already been consumed by the workstation,
+                                # components_available_in_phib is going to be empty.
+                                # In this case of a redundant MaterialsRequest we can delete it.
+                                if len(components_available_in_phib) == 0:
+                                    earliest_event.component_dict.pop(material)
 
                                 # Remove MaterialsRequest event if no components left unhandled
                                 if earliest_event.component_dict == {}:
