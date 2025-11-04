@@ -4,20 +4,21 @@ import copy
 import base64
 import json
 import ast
+import re
 import numpy as np
 #import matplotlib
 #matplotlib.use('QtAgg')
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from PyQt5 import QtCore, QtWidgets, QtGui
-from PyQt5.QtGui import QPainter, QPen, QColor, QPixmap, QStandardItemModel, QStandardItem, QIcon
+from PyQt5.QtGui import QPainter, QPen, QColor, QPixmap, QStandardItemModel, QStandardItem, QIcon, QRegExpValidator
 from PyQt5.QtCore import Qt, QRect, QModelIndex, QSize
 from PyQt5.QtWidgets import QWidget, QDialogButtonBox, QRadioButton, QDialog, QLabel, QVBoxLayout, QHBoxLayout
 from PyQt5.QtWidgets import QPushButton, QLineEdit, QTableWidget, QTableWidgetItem, QListWidget, QComboBox
 from PyQt5.QtWidgets import QInputDialog, QMenu, QMessageBox, QListWidgetItem, QGridLayout, QDateTimeEdit
 from PyQt5.QtWidgets import QStyledItemDelegate, QHeaderView, QCheckBox, QFrame, QScrollArea, QSlider, QGroupBox, QSizePolicy
 from PyQt5.QtWidgets import QWizard, QWizardPage, QTabWidget, QApplication, QMainWindow, QFileDialog, QStyle, QToolBar, QAction
-from PyQt5.QtWidgets import QStackedWidget, QFormLayout, QTreeView, QStackedLayout
+from PyQt5.QtWidgets import QStackedWidget, QFormLayout, QTreeView, QStackedLayout, QToolTip
 from PyQt5.QtCore import QUrl, QTimer, QItemSelectionModel, QObject, QEvent
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from product_instructions import ProductPalette
@@ -95,7 +96,7 @@ class OperationDialog(QDialog):
         proc_time_label = QLabel("Processing time")
         proc_time_label.setFixedWidth(125)
         self.proc_time_layout.addWidget(proc_time_label)
-        pt_value_field = QLineEdit("0")
+        pt_value_field = QLineEdit("0.0")
         pt_unit_field = QComboBox()
         pt_unit_field.addItems(['s', 'min', 'h', 'd'])
         pt_unit_field.setFixedWidth(50)
@@ -157,7 +158,7 @@ class OperationDialog(QDialog):
     def add_capability_fields(self):
         capability_field = QLineEdit("Enter capability")
         self.capabilities_layout.addWidget(capability_field)
-
+        '''
         # A Note for the user to pay attention to case sensitivity
         # if the note is already there it will be deleted to make sure its only on the bottom one time
         if hasattr(self, "capability_hint_label"):
@@ -168,6 +169,7 @@ class OperationDialog(QDialog):
         self.capability_hint_label = QLabel("⚠️ Pay attention to case sensitivity")
         self.capability_hint_label.setStyleSheet("color: red; font-size: 9pt; margin-top: 5px;")
         self.capabilities_layout.addWidget(self.capability_hint_label)
+        '''
 
     def edit_tool_requirements_effects(self, tool_sel_combo):
         # tool requirements and effects = tre
@@ -528,17 +530,58 @@ class OperationNode(QLabel):
         action = menu.exec_(self.mapToGlobal(position))
         
         if action == rename_action:
-            new_name, ok = QInputDialog.getText(self, "Rename node", "Enter new node name:")
+            #new_name, ok = QInputDialog.getText(self, "Rename node", "Enter new node name:")
+            #use top-level window as parent so the dialog uses standard window style,
+            # not the node's stylesheet
+            parent_window = self.window() or None
+            new_name, ok = QInputDialog.getText(parent_window, "Rename node", "Enter new node name:")
             if ok and new_name:
                 self.setText(new_name)
                 self.operation_name = new_name
         elif action == delete_action:
-            self.destroy()
-            self.setHidden(True)
+            #self.destroy()
+            #self.setHidden(True)
+            try:
+                self.delete_node()
+            except Exception:
+                self.setVisible(False)
+                self.setParent(None)
+                self.deleteLater()
         elif action == components_action:
             components_dialog = OperationDialog(operation=self)
             components_dialog.exec()
             #self = components_dialog.operation
+    
+    def delete_node(self):
+        """Delete this node cleanly: remove from GraphPanel.connections, unparent, deleteLater."""
+        # hide immediately so visibility checks stop including this node
+        self.setVisible(False)
+
+        # find enclosing GraphPanel (workspace.parent() -> GraphPanel) robustly
+        parent = self.parent()
+        graph_panel = None
+        while parent is not None:
+            if isinstance(parent, GraphPanel):
+                graph_panel = parent
+                break
+            parent = parent.parent()
+
+        if graph_panel is not None:
+            # remove all connections that reference this node (by node_uid)
+            uid = getattr(self, "node_uid", None)
+            if uid is not None:
+                graph_panel.connections = [
+                    (s, t) for (s, t) in graph_panel.connections
+                    if getattr(s, "node_uid", None) != uid and getattr(t, "node_uid", None) != uid
+                ]
+            # force repaint to drop arrows
+            graph_panel.update()
+
+        # detach from any parent and delete later (safe in Qt)
+        self.setParent(None)
+        self.deleteLater()
+    
+
 
 class GraphPanel(QWidget):
     def __init__(self, parent=None):
@@ -675,7 +718,8 @@ class GraphPanel(QWidget):
         node.connect_to_signal.connect(self.initiate_connection)
         node.disconnect_from_signal.connect(self.destroy_connection)
         node.clicked_signal.connect(self.handle_node_click)  # Connect click signal to handler
-        node.setParent(self)
+        #node.setParent(self)
+        self.update() 
 
     def handle_node_click(self, target_node):
         """Handle clicks on nodes for connection if in 'Connect to...' mode."""
@@ -932,13 +976,13 @@ class ProductInstructionsTab(QWidget):
         # Dialog
         box = QMessageBox(self)
         box.setIcon(QMessageBox.Warning)
-        box.setWindowTitle("Unverbundene Schritte")
+        box.setWindowTitle("Unconnected Operations")
         box.setText(
-            f"Es gibt {len(dangling)} Arbeitsschritt(e), die nicht verbunden sind.\n"
-            "Beim Wechseln gehen diese verloren."
+            f"There are {len(dangling)} unconnected operation(s).\n"
+            "Switching products will discard them."
         )
-        stay_btn = box.addButton("Im aktuellen Produkt bleiben", QMessageBox.RejectRole)
-        go_btn   = box.addButton("Trotzdem wechseln", QMessageBox.AcceptRole)
+        stay_btn = box.addButton("Stay", QMessageBox.RejectRole)
+        go_btn   = box.addButton("Continue", QMessageBox.AcceptRole)
         box.setDefaultButton(stay_btn)
         box.exec_()
 
@@ -946,19 +990,13 @@ class ProductInstructionsTab(QWidget):
         self._stop_blink_nodes()
 
         if box.clickedButton() is stay_btn:
-            # Event VERBRAUCHEN → Selektion bleibt unverändert (kein Blauwechsel)
+            # event verbauchen -> Selektion bleibt unverändert (kein Blauwechsel)
             return True
-
-        # Nutzer will wechseln → wir lassen das Event normal weiterlaufen.
-        # Optional: Wenn du beim eigentlichen Wechsel noch Code hast, der in currentItemChanged hängt,
-        # kannst du hier z. B. einen Flag setzen, um Doppel-Dialoge zu vermeiden:
-        # self._allow_next_programmatic_switch = True
         return False
 
     
     def _set_node_highlight(self, node, on: bool):
-        """Node-Umrandung an/aus (QWidget oder QGraphicsItem)."""
-        # QWidget-Weg
+        """Node-Umrandung an/aus."""
         if hasattr(node, "setStyleSheet"):
             if on:
                 node.setStyleSheet("border: 2px solid orange;")
@@ -966,7 +1004,6 @@ class ProductInstructionsTab(QWidget):
                 node.setStyleSheet("")
             return
 
-        # QGraphicsItem-Weg
         if hasattr(node, "setPen"):
             # originalen Pen merken/wiederherstellen
             if on:
@@ -993,10 +1030,10 @@ class ProductInstructionsTab(QWidget):
         """Alle sichtbaren OperationNodes im Workspace."""
         nodes = []
         for obj in self.graph_panel.workspace.children():
-            # robustes Duck-Typing: hat eine node_uid? dann ist's ein Node
+            # hat eine node_uid? dann ist's ein Node
             if hasattr(obj, "node_uid"):
                 try:
-                    if obj.isVisible():  # QWidget/QGraphicsItem-kompatibel
+                    if obj.isVisible():  
                         nodes.append(obj)
                 except Exception:
                     nodes.append(obj)
@@ -1029,6 +1066,12 @@ class ProductInstructionsTab(QWidget):
         Liefert sichtbare Nodes, die weder als Quelle noch als Ziel in
         self.graph_panel.connections vorkommen. Vergleicht über node_uid.
         """
+        '''
+         # Debug: Verbindungen ausgeben
+        print("[DEBUG] Current connections:")
+        for conn in self.graph_panel.connections:
+            print(f"  Source: {conn[0].node_uid}, Target: {conn[1].node_uid}")
+
         # alle sichtbaren Knoten einsammeln
         visible_nodes = []
         for obj in self.graph_panel.workspace.children():
@@ -1039,6 +1082,21 @@ class ProductInstructionsTab(QWidget):
                 except Exception:
                     visible_nodes.append(obj)
 
+        # Debug: Sichtbare Knoten ausgeben
+        print("[DEBUG] Visible nodes:")
+        for node in visible_nodes:
+            print(f"  Node UID: {node.node_uid}")
+
+        if not visible_nodes:
+            return []
+        '''
+
+        # Debug: Verbindungen ausgeben
+        print("[DEBUG] Current connections:", getattr(self.graph_panel, "connections", []))
+
+        # Benutze zentrale Funktion, damit Visibility-Logik nur an einer Stelle lebt
+        visible_nodes = self._visible_operation_nodes()
+        print("[DEBUG] Visible nodes:", [getattr(n, "node_uid", None) for n in visible_nodes])
         if not visible_nodes:
             return []
 
@@ -1053,8 +1111,16 @@ class ProductInstructionsTab(QWidget):
             if hasattr(dst, "node_uid"):
                 connected_uids.add(dst.node_uid)
 
+        # Debug: Verbundene UIDs ausgeben
+        print("[DEBUG] Connected UIDs:", connected_uids)
+
         # lose = Node-UID nicht in connected_uids
         return [n for n in visible_nodes if getattr(n, "node_uid", None) not in connected_uids]
+
+        # Debug: Unverbundene Knoten ausgeben
+        print("[DEBUG] Dangling nodes:")
+        for node in dangling_nodes:
+            print(f"  Node UID: {node.node_uid}")
     
     def update_product_graph_display(self, current_item, previous_item):
         '''
@@ -1080,7 +1146,7 @@ class ProductInstructionsTab(QWidget):
         
         # Show and load the GraphPanel with the selected product's graph
         sel_prod_id = current_item.text()
-        self.graph_panel.active_product_id = sel_prod_id   ############ <- neu RD
+        self.graph_panel.active_product_id = sel_prod_id   ############ 
         try:
             # Logic to load and display the production graph for the clicked product
             for connection in self.product_palette.product_palette[sel_prod_id]:
@@ -1119,6 +1185,12 @@ class ProductInstructionsTab(QWidget):
             item = self.product_list_widget.itemAt(position)
             row = self.product_list_widget.row(item)
             self.product_list_widget.takeItem(row)
+
+            if item:  # Check if an item is selected
+                self.delete_product(item)  # Call the delete_product method
+                print (f"Deleted product: {item.text()}")
+            else:
+                print("No item selected for deletion.")
 
     def rename_product(self, item):
         """Rename the selected product."""
@@ -1826,6 +1898,62 @@ class VerticalLabel(QLabel):
         #self.setStyleSheet("writing-mode: vertical-lr;")  # Set vertical writing mode
 
 
+class WorkerAvailabilityTable(QWidget):
+    def __init__(self, avail_table=None):
+        super().__init__()
+        self.avail_table = avail_table  # dict of dicts [row][column]
+        self.initUI()
+        self.setMinimumWidth(540)
+        self.setMinimumHeight(345)
+
+    def initUI(self):
+
+        # Create a table widget
+        table = QTableWidget()
+        self.table = table
+
+        row_headers = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        table.setRowCount(7)
+        table.setVerticalHeaderLabels(row_headers)
+
+        col_headers = ['From', 'To', 'Break start', 'Break end']
+        table.setColumnCount(4)
+        table.setHorizontalHeaderLabels(col_headers)
+
+        # Populate the table with values for display if there are any
+        for row in range(table.rowCount()):
+            for col in range(table.columnCount()):
+                try:
+                    table_item = QTableWidgetItem(str(self.avail_table[row_headers[row]][col_headers[col]]))
+                    table.setItem(row, col, table_item)
+                except KeyError:
+                    # The provided availability matrix doesn't have any value saved for this row & column, leave the cell empty
+                    table_item = QTableWidgetItem('')
+                    table.setItem(row, col, table_item)
+
+        main_layout = QVBoxLayout()
+        main_layout.addWidget(self.table)
+        self.setLayout(main_layout)
+
+    def validate_entries(self):
+        """
+        Validate that all non-empty cells match HH:MM (24h) format.
+        Returns True if all entries are valid or empty, False otherwise.
+        """
+        pattern = re.compile(r'^(?:[01]\d|2[0-3]):[0-5]\d$')
+        for r in range(self.table.rowCount()):
+            for c in range(self.table.columnCount()):
+                item = self.table.item(r, c)
+                if item is None:
+                    continue
+                text = (item.text() or "").strip()
+                if text == "":
+                    continue
+                if not pattern.match(text):
+                    return False
+        return True
+
+
 class SetupMatrixTable(QWidget):
     def __init__(self, setup_table=None):
         super().__init__()
@@ -1941,6 +2069,8 @@ class ProductionResourcesTab(QWidget):
         worker_capabilities_layout.addWidget(container_widget)
         add_cap_button = QPushButton("Add worker capability")
         add_cap_button.clicked.connect(lambda: self.add_new_worker_capability(provided_str=None))
+        add_cap_button.setToolTip("Worker capabilities are specific worker skills, e.g., welding or assembly and could \n"
+                                  "also include the workers qualification level for that skill e.g. senior, beginner, etc.")
         worker_capabilities_layout.addWidget(add_cap_button)
         self.worker_cap_list_widget = QListWidget()
         self.worker_cap_list_widget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -1963,6 +2093,8 @@ class ProductionResourcesTab(QWidget):
         workers_layout.addWidget(container_widget)
         add_wrkr_button = QPushButton("Add worker")
         add_wrkr_button.clicked.connect(lambda: self.add_new_worker(provided_dict=None))
+        add_wrkr_button.setToolTip("Each worker's capabilities as well as a unique time schedule \n"
+                                   "including breaks can be assigned individually.")
         workers_layout.addWidget(add_wrkr_button)
         self.workers_list_widget = QListWidget()
         self.workers_list_widget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -1986,6 +2118,7 @@ class ProductionResourcesTab(QWidget):
         worker_pools_layout.addWidget(container_widget)
         add_pool_button = QPushButton("Add worker pool")
         add_pool_button.clicked.connect(lambda: self.add_new_pool(pool_id=None, provided_list=None))
+        add_pool_button.setToolTip("Each worker from a worker pool can be shared by different workstations.")
         worker_pools_layout.addWidget(add_pool_button)
         self.worker_pool_list_widget = QListWidget()
         self.worker_pool_list_widget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -2000,6 +2133,9 @@ class ProductionResourcesTab(QWidget):
         container_layout.setContentsMargins(0, 0, 0, 0)
         machine_cap_label = QLabel("Machine capabilities")
         machine_cap_label.setFixedWidth(200)
+        machine_cap_label.setToolTip("Machine capabilities are specific machine skills, e.g., cutting or drilling and could \n"
+                                     "also include the machines specification level for that skill e.g. high-precision, \n"
+                                     "standard, etc.")
         icon_path = "images/Machine_capabilities_icon.png"
         icon_label = QtWidgets.QLabel()
         pixmap = QtGui.QPixmap(icon_path).scaled(32, 32, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
@@ -2011,6 +2147,9 @@ class ProductionResourcesTab(QWidget):
         #machine_capabilities_layout.addStretch()
         add_mac_button = QPushButton("Add machine capability")
         add_mac_button.clicked.connect(lambda: self.add_new_machine_capability(provided_str=None))
+        add_mac_button.setToolTip("Machine capabilities are specific machine skills, e.g., cutting or drilling and could \n"
+                                  "also include the machines specification level for that skill e.g. high-precision, \n"
+                                  "standard, etc.")
         machine_capabilities_layout.addWidget(add_mac_button)
         self.machine_cap_list_widget = QListWidget()
         self.machine_cap_list_widget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -2023,6 +2162,10 @@ class ProductionResourcesTab(QWidget):
         container_layout.setContentsMargins(0, 0, 0, 0)
         machines_label = QLabel("Machines")
         machines_label.setFixedWidth(200)
+        machines_label.setToolTip("Each machine can have different capabilities and may  \n"
+                                  "be provided with different tools or sets of tools. \n"
+                                  "Machines can also be used to simulate transport times \n" 
+                                  "between different stations in the production process.")
         icon_path = "images/Machines_icon.png"
         icon_label = QtWidgets.QLabel()
         pixmap = QtGui.QPixmap(icon_path).scaled(32, 32, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
@@ -2033,6 +2176,10 @@ class ProductionResourcesTab(QWidget):
         machines_layout.addWidget(container_widget)
         add_machn_button = QPushButton("Add machine")
         add_machn_button.clicked.connect(lambda: self.add_new_machine(provided_dict=None))
+        add_machn_button.setToolTip("Each machine can have different capabilities and may  \n"
+                                    "be provided with different tools or sets of tools. \n"
+                                    "Machines can also be used to simulate transport times \n" 
+                                    "between different stations in the production process.")
         machines_layout.addWidget(add_machn_button)
         self.machines_list_widget = QListWidget()
         self.machines_list_widget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -2046,6 +2193,10 @@ class ProductionResourcesTab(QWidget):
         container_layout.setContentsMargins(0, 0, 0, 0)
         workstation_label = QLabel("Workstations")
         workstation_label.setFixedWidth(200)
+        workstation_label.setToolTip("Workstations can be assigned with permanent tools or tool pools to work \n"
+                                     "with as well as permant workers or worker pools who will permanently work \n"
+                                     "on this workstation. They can also have different types of physical input \n"
+                                     "or output buffers configurated specifically with limits for each station.")
         icon_path = "images/Workstations_icon.png"
         icon_label = QtWidgets.QLabel()
         pixmap = QtGui.QPixmap(icon_path).scaled(32, 32, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
@@ -2056,6 +2207,10 @@ class ProductionResourcesTab(QWidget):
         workstation_layout.addWidget(container_widget)
         add_work_button = QPushButton("Add workstation")
         add_work_button.clicked.connect(lambda: self.add_new_workstation(provided_dict=None))
+        add_work_button.setToolTip("Workstations can be assigned with permanent tools or tool pools to work \n"
+                                   "with as well as permant workers or worker pools who will permanently work \n"
+                                   "on this workstation. They can also have different types of physical input \n"
+                                   "or output buffers configurated specificly with limits for each station.")
         workstation_layout.addWidget(add_work_button)
         self.workstation_list_widget = QListWidget()
         self.workstation_list_widget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -2079,6 +2234,10 @@ class ProductionResourcesTab(QWidget):
         tools_layout.addWidget(container_widget)
         add_tool_button = QPushButton("Add tool")
         add_tool_button.clicked.connect(lambda: self.add_new_tool(provided_dict=None))
+        add_tool_button.setToolTip("Workstations and machines can use tools as resources. \n" \
+                                    "Tools can also be required for specific operations in order to make a product. \n"
+                                    "Each tool can have its own static and dynamic properties. Examples for \n"
+                                    "tools are drills, welding wires, cleaning fluids, sorted waste containers etc.")
         tools_layout.addWidget(add_tool_button)
         self.tool_list_widget = QListWidget()
         self.tool_list_widget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -2102,6 +2261,8 @@ class ProductionResourcesTab(QWidget):
         toolpools_layout.addWidget(container_widget)
         add_toolpool_button = QPushButton("Add tool pool")
         add_toolpool_button.clicked.connect(lambda: self.add_new_toolpool(pool_id=None, provided_list=None))
+        add_toolpool_button.setToolTip("Tools from a tool pool can be shared by different workstations \n"
+                                       "that have access to that tool pool.")
         toolpools_layout.addWidget(add_toolpool_button)
         self.toolpools_list_widget = QListWidget()
         self.toolpools_list_widget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -2164,7 +2325,13 @@ class ProductionResourcesTab(QWidget):
             item = QListWidgetItem(wrkr_name)  
             self.workers_list_widget.addItem(item)
             wrkr_capas = provided_dict['provided_capabilities']
-            self.production_system.workers.update({wrkr_name: Worker(worker_id=wrkr_name, provided_capabilities=wrkr_capas)})
+            # Older use case versions did not model worker availability, assume empty
+            wrkr_avail = {}
+            if 'availability' in provided_dict.keys():
+                wrkr_avail = provided_dict['availability']
+            self.production_system.workers.update({wrkr_name: Worker(worker_id=wrkr_name,
+                                                                     provided_capabilities=wrkr_capas,
+                                                                     availability=wrkr_avail)})
         self.workers_list_widget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.workers_list_widget.customContextMenuRequested.connect(self.show_worker_menu)
         
@@ -2175,6 +2342,88 @@ class ProductionResourcesTab(QWidget):
 
         # Main layout for the dialog
         worker_edit_layout = QVBoxLayout()
+
+        self.temp_wrkr_avail_table = {}  # to retain worker availability table while editing worker
+
+        # Button to edit worker availability
+        def edit_worker_availability():
+            worker_availability_dialog = QDialog()
+            worker_availability_dialog.setWindowTitle(f'Availability of worker {item.text()}')
+            worker_availability_dialog.setMinimumWidth(400)
+            # Layout: table and save/cancel
+            wrkr_avail_lt = QVBoxLayout()
+            # Table structure
+            wa_rows = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+            wa_cols = ['From', 'To', 'Break start', 'Break end']
+            # Retrieve availability table if available
+            worker_availability_table = None
+            if self.temp_wrkr_avail_table:
+                print("Temp worker availability table:")
+                print(self.temp_wrkr_avail_table)
+                worker_availability_table = WorkerAvailabilityTable(avail_table=self.temp_wrkr_avail_table)
+            elif self.production_system.workers:
+                worker : Worker = self.production_system.workers[item.text()]
+                if worker:
+                    if hasattr(worker, 'availability'):
+                        print("Worker availability table loaded from memory:")
+                        print(worker.availability)
+                        if worker.availability != {}:
+                            worker_availability_table = WorkerAvailabilityTable(avail_table=worker.availability)
+                        else:
+                            # No availability data stored in worker object
+                            # Still create a table with rows and columns
+                            wa_table_blank = {row: {col: "" for col in wa_cols} for row in wa_rows}
+                            worker_availability_table = WorkerAvailabilityTable(avail_table=wa_table_blank)
+                    else:
+                        print("Worker object has no availability attribute")
+
+            def accept_wa():
+                wrkr_avail_table = {}
+                # Validate HH:MM format or empty
+                if not worker_availability_table.validate_entries():
+                    QMessageBox.warning(
+                        worker_availability_dialog,
+                        "Wrong input format",
+                        "Wrong input format: should be HH:MM or empty",
+                        QMessageBox.Ok
+                    )
+                    return
+                # Save worker availability table
+                #wa_input_table = worker_availability_table.layout().itemAt(0).widget()
+                wa_input_table = worker_availability_table.table
+                # For each row and column combination
+                for row in range(wa_input_table.rowCount()):
+                    row_header = wa_input_table.verticalHeaderItem(row).text()
+                    wa_row_dict = {}
+                    for col in range(wa_input_table.columnCount()):       
+                        # Get the names of the headers corresponding to the table item
+                        col_header = wa_input_table.horizontalHeaderItem(col).text()
+                        # Get the value of the table item
+                        cell_item = wa_input_table.item(row, col)
+                        clock_value = (cell_item.text() if cell_item else "").strip()
+                        # Update target dictionary with the entry
+                        if clock_value != '':
+                            wa_row_dict.update({col_header: clock_value})  # e.g. "07:30"
+                    wrkr_avail_table.update({row_header: wa_row_dict})
+                self.temp_wrkr_avail_table = wrkr_avail_table
+
+            wrkr_avail_lt.addWidget(worker_availability_table)
+
+            save_wa_btn = QDialogButtonBox.Save | QDialogButtonBox.Cancel
+            buttonBox = QDialogButtonBox(save_wa_btn)
+            buttonBox.accepted.connect(worker_availability_dialog.accept)
+            buttonBox.accepted.connect(accept_wa)
+            buttonBox.rejected.connect(worker_availability_dialog.reject)
+            wrkr_avail_lt.addWidget(buttonBox)
+
+            worker_availability_dialog.setLayout(wrkr_avail_lt)
+            worker_availability_dialog.exec()
+
+
+        edit_availability_button = QPushButton("Availability")
+        edit_availability_button.clicked.connect(edit_worker_availability)
+        worker_edit_layout.addWidget(edit_availability_button)
+
         prov_cap_label = QLabel("Provided capabilities:")
         prov_cap_label.setFixedWidth(400)
         worker_edit_layout.addWidget(prov_cap_label)
@@ -2186,17 +2435,18 @@ class ProductionResourcesTab(QWidget):
             items = [lw.item(x).text() for x in range(lw.count())]
             wrkr_caps = list(items)
             capability_selection.addItems(wrkr_caps)
-            edit_dialog.layout().itemAt(2).layout().addWidget(capability_selection)
+            edit_dialog.layout().itemAt(3).layout().addWidget(capability_selection)
         
         add_cap_button = QPushButton("Add capability")
         add_cap_button.clicked.connect(add_worker_cap_row)
+        add_cap_button.setToolTip("Assign capabilities to your worker.")
         worker_edit_layout.addWidget(add_cap_button)
 
         # Placeholder for capability drop-downs
         wrkr_cap_lt = QVBoxLayout()  # only for holding the QComboBoxes with selected capabilities
         worker_edit_layout.addLayout(wrkr_cap_lt)
 
-        # To load previously saved worker capabilities
+        # To load previously saved worker capabilities to display in the edit dialog
         def load_worker_data():
             if self.production_system.workers:
                 try:
@@ -2209,22 +2459,24 @@ class ProductionResourcesTab(QWidget):
                             capability_name_field.addItems(capas)
                             i = capability_name_field.findText(c)
                             capability_name_field.setCurrentIndex(i)
-                            edit_dialog.layout().itemAt(2).layout().addWidget(capability_name_field)
+                            edit_dialog.layout().itemAt(3).layout().addWidget(capability_name_field)
                 except KeyError:
                     print(f"No information about worker {item.text()} is stored yet.")
             else:
                 # there are no workers saved yet
                 return
 
-        def save_worker_capability_list():
+        def save_worker_data():
             capa_list = []
             for i in range(wrkr_cap_lt.count()):
                 c = wrkr_cap_lt.itemAt(i).widget().currentText()
                 capa_list.append(c)
-            self.production_system.workers.update({item.text(): Worker(worker_id=item.text(), provided_capabilities=capa_list)})
+            self.production_system.workers.update({item.text(): Worker(worker_id=item.text(),
+                                                                       provided_capabilities=capa_list,
+                                                                       availability=self.temp_wrkr_avail_table)})
 
         def accept():
-            save_worker_capability_list()
+            save_worker_data()
 
         # Dialog buttons
         QBtn = QDialogButtonBox.Save | QDialogButtonBox.Cancel
@@ -2300,6 +2552,8 @@ class ProductionResourcesTab(QWidget):
             edit_dialog.layout().itemAt(2).layout().addWidget(worker_selection)
         add_wrkr_button = QPushButton("Add worker")
         add_wrkr_button.clicked.connect(add_worker_row)
+        add_wrkr_button.setToolTip("Assign workers to this worker pool.\n"
+                                   "Workers can be part of multiple worker pools.")
         worker_pool_edit_layout.addWidget(add_wrkr_button)
         # Placeholder for worker drop-downs
         wrkr_lt = QVBoxLayout()
@@ -5259,6 +5513,7 @@ class AIOptimizationTab(QWidget):
         new_run_btn = QPushButton("New optimization run")
         new_run_btn.setFixedWidth(200)
         new_run_btn.clicked.connect(self.show_optimization_wizard)
+        new_run_btn.setToolTip("Configure a new optimization run.")
         layout.addWidget(new_run_btn)
 
         # Create table widget for optimization runs
@@ -5274,7 +5529,19 @@ class AIOptimizationTab(QWidget):
             "Result (reward)",
             "Result (details)"
         ]
-        self.runs_table.setHorizontalHeaderLabels(headers)
+
+        tooltips = [
+            "Unique run identifier.",
+            "Choose the algorithm to be used.",
+            "Observation space configuration defines which information is available to the agent when making decisions.",
+            "Action space configuration defines which actions the agent can take and whether they are made directly or indirectly.",
+            "Reward function defines how the agent is rewarded based on selected KPIs allowing to guide the learning process towards desired outcomes.",
+            "Optimize starts the optimization process using the defined configuration",
+            "Best reward found in this run.",       # Je nachdem was in dieser Spalte angezigt wird, muss das evtl angepasst werden
+            "Detailed information about the optimization result."   #hier auch ggf anpassen 
+        
+        ]
+        #self.runs_table.setHorizontalHeaderLabels(headers)
         
         # Set column widths
         self.runs_table.setColumnWidth(0, 150)  # ID
@@ -5285,6 +5552,11 @@ class AIOptimizationTab(QWidget):
         self.runs_table.setColumnWidth(5, 100)  # "Optimize" button
         self.runs_table.setColumnWidth(6, 100)  # Result (reward)
         self.runs_table.setColumnWidth(7, 100)  # Result (details)
+
+        for col, (label, tip) in enumerate(zip(headers, tooltips)):             # Set header items with tooltips
+            item = QTableWidgetItem(label)
+            item.setToolTip(tip)                 
+            self.runs_table.setHorizontalHeaderItem(col, item)
 
         layout.addWidget(self.runs_table)
 
@@ -6023,7 +6295,7 @@ class ObservationSpaceConfigPage(QWizardPage):
         super().__init__(parent)
         self.production_system : ProductionSystem = production_system
         self.setTitle(" Observation Space Configuration")
-        self.setSubTitle("Configure the observation space parameters")
+        self.setSubTitle("Choose which information of the environment should be given to the agent when making a decision.")
 
         # Call make_simulatable of the production system object to prepare correct observation space configuration
         if not self.production_system.is_prepared:
@@ -6141,7 +6413,7 @@ class ActionSpaceConfigPage(QWizardPage):
     def __init__(self):
         super().__init__()
         self.setTitle("Action Space Configuration")
-        self.setSubTitle("Configure the action space parameters")
+        self.setSubTitle("Choose whether the agent should do actions direct or indirect. If choosing indirect, also choose a heuristic the agent should use.")
         
         # Create a table with three columns
         self.table = QTableWidget(4, 3)
@@ -6210,7 +6482,7 @@ class RewardFunctionConfigPage(QWizardPage):
     def __init__(self):
         super().__init__()
         self.setTitle("Reward Function Configuration")
-        self.setSubTitle("Configure the reward function parameters")
+        self.setSubTitle("Configure KPIs to determine how the target variable is evaluated at the end of an episode.")
         
         # Create a table with 5 rows and 4 columns
         self.table = QTableWidget(5, 4)
@@ -6313,23 +6585,29 @@ class MainWindow(QMainWindow):
 
         # Production resources tab
         self.production_resources_tab = ProductionResourcesTab()
-        self.tabs.addTab(self.production_resources_tab, "Production resources")
+        idx = self.tabs.addTab(self.production_resources_tab, "Production resources")
+        self.tabs.setTabToolTip(idx, "Manage workers, machines, tools, workstations and pools")
 
         # Production instructions tab
         self.product_instructions_tab = ProductInstructionsTab()
-        self.tabs.addTab(self.product_instructions_tab, "Product instructions")
+        idx = self.tabs.addTab(self.product_instructions_tab, "Product instructions")
+        self.tabs.setTabToolTip(idx, "Define products and their manufacturing processes")
 
         # Placeholder for other tabs
         self.order_data_tab = OrderDataTab()
-        self.tabs.addTab(self.order_data_tab, "Order data")
+        idx = self.tabs.addTab(self.order_data_tab, "Order data")
+        self.tabs.setTabToolTip(idx, "Edit product lists, release dates and deadlines of orders.")
 
         # Simulation tab
         self.simulation_tab = SimulationTab()
-        self.tabs.addTab(self.simulation_tab, "System simulation")
+        idx = self.tabs.addTab(self.simulation_tab, "System simulation")
+        self.tabs.setTabToolTip(idx, "Configure system-wide parameters, planning horizon\n \
+                                and generate schedules using trained models.")                         #je nachdem was am ende hier passiert
 
         # Optimization tab
         self.optimization_tab = AIOptimizationTab()
-        self.tabs.addTab(self.optimization_tab, "AI optimization")
+        idx = self.tabs.addTab(self.optimization_tab, "AI optimization")
+        self.tabs.setTabToolTip(idx, "Configure and run new experiments using heuristics or Reinforcement Learning")
 
         # Set main widget
         self.setCentralWidget(self.tabs)

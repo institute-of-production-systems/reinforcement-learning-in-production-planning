@@ -6,7 +6,7 @@ import math
 from enum import Enum, IntEnum
 from file_utils import object_to_dict
 from collections import deque
-from datetime import datetime
+from datetime import datetime, timedelta
 import numpy
 import fnmatch
 
@@ -277,17 +277,20 @@ class WorkerStatus(IntEnum):
     WALKING = 2
     SETTING_UP = 3
     BUSY = 4
+    OFF_WORK = 5
 
 
 class Worker():
-    def __init__(self, worker_id='', provided_capabilities=list()):
+    def __init__(self, worker_id='', provided_capabilities=list(), availability=dict()):
         self.worker_id = worker_id
         self.provided_capabilities = provided_capabilities  # List of strings (names of worker capabilities)
+        self.availability = availability  # Dictionary: working time for each weekday (from, to, break start, break end)
         # Simulation trackers:
         self.location = ''  # workstation / transport machine / worker pool / shopfloor
         self.destination = ''  # workstation / transport machine
         self.distance_to_destination = 0.0  # in meters
         self.status : WorkerStatus = WorkerStatus.IDLE
+        self.status_before_break : WorkerStatus = None
         self.busy_time = 0.0
         self.setup_time = 0.0
         self.walking_time = 0.0
@@ -296,7 +299,8 @@ class Worker():
     def to_dict(self):
         return {
             "worker_id": self.worker_id,
-            "provided_capabilities": object_to_dict(self.provided_capabilities)
+            "provided_capabilities": object_to_dict(self.provided_capabilities),
+            "availability": object_to_dict(self.availability)
         }
     
     def update_timers(self, delta_t):
@@ -307,11 +311,98 @@ class Worker():
         elif self.status and self.status == WorkerStatus.WALKING:
             self.walking_time += delta_t
 
-    def log_status_change(self, change_timestamp):
-        if self.status:
-            self.status_history.append((change_timestamp, self.status.name))
+    def log_status_change(self, change_timestamp, override_status=None):
+        if override_status:
+            self.status_history.append((change_timestamp, override_status.name))
         else:
-            self.status_history.append((change_timestamp, WorkerStatus.IDLE.name))
+            if self.status:
+                self.status_history.append((change_timestamp, self.status.name))
+            else:
+                self.status_history.append((change_timestamp, WorkerStatus.IDLE.name))
+
+    def is_available(self, checked_timestamp):
+        """
+        Return True if checked_timestamp falls into worker's presence periods (considering break),
+        False otherwise.
+
+        Expected self.availability format:
+        { 'Monday': {'From': '07:30', 'To': '16:30', 'Break start': '12:00', 'Break end': '12:30'}, ... }
+        Missing schedule or empty dict => available.
+        """
+        if not hasattr(self, 'availability') or not isinstance(self.availability, dict) or len(self.availability) == 0:
+            return True
+
+        test_dt = datetime.fromtimestamp(checked_timestamp)
+        day_name = test_dt.strftime('%A')
+        today_sched = self.availability.get(day_name, {})
+
+        # Helper to parse "HH:MM" or return None
+        def parse_time(tstr):
+            t = (tstr or "").strip()
+            if t == "":
+                return None
+            try:
+                hh, mm = map(int, t.split(':'))
+                return hh, mm
+            except Exception:
+                return None
+            
+        from_tm = parse_time(today_sched.get('From', ''))
+        to_tm = parse_time(today_sched.get('To', ''))
+        break_start_tm = parse_time(today_sched.get('Break start', ''))
+        break_end_tm = parse_time(today_sched.get('Break end', ''))
+
+        # Default: available full day if no From/To provided
+        if from_tm is None and to_tm is None:
+            # Still check break if present
+            if break_start_tm and break_end_tm:
+                bs_dt = datetime(test_dt.year, test_dt.month, test_dt.day, break_start_tm[0], break_start_tm[1])
+                be_dt = datetime(test_dt.year, test_dt.month, test_dt.day, break_end_tm[0], break_end_tm[1])
+                # if break end equals 00:00 interpret as next day
+                if be_dt.time() == datetime.min.time() and (break_end_tm[0] == 0 and break_end_tm[1] == 0):
+                    be_dt += timedelta(days=1)
+                if bs_dt <= test_dt < be_dt:
+                    return False
+            return True
+
+        # Build from_dt and to_dt datetimes
+        if from_tm:
+            from_dt = datetime(test_dt.year, test_dt.month, test_dt.day, from_tm[0], from_tm[1])
+        else:
+            from_dt = datetime(test_dt.year, test_dt.month, test_dt.day, 0, 0)
+
+        if to_tm:
+            to_dt = datetime(test_dt.year, test_dt.month, test_dt.day, to_tm[0], to_tm[1])
+            # Interpret "00:00" as end of day -> next day
+            if to_dt.time() == datetime.min.time() and (to_tm[0] == 0 and to_tm[1] == 0):
+                to_dt += timedelta(days=1)
+        else:
+            # missing To -> assume next day 00:00
+            to_dt = datetime(test_dt.year, test_dt.month, test_dt.day, 0, 0) + timedelta(days=1)
+
+        # If to is before or equal from (overnight shift) ensure to_dt > from_dt
+        if to_dt <= from_dt:
+            to_dt += timedelta(days=1)
+
+        # Check if test_dt is inside shift interval
+        if not (from_dt <= test_dt < to_dt):
+            return False
+
+        # If break given, check whether time falls into break interval (treat break crossing midnight similarly)
+        if break_start_tm and break_end_tm:
+            bs_dt = datetime(test_dt.year, test_dt.month, test_dt.day, break_start_tm[0], break_start_tm[1])
+            be_dt = datetime(test_dt.year, test_dt.month, test_dt.day, break_end_tm[0], break_end_tm[1])
+            # interpret break end 00:00 as next day
+            if be_dt.time() == datetime.min.time() and (break_end_tm[0] == 0 and break_end_tm[1] == 0):
+                be_dt += timedelta(days=1)
+            if be_dt <= bs_dt:
+                be_dt += timedelta(days=1)
+            # Only consider break if it overlaps the shift interval
+            # If test_dt is within break -> unavailable
+            if bs_dt <= test_dt < be_dt:
+                return False
+
+        return True
 
 
 class Tool():
@@ -924,6 +1015,7 @@ class Workstation():
         
         # Simulation tracker variables
         self.status = list()  # Tracks the stati of the Workstation
+        self.status_before_break = list()
         self.remaining_setup_time = 0
         self.remaining_maintenance_time = 0
         self.remaining_repair_time = 0
@@ -944,25 +1036,33 @@ class Workstation():
         elif self.status and self.status[-1] == WorkstationStatus.SETUP:
             self.setup_time += delta_t
 
-    def log_status_change(self, change_timestamp, op_quadruple=None):
-        if self.status:
-            # If this Workstation's status is not empty...
-            if self.status[-1] == WorkstationStatus.BUSY and op_quadruple is not None:
-                # If it has been BUSY up to this moment, but a new operation is to be started...
-                display_op_name = op_quadruple[0]+' | '+op_quadruple[1]+' | '+op_quadruple[2]+' | '+str(op_quadruple[3])
-                # ...simply write the new operation as the Workstation's singular status
-                self.status_history.append((change_timestamp, [display_op_name]))
-            else:
-                # If the Workstation is not BUSY or no new operation is to be started,
-                # just record current status list in status history of the Workstation
-                # but remove IDLE if it overlaps with other stati.
-                # Although it is kind of true that a Workstation is IDLE while being SETUP or WAITING_FOR_...
-                # it is better for readability to just say "SETUP" instead of "IDLE, SETUP".
-                if len(self.status) > 1 and WorkstationStatus.IDLE in self.status:
-                    self.status.remove(WorkstationStatus.IDLE)
-                self.status_history.append((change_timestamp, [s.name for s in self.status]))
+    def log_status_change(self, change_timestamp, op_quadruple=None, override_status=None):
+        if override_status:
+            if override_status == WorkstationStatus.IDLE:
+                self.status_history.append((change_timestamp, [override_status.name]))
+            elif override_status == WorkstationStatus.BUSY:
+                if op_quadruple:
+                    display_op_name = op_quadruple[0]+' | '+op_quadruple[1]+' | '+op_quadruple[2]+' | '+str(op_quadruple[3])
+                    self.status_history.append((change_timestamp, [display_op_name]))
         else:
-            self.status_history.append((change_timestamp, [WorkstationStatus.IDLE.name]))
+            if self.status:
+                # If this Workstation's status is not empty...
+                if self.status[-1] == WorkstationStatus.BUSY and op_quadruple is not None:
+                    # If it has been BUSY up to this moment, but a new operation is to be started...
+                    display_op_name = op_quadruple[0]+' | '+op_quadruple[1]+' | '+op_quadruple[2]+' | '+str(op_quadruple[3])
+                    # ...simply write the new operation as the Workstation's singular status
+                    self.status_history.append((change_timestamp, [display_op_name]))
+                else:
+                    # If the Workstation is not BUSY or no new operation is to be started,
+                    # just record current status list in status history of the Workstation
+                    # but remove IDLE if it overlaps with other stati.
+                    # Although it is kind of true that a Workstation is IDLE while being SETUP or WAITING_FOR_...
+                    # it is better for readability to just say "SETUP" instead of "IDLE, SETUP".
+                    if len(self.status) > 1 and WorkstationStatus.IDLE in self.status:
+                        self.status.remove(WorkstationStatus.IDLE)
+                    self.status_history.append((change_timestamp, [s.name for s in self.status]))
+            else:
+                self.status_history.append((change_timestamp, [WorkstationStatus.IDLE.name]))
 
     def log_utilization_change(self, change_timestamp, elapsed):
         if elapsed <= 0:
@@ -1425,6 +1525,31 @@ class TransportRoutingPostponed(Event):
         self.source = source
         self.destination = destination
         print(f'... New TransportRoutingPostponed')
+
+
+class WorkerBreakStart(Event):
+    '''When a worker takes a break or goes home. Used to properly log utilization.
+    '''
+    def __init__(self, timestamp : int, worker : Worker, workstation : Workstation):
+        super().__init__(timestamp)
+        self.worker = worker
+        self.workstation = workstation
+        self.handled = False  # flag to delete this event once update_timers() was called
+        print(f'<<< New WorkerBreakStart')
+        print(f'    worker: {self.worker.worker_id}')
+        print(f'    workstation: {self.workstation.workstation_id}')
+
+class WorkerBreakEnd(Event):
+    '''When a worker comes back from a break or starts working. Used to properly log utilization.
+    '''
+    def __init__(self, timestamp : int, worker : Worker, workstation : Workstation):
+        super().__init__(timestamp)
+        self.worker = worker
+        self.workstation = workstation
+        self.handled = False  # flag to delete this event once update_timers() was called
+        print(f'>>> New WorkerBreakEnd')
+        print(f'    worker: {self.worker.worker_id}')
+        print(f'    workstation: {self.workstation.workstation_id}')
 
 
 class OperationStatus(IntEnum):
@@ -2118,8 +2243,8 @@ class ProductionSystem():
                         worker_at_workstation = False
                         break
 
-        if not worker_at_workstation:
-            all_required_worker_capabilities = [capability for capability in operation.capabilities if capability in self.worker_capabilities]
+        #if not worker_at_workstation:
+        all_required_worker_capabilities = [capability for capability in operation.capabilities if capability in self.worker_capabilities]
                 
         return worker_at_workstation, all_required_worker_capabilities
     
@@ -2847,11 +2972,133 @@ class ProductionSystem():
                 self.workers[workstation.seized_worker].log_status_change(self.timestamp)
             operation_progress[operation_id]['status'] = OperationStatus.PROCESSING
             print('    Set operation status to PROCESSING.')
+
             operation_progress[operation_id]['start_time'] = self.timestamp
-            self.event_queue.appendleft(OperationFinishedEvent(timestamp=self.timestamp + operation_progress[operation_id]['remaining_work'],
+
+            # Simple policy for times when workers become unavailable during the operation
+            # but are required for operation execution could be:
+            # Assume that the operation can be simply "paused" at shift end / break and resumed the next working day / after break.
+            # Although it is conceivable that some longer assembly operations can be started by one person
+            # and finished later by another person, it is also a quality risk which should be avoided.
+            # An intelligent algorithm might learn to plan around this in such way that operations are not assigned
+            # to workstations where it is known that the worker who is going to start the operation
+            # has multiple days free time after.
+            # It is maybe helpful to let the worker start an operation before his long absence
+            # and allow him to do overtime required to finish the job.
+
+            # GPT-5:
+            remaining_secs = int(operation_progress[operation_id]['remaining_work'])
+
+            if len(all_required_worker_capabilities) > 0 and workstation.seized_worker:
+                # MY SOLUTION SKETCH
+
+                # The operation is not completely automatic.
+
+                # Check whether the worker's break lies fully within the initial operation duration.
+                # If so, extend operation duration by break duration, log worker and workstation status change.
+
+                # Check whether the seized worker is unavailable for one or more days after his current availability period ends.
+                # If so, let him do overtime to finish the job - i.e. don't calculate any additional idle time to add to operation duration.
+
+                # If the worker will be available again the next day, insert absence time into operation, log status changes.
+
+
+                # GPT-5:
+
+                try:
+                    worker : Worker = self.workers[workstation.seized_worker]
+                    avail = getattr(worker, "availability", {})
+                    if len(avail) > 0:
+                        # Operation start and end (initial estimate)
+                        op_start_ts = self.timestamp
+                        op_end_ts = op_start_ts + remaining_secs
+
+                        # Helper: weekday names used by UI
+                        weekday_names = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+                        start_dt = datetime.fromtimestamp(op_start_ts)
+                        today_name = start_dt.strftime('%A')
+
+                        # Check today's schedule
+                        today_sched = avail.get(today_name, {})
+
+                        # Consider break overlap on the same day
+                        try:
+                            bstart = today_sched.get('Break start', '').strip() # break start
+                            bend = today_sched.get('Break end', '').strip() # break end
+                            if bstart and bend:
+                                bh, bm = map(int, bstart.split(':')) # begin hour, minute
+                                eh, em = map(int, bend.split(':')) # end hour, minute
+                                break_start_dt = datetime(start_dt.year, start_dt.month, start_dt.day, bh, bm)
+                                break_end_dt = datetime(start_dt.year, start_dt.month, start_dt.day, eh, em)
+                                # Compute overlap between operation interval and break interval
+                                overlap = max(0, min(op_end_ts, int(break_end_dt.timestamp())) - max(op_start_ts, int(break_start_dt.timestamp())))
+                                if overlap > 0:
+                                    remaining_secs += int(overlap)
+                                    op_end_ts = op_start_ts + remaining_secs
+                                    # Log worker break
+                                    worker.log_status_change(int(break_start_dt.timestamp()), override_status=WorkerStatus.IDLE)
+                                    worker.log_status_change(int(break_end_dt.timestamp()), override_status=WorkerStatus.BUSY)
+                                    # Log resulting workstation break
+                                    workstation.log_status_change(int(break_start_dt.timestamp()), override_status=WorkstationStatus.IDLE)
+                                    workstation.log_status_change(int(break_end_dt.timestamp()),
+                                                                    op_quadruple=(operation_id, product_id, order_id, product_instance),
+                                                                    override_status=WorkstationStatus.BUSY)
+                                    # Generate WorkerBreakStart/End events for proper utilization logging in run_until_decision_point()
+                                    self.event_queue.append(WorkerBreakStart(int(break_start_dt.timestamp()), worker, workstation))
+                                    self.event_queue.append(WorkerBreakEnd(int(break_end_dt.timestamp()), worker, workstation))
+                        except Exception:
+                            # ignore malformed times
+                            pass
+
+                        # Consider day-end gap: if worker shift "To" end before op_end, and worker has a next-day "From",
+                        # insert idle time until next day's "From"; if no next-day From, allo overtime (do nothing)
+                        try:
+                            to_time = today_sched.get('To', '').strip()
+                            if to_time:
+                                th, tm = map(int, to_time.split(':'))
+                                to_dt = datetime(start_dt.year, start_dt.month, start_dt.day, th, tm)
+                                if int(to_dt.timestamp()) < op_end_ts:
+                                    # check next day availability
+                                    next_dt = start_dt + timedelta(days=1)
+                                    next_name = next_dt.strftime('%A')
+                                    next_sched = avail.get(next_name, {})
+                                    next_from = next_sched.get('From', '').strip()
+                                    if next_from:
+                                        fh, fm = map(int, next_from.split(':'))
+                                        next_from_dt = datetime(next_dt.year, next_dt.month, next_dt.day, fh, fm)
+                                        # only add idle if next_from is strictly after today's 'To'
+                                        idle = int(max(0, next_from_dt.timestamp() - to_dt.timestamp()))
+                                        if idle > 0:
+                                            remaining_secs += idle
+                                            op_end_ts = op_start_ts + remaining_secs
+                                            # Log worker absence
+                                            worker.log_status_change(int(to_dt.timestamp()), override_status=WorkerStatus.IDLE)
+                                            worker.log_status_change(int(next_from_dt.timestamp()), override_status=WorkerStatus.BUSY)
+                                            # Log workstation downtime
+                                            workstation.log_status_change(int(to_dt.timestamp()), override_status=WorkstationStatus.IDLE)
+                                            workstation.log_status_change(int(next_from_dt.timestamp()),
+                                                                          op_quadruple=(operation_id, product_id, order_id, product_instance),
+                                                                          override_status=WorkstationStatus.BUSY)
+                                            # Generate WorkerBreakStart/End events for proper utilization logging in run_until_decision_point()
+                                            self.event_queue.append(WorkerBreakStart(int(to_dt.timestamp()), worker, workstation))
+                                            self.event_queue.append(WorkerBreakEnd(int(next_from_dt.timestamp()), worker, workstation))
+                                    else:
+                                        # no next-day start -> allow overtime, do not add idle time
+                                        pass
+                        except Exception:
+                            # ignore malformed times
+                            pass
+                except KeyError:
+                    # worker not found in model, fall back to default scheduling
+                    pass
+
+            finish_ts = self.timestamp + remaining_secs
+            # Schedule operation finished event at computed finish time
+            self.event_queue.appendleft(OperationFinishedEvent(timestamp=finish_ts,  #self.timestamp + operation_progress[operation_id]['remaining_work'],
                                                             workstation=workstation,
                                                             operation_id=(operation_id, product_id, order_id, product_instance)))
-            operation_progress[operation_id]['finish_time'] = self.timestamp + operation_progress[operation_id]['remaining_work']
+            operation_progress[operation_id]['finish_time'] = finish_ts  #self.timestamp + operation_progress[operation_id]['remaining_work']
+
             # Transform required WIP components into an instance of the operation product
             for rc, rq in required_components.items():
                 already_removed_qty = 0
@@ -3776,11 +4023,49 @@ class ProductionSystem():
                         print(f'All initial operations in order {order_id} has been routed, removing OrderReleaseEvent')
                         self.event_queue.remove(earliest_event)
 
+                elif isinstance(earliest_event, WorkerBreakStart):
+                    worker = earliest_event.worker
+                    workstation = earliest_event.workstation
+                    print(f'\nHandling WorkerBreakStart of worker {worker.worker_id} at workstation {workstation.workstation_id}')
+                    # Remember what status worker and workstation had before break to reset them after break
+                    worker.status_before_break = worker.status
+                    worker.status = WorkerStatus.IDLE
+                    workstation.status_before_break = workstation.status
+                    workstation.status = [WorkstationStatus.IDLE]
+                    earliest_event.handled = True
+
+                elif isinstance(earliest_event, WorkerBreakEnd):
+                    worker = earliest_event.worker
+                    workstation = earliest_event.workstation
+                    print(f'\nHandling WorkerBreakEnd of worker {worker.worker_id} at workstation {workstation.workstation_id}')
+                    # Reset worker and workstation stati after break
+                    worker.status = worker.status_before_break
+                    worker.status_before_break = None
+                    workstation.status = workstation.status_before_break
+                    workstation.status_before_break = list()
+                    earliest_event.handled = True
+
                 elif isinstance(earliest_event, OperationFinishedEvent):
                     finished_op = earliest_event.operation_id
                     workstation : Workstation = earliest_event.workstation
                     print(f'\nHandling OperationFinishedEvent of operation {str(finished_op)} at workstation {workstation.workstation_id}')
                     #print(f'    Handling this event will{' ' if earliest_event.trigger_push_operation_downstream else ' not necessarily '}trigger further routing and sequencing actions.')
+
+                    if WorkstationStatus.BUSY in workstation.status:
+                        print('    Removed BUSY from workstation status list.')
+                        workstation.status.remove(WorkstationStatus.BUSY)
+                        workstation.log_status_change(self.timestamp)
+
+                    # Release workers, set their status to IDLE
+                    if workstation.seized_worker:
+                        worker = self.workers[workstation.seized_worker]
+                        print(f'    Currently seized worker: {workstation.seized_worker}')
+                        worker.status = WorkerStatus.IDLE
+                        print('    Set worker status to IDLE.')
+                        worker.log_status_change(self.timestamp)
+                        self.event_queue.append(WorkerReleaseEvent(timestamp=self.timestamp,
+                                                    workstation=workstation,
+                                                    worker=worker))
 
                     # Handle simultaneously finished operations at the same workstation (e.g. in a batch processing machine)
                     #operation_product_quantity = 1
@@ -3997,7 +4282,8 @@ class ProductionSystem():
                             continue
 
                         # With empty O-WIP the workstation is not BUSY anymore, it is IDLE
-                        workstation.status.remove(WorkstationStatus.BUSY)
+                        if WorkstationStatus.BUSY in workstation.status:
+                            workstation.status.remove(WorkstationStatus.BUSY)
                         workstation.status.append(WorkstationStatus.IDLE)
                         # And it needs to be logged
                         workstation.log_status_change(self.timestamp)
@@ -4268,6 +4554,12 @@ class ProductionSystem():
                     workstation : Workstation = earliest_event.workstation
                     worker : Worker = earliest_event.worker
                     print(f'\nHandling WorkerReleaseEvent of worker {worker.worker_id} from workstation {workstation.workstation_id}')
+
+                    # If the worker is released during his/her absence, then they are doing overtime ->
+                    # create WorkerBreakStart
+                    if not worker.is_available(earliest_timestamp):
+                        self.event_queue.append(WorkerBreakStart(earliest_timestamp, worker, workstation))
+
                     if not workstation.permanent_worker_assignment:
                         wp_of_origin = [wp for wp in workstation.allowed_worker_pools if worker.worker_id in self.worker_pools[wp]][0]
                         self.worker_pool_tracker[wp_of_origin].append(worker.worker_id)
@@ -4778,7 +5070,7 @@ class ProductionSystem():
                         worker_found = False
                         # Special cases and missing input handling
                         if not target_workstation.allowed_worker_pools:
-                            print('    This is a fully automated workstation (no allowed worker pools).')
+                            print('    No allowed worker pools were specified for this workstation.')
                             # It can be that the workstation is fully automated, including setup operations.
                             # In this case ignore the request if an empty list of worker capabilities has been requested.
                             if not earliest_event.capability_list:
@@ -4801,6 +5093,10 @@ class ProductionSystem():
                         print('    Target workstation has access to worker pools.')
                         for worker_pool_id in target_workstation.allowed_worker_pools:
                             for worker_id in deepcopy(self.worker_pool_tracker[worker_pool_id]):
+                                # Check availability
+                                if not self.workers[worker_id].is_available(self.timestamp):
+                                    continue
+                                # Check capability match
                                 if set(earliest_event.capability_list).issubset(set(self.workers[worker_id].provided_capabilities)):
                                     print(f'    Found worker {worker_id} in the worker pool tracker with requested capabilities.')
                                     worker_found = True
@@ -4906,6 +5202,15 @@ class ProductionSystem():
                             self.event_queue.remove(_event)
                             print('\n### Removed a handled WorkstationSequencingPostponed')
                             #return True
+                    # any handled WorkerBreakStart/End
+                    if isinstance(_event, WorkerBreakStart):
+                        if _event.handled:
+                            self.event_queue.remove(_event)
+                            print('\n### Removed a handled WorkerBreakStart')
+                    if isinstance(_event, WorkerBreakEnd):
+                        if _event.handled:
+                            self.event_queue.remove(_event)
+                            print('\n### Removed a handled WorkerBreakEnd')
 
                 continue
 
