@@ -1702,6 +1702,12 @@ class ProductionSystem():
         # 3. Transport sequencing (transport machine chooses among possible destinations): transport machine ID, list of workstation IDs or inventory IDs or 'skip'
         # 4. Transport routing (workstation or inventory chooses among possible transport machines to pickup produced units): (component_dict, source, destination, eligible_transport)
         self.required_action_type : ActionType = None
+        self.req_stats = {
+            "ws_seq_counts": [],
+            "ws_route_counts": [],
+            "tm_seq_counts": [],
+            "tm_route_counts": []
+        }
         self.action_relevant_info = tuple()
 
         # Optimization/planning run configurations that influence the system behaviour, extracted from AIOptimizationTab
@@ -2110,6 +2116,13 @@ class ProductionSystem():
 
         self.prepare_observation_space_dimensions()
 
+        self.req_stats = {
+            "ws_seq_counts": [],
+            "ws_route_counts": [],
+            "tm_seq_counts": [],
+            "tm_route_counts": []
+        }
+
         self.is_prepared = True
 
 
@@ -2304,6 +2317,8 @@ class ProductionSystem():
 
         chosen_op_triple = ()
 
+        self.req_stats["ws_seq_counts"].append(len(op_triple_list))
+
         # Vector of alternative operation durations in seconds to enable LPT and SPT
         op_durations = []
         # Vector of deadlines to enable EDF
@@ -2368,6 +2383,8 @@ class ProductionSystem():
         eligible_workstations = sorted(eligible_workstations)
 
         chosen_workstation = ''
+
+        self.req_stats["ws_route_counts"].append(len(eligible_workstations))
 
         # Vector of numbers of queued operations at workstations to enable LQO
         queued_ops = []
@@ -2853,6 +2870,11 @@ class ProductionSystem():
                     software_setup_time_value = machine.software_setup_time_value
                     software_setup_time_unit = machine.software_setup_time_unit
                     software_setup_parallel_to_operation = machine.software_setup_parallel_to_operation
+                elif operation_is_fully_manual:
+                    # No machine capabilities are required.
+                    # Even if tools are needed, setup times are not considered.
+                    # Use machines to model setup of tools that requires time.
+                    hardware_setup_parallel_to_operation = True  # this will skip tool exchange calculation
                 # Add software setup time if not parallel to operation
                 if not software_setup_parallel_to_operation:
                     total_setup_duration += self.get_int_seconds(software_setup_time_value, software_setup_time_unit)
@@ -3121,6 +3143,8 @@ class ProductionSystem():
         '''
         chosen_transport = ''
 
+        self.req_stats["tm_route_counts"].append(len(eligible_transport))
+
         # Vector of distances between transport machines and the source to enable CT
         distances_to_source = []
         # Vector of numbers of queued transport orders to enable LQTO
@@ -3168,6 +3192,8 @@ class ProductionSystem():
         possible_targets = list(possible_targets)  # in case a set object was provided
 
         chosen_target = ''
+
+        self.req_stats["tm_seq_counts"].append(len(possible_targets))
 
         # Vector of distances between transport machines and targets to enable CD
         distances_to_targets = []
@@ -3532,6 +3558,16 @@ class ProductionSystem():
                     legal_actions.append(i * self.action_matrix_n_cols + j)
 
         # TODO: Indirect legal actions (heuristics) - just a different set of rules to deal with the same "full picture"
+
+        # Record action alternative statistics
+        if self.required_action_type == ActionType.WORKSTATION_SEQUENCING:
+            self.req_stats['ws_seq_counts'].append(len(legal_actions))
+        elif self.required_action_type == ActionType.WORKSTATION_ROUTING:
+            self.req_stats['ws_route_counts'].append(len(legal_actions))
+        elif self.required_action_type == ActionType.TRANSPORT_SEQUENCING:
+            self.req_stats['tm_seq_counts'].append(len(legal_actions))
+        elif self.required_action_type == ActionType.TRANSPORT_ROUTING:
+            self.req_stats['tm_route_counts'].append(len(legal_actions))
 
         return legal_actions
 
@@ -4562,7 +4598,9 @@ class ProductionSystem():
 
                     if not workstation.permanent_worker_assignment:
                         wp_of_origin = [wp for wp in workstation.allowed_worker_pools if worker.worker_id in self.worker_pools[wp]][0]
-                        self.worker_pool_tracker[wp_of_origin].append(worker.worker_id)
+                        # Avoid duplicate released workers
+                        if worker.worker_id not in self.worker_pool_tracker[wp_of_origin]:
+                            self.worker_pool_tracker[wp_of_origin].append(worker.worker_id)
                         workstation.seized_worker = ''
                         print(f'    Workstation {workstation.workstation_id} has no seized workers now.')
                         # Try handling the first pending WorkerCapabilitiesRequest that asks for this worker.
@@ -5093,12 +5131,38 @@ class ProductionSystem():
                         print('    Target workstation has access to worker pools.')
                         for worker_pool_id in target_workstation.allowed_worker_pools:
                             for worker_id in deepcopy(self.worker_pool_tracker[worker_pool_id]):
-                                # Check availability
-                                if not self.workers[worker_id].is_available(self.timestamp):
-                                    continue
+                                # Check availability according to schedule
+                                if not self.workers[worker_id].is_available(earliest_event.timestamp):  # self.timestamp
+                                    continue    
                                 # Check capability match
                                 if set(earliest_event.capability_list).issubset(set(self.workers[worker_id].provided_capabilities)):
                                     print(f'    Found worker {worker_id} in the worker pool tracker with requested capabilities.')
+                                    # Now check availability (whether the worker has status BUSY or SETTING_UP at some other workstation)
+                                    # at the timestamp of this WorkerCapabilitiesRequest.
+                                    # If already busy elsewhere, continue in the loop, worker is not found.
+                                    latest_simult_stati = []
+                                    _ts = -1  # timestamp of latest status entry
+                                    for status_entry in self.workers[worker_id].status_history:
+                                        # Iterate over status history until entries
+                                        # with the same timestamp as this WorkerCapabilitiesRequest
+                                        # or later are encountered and watch out for busy, setting up or walking.
+                                        if status_entry[0] >= earliest_event.timestamp:
+                                            if _ts == -1:
+                                                _ts = status_entry[0]  # save timestamp of first simultaneous status entry
+                                                latest_simult_stati.append(status_entry)
+                                                continue
+                                            if len(latest_simult_stati) > 0:
+                                                if status_entry[0] == latest_simult_stati[-1][0]:
+                                                    latest_simult_stati.append(status_entry)
+                                                elif status_entry[0] > _ts:
+                                                    break
+
+                                    stat_name_list = [se[1] for se in latest_simult_stati]
+                                    if (WorkerStatus.BUSY.name in stat_name_list or
+                                        WorkerStatus.SETTING_UP.name in stat_name_list or
+                                        WorkerStatus.WALKING.name in stat_name_list):
+                                        continue
+
                                     worker_found = True
                                     self.workers[worker_id].status = WorkerStatus.WALKING
                                     print('    Set their status to WALKING.')
@@ -5120,6 +5184,9 @@ class ProductionSystem():
                                     break
                             if worker_found:
                                 break
+                            elif not worker_found:
+                                print('    Current WorkerCapabilitiesRequest could not be satisfied at this time.')
+
 
                     if isinstance(earliest_event.target, TransportMachine):
                         target_transport : TransportMachine = earliest_event.target
@@ -5692,6 +5759,14 @@ class ProductionSystem():
             for ob in workstation.physical_output_buffers.values():
                 ob.contents = {}
                 ob.fill_level_history = []
+
+        # Reset action alternative stats
+        self.req_stats = {
+            "ws_seq_counts": [],
+            "ws_route_counts": [],
+            "tm_seq_counts": [],
+            "tm_route_counts": []
+        }
 
         # Reset tool states
         self.prepare_tool_state_tracker()
