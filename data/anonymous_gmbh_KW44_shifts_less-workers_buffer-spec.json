@@ -1,0 +1,1186 @@
+{
+    "worker_capabilities": [
+        "106001",
+        "106002",
+        "106003",
+        "106004",
+        "106005",
+        "106009",
+        "106007"
+    ],
+    "workers": {
+        "Monteur Takt 1": {
+            "worker_id": "Monteur Takt 1",
+            "provided_capabilities": [
+                "106001"
+            ],
+            "availability": {
+                "Monday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Tuesday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Wednesday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Thursday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Friday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Saturday": {},
+                "Sunday": {}
+            }
+        },
+        "Monteur Takt 2": {
+            "worker_id": "Monteur Takt 2",
+            "provided_capabilities": [
+                "106002"
+            ],
+            "availability": {
+                "Monday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Tuesday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Wednesday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Thursday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Friday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Saturday": {},
+                "Sunday": {}
+            }
+        },
+        "Monteur Takt 3": {
+            "worker_id": "Monteur Takt 3",
+            "provided_capabilities": [
+                "106003"
+            ],
+            "availability": {
+                "Monday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Tuesday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Wednesday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Thursday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Friday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Saturday": {},
+                "Sunday": {}
+            }
+        },
+        "Monteur Takt 4": {
+            "worker_id": "Monteur Takt 4",
+            "provided_capabilities": [
+                "106004",
+                "106005"
+            ],
+            "availability": {
+                "Monday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Tuesday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Wednesday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Thursday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Friday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Saturday": {},
+                "Sunday": {}
+            }
+        },
+        "Monteur Takt 5": {
+            "worker_id": "Monteur Takt 5",
+            "provided_capabilities": [
+                "106005"
+            ],
+            "availability": {
+                "Monday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Tuesday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Wednesday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Thursday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Friday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Saturday": {},
+                "Sunday": {}
+            }
+        },
+        "Mitarbeiter Endpr\u00fcfung": {
+            "worker_id": "Mitarbeiter Endpr\u00fcfung",
+            "provided_capabilities": [
+                "106009"
+            ],
+            "availability": {
+                "Monday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Tuesday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Wednesday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Thursday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Friday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Saturday": {},
+                "Sunday": {}
+            }
+        },
+        "Mitarbeiter Montage Baugr.": {
+            "worker_id": "Mitarbeiter Montage Baugr.",
+            "provided_capabilities": [
+                "106007"
+            ],
+            "availability": {
+                "Monday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Tuesday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Wednesday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Thursday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Friday": {
+                    "From": "06:30",
+                    "To": "15:00",
+                    "Break start": "10:30",
+                    "Break end": "11:00"
+                },
+                "Saturday": {},
+                "Sunday": {}
+            }
+        }
+    },
+    "worker_pools": {
+        "Takte 4 und 5": [
+            "Monteur Takt 4"
+        ]
+    },
+    "tools": {},
+    "tool_pools": {},
+    "machine_capabilities": [],
+    "machines": {},
+    "workstations": {
+        "Montage Takt 1": {
+            "workstation_id": "Montage Takt 1",
+            "machine": "",
+            "permanent_tools": [],
+            "seized_tools": [],
+            "tools_in_use": [],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {
+                "1": {
+                    "buffer_location": 1,
+                    "idx1": "1",
+                    "diff_comp_comb": false,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "*": {
+                            "Max. quantity": 2,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "physical_output_buffers": {
+                "1": {
+                    "buffer_location": 2,
+                    "idx1": "1",
+                    "diff_comp_comb": false,
+                    "sequence_type": null,
+                    "comp_specific_sizes": {},
+                    "identical_buffer": "Montage Takt 2 : IN : 1"
+                }
+            },
+            "wip_components": [],
+            "allowed_worker_pools": [],
+            "seized_worker": "Monteur Takt 1",
+            "permanent_worker_assignment": true
+        },
+        "Montage Takt 2": {
+            "workstation_id": "Montage Takt 2",
+            "machine": "",
+            "permanent_tools": [],
+            "seized_tools": [],
+            "tools_in_use": [],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {
+                "1": {
+                    "buffer_location": 1,
+                    "idx1": "1",
+                    "diff_comp_comb": false,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "*": {
+                            "Max. quantity": 2,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "physical_output_buffers": {
+                "1": {
+                    "buffer_location": 2,
+                    "idx1": "1",
+                    "diff_comp_comb": false,
+                    "sequence_type": null,
+                    "comp_specific_sizes": {},
+                    "identical_buffer": "Montage Takt 3 : IN : 1"
+                }
+            },
+            "wip_components": [],
+            "allowed_worker_pools": [],
+            "seized_worker": "Monteur Takt 2",
+            "permanent_worker_assignment": true
+        },
+        "Montage Takt 3": {
+            "workstation_id": "Montage Takt 3",
+            "machine": "",
+            "permanent_tools": [],
+            "seized_tools": [],
+            "tools_in_use": [],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {
+                "1": {
+                    "buffer_location": 1,
+                    "idx1": "1",
+                    "diff_comp_comb": false,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "*": {
+                            "Max. quantity": 2,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "physical_output_buffers": {
+                "1": {
+                    "buffer_location": 2,
+                    "idx1": "1",
+                    "diff_comp_comb": false,
+                    "sequence_type": null,
+                    "comp_specific_sizes": {},
+                    "identical_buffer": "Montage Takt 4 : IN : 1"
+                }
+            },
+            "wip_components": [],
+            "allowed_worker_pools": [],
+            "seized_worker": "Monteur Takt 3",
+            "permanent_worker_assignment": true
+        },
+        "Montage Takt 4": {
+            "workstation_id": "Montage Takt 4",
+            "machine": "",
+            "permanent_tools": [],
+            "seized_tools": [],
+            "tools_in_use": [],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {
+                "1": {
+                    "buffer_location": 1,
+                    "idx1": 1,
+                    "diff_comp_comb": false,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "Produkt * - 30": {
+                            "Max. quantity": 2,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "physical_output_buffers": {
+                "1": {
+                    "buffer_location": 2,
+                    "idx1": 1,
+                    "diff_comp_comb": false,
+                    "sequence_type": null,
+                    "comp_specific_sizes": {},
+                    "identical_buffer": "Montage Takt 5 : IN : 1"
+                }
+            },
+            "wip_components": [],
+            "allowed_worker_pools": [
+                "Takte 4 und 5"
+            ],
+            "seized_worker": "",
+            "permanent_worker_assignment": false
+        },
+        "Montage Takt 5": {
+            "workstation_id": "Montage Takt 5",
+            "machine": "",
+            "permanent_tools": [],
+            "seized_tools": [],
+            "tools_in_use": [],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {
+                "1": {
+                    "buffer_location": 1,
+                    "idx1": "1",
+                    "diff_comp_comb": false,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "Produkt * - 50": {
+                            "Max. quantity": 2,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "physical_output_buffers": {
+                "1": {
+                    "buffer_location": 2,
+                    "idx1": "1",
+                    "diff_comp_comb": false,
+                    "sequence_type": null,
+                    "comp_specific_sizes": {},
+                    "identical_buffer": "Montage Endpr\u00fc. : IN : 1"
+                }
+            },
+            "wip_components": [],
+            "allowed_worker_pools": [
+                "Takte 4 und 5"
+            ],
+            "seized_worker": "",
+            "permanent_worker_assignment": false
+        },
+        "Montage Endpr\u00fc.": {
+            "workstation_id": "Montage Endpr\u00fc.",
+            "machine": "",
+            "permanent_tools": [],
+            "seized_tools": [],
+            "tools_in_use": [],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {
+                "1": {
+                    "buffer_location": 1,
+                    "idx1": "1",
+                    "diff_comp_comb": false,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "*": {
+                            "Max. quantity": 2,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "physical_output_buffers": {
+                "1": {
+                    "buffer_location": 2,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "*": {
+                            "Max. quantity": 100,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "wip_components": [],
+            "allowed_worker_pools": [],
+            "seized_worker": "Mitarbeiter Endpr\u00fcfung",
+            "permanent_worker_assignment": true
+        },
+        "Montage Baugr.": {
+            "workstation_id": "Montage Baugr.",
+            "machine": "",
+            "permanent_tools": [],
+            "seized_tools": [],
+            "tools_in_use": [],
+            "allowed_tool_pools": [],
+            "input_operation_buffer": [],
+            "output_operation_buffer": [],
+            "wip_operations": [],
+            "physical_input_buffers": {
+                "1": {
+                    "buffer_location": 1,
+                    "idx1": "1",
+                    "diff_comp_comb": true,
+                    "sequence_type": 3,
+                    "comp_specific_sizes": {
+                        "*": {
+                            "Max. quantity": 100,
+                            "Quantity step": 1,
+                            "Group": ""
+                        }
+                    },
+                    "identical_buffer": ""
+                }
+            },
+            "physical_output_buffers": {
+                "1": {
+                    "buffer_location": 2,
+                    "idx1": "1",
+                    "diff_comp_comb": false,
+                    "sequence_type": null,
+                    "comp_specific_sizes": {},
+                    "identical_buffer": "Montage Takt 1 : IN : 1"
+                }
+            },
+            "wip_components": [],
+            "allowed_worker_pools": [],
+            "seized_worker": "Mitarbeiter Montage Baugr.",
+            "permanent_worker_assignment": true
+        }
+    },
+    "product_instructions": {
+        "product_palette": {
+            "17060001 - Produkt 6000": [
+                [
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "5",
+                        "display_pos": [
+                            40,
+                            52
+                        ],
+                        "node_uid": 0,
+                        "components": {
+                            "Produkt 6000 - Start": 1
+                        },
+                        "capabilities": [
+                            "106007"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 2.17,
+                        "processing_time_unit": "min",
+                        "output_name": "Produkt 6000 - 5"
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "10",
+                        "display_pos": [
+                            181,
+                            52
+                        ],
+                        "node_uid": 1,
+                        "components": {
+                            "Produkt 6000 - 5": 1
+                        },
+                        "capabilities": [
+                            "106001"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 99.81,
+                        "processing_time_unit": "min",
+                        "output_name": "Produkt 6000 - 10"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "10",
+                        "display_pos": [
+                            181,
+                            52
+                        ],
+                        "node_uid": 1,
+                        "components": {
+                            "Produkt 6000 - 5": 1
+                        },
+                        "capabilities": [
+                            "106001"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 99.81,
+                        "processing_time_unit": "min",
+                        "output_name": "Produkt 6000 - 10"
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "20",
+                        "display_pos": [
+                            318,
+                            52
+                        ],
+                        "node_uid": 2,
+                        "components": {
+                            "Produkt 6000 - 10": 1
+                        },
+                        "capabilities": [
+                            "106002"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 100.03,
+                        "processing_time_unit": "min",
+                        "output_name": "Produkt 6000 - 20"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "20",
+                        "display_pos": [
+                            318,
+                            52
+                        ],
+                        "node_uid": 2,
+                        "components": {
+                            "Produkt 6000 - 10": 1
+                        },
+                        "capabilities": [
+                            "106002"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 100.03,
+                        "processing_time_unit": "min",
+                        "output_name": "Produkt 6000 - 20"
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "30",
+                        "display_pos": [
+                            449,
+                            53
+                        ],
+                        "node_uid": 3,
+                        "components": {
+                            "Produkt 6000 - 20": 1
+                        },
+                        "capabilities": [
+                            "106003"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 101.44,
+                        "processing_time_unit": "min",
+                        "output_name": "Produkt 6000 - 30"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "30",
+                        "display_pos": [
+                            449,
+                            53
+                        ],
+                        "node_uid": 3,
+                        "components": {
+                            "Produkt 6000 - 20": 1
+                        },
+                        "capabilities": [
+                            "106003"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 101.44,
+                        "processing_time_unit": "min",
+                        "output_name": "Produkt 6000 - 30"
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "40+50",
+                        "display_pos": [
+                            581,
+                            52
+                        ],
+                        "node_uid": 4,
+                        "components": {
+                            "Produkt 6000 - 30": 1
+                        },
+                        "capabilities": [
+                            "106004"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 108.5,
+                        "processing_time_unit": "min",
+                        "output_name": "Produkt 6000 - 50"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "40+50",
+                        "display_pos": [
+                            581,
+                            52
+                        ],
+                        "node_uid": 4,
+                        "components": {
+                            "Produkt 6000 - 30": 1
+                        },
+                        "capabilities": [
+                            "106004"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 108.5,
+                        "processing_time_unit": "min",
+                        "output_name": "Produkt 6000 - 50"
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "80+90",
+                        "display_pos": [
+                            714,
+                            54
+                        ],
+                        "node_uid": 5,
+                        "components": {
+                            "Produkt 6000 - 50": 1
+                        },
+                        "capabilities": [
+                            "106005"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 115.12,
+                        "processing_time_unit": "min",
+                        "output_name": "Produkt 6000 - 90"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "80+90",
+                        "display_pos": [
+                            714,
+                            54
+                        ],
+                        "node_uid": 5,
+                        "components": {
+                            "Produkt 6000 - 50": 1
+                        },
+                        "capabilities": [
+                            "106005"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 115.12,
+                        "processing_time_unit": "min",
+                        "output_name": "Produkt 6000 - 90"
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "100+110",
+                        "display_pos": [
+                            853,
+                            55
+                        ],
+                        "node_uid": 6,
+                        "components": {
+                            "Produkt 6000 - 90": 1
+                        },
+                        "capabilities": [
+                            "106009"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 54.42,
+                        "processing_time_unit": "min",
+                        "output_name": "Produkt 6000"
+                    }
+                ]
+            ],
+            "17040021 - Produkt 4000": [
+                [
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "5",
+                        "display_pos": [
+                            24,
+                            41
+                        ],
+                        "node_uid": 13,
+                        "components": {
+                            "Produkt 4000 - Start": 1
+                        },
+                        "capabilities": [
+                            "106007"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 2.17,
+                        "processing_time_unit": "min",
+                        "output_name": "Produkt 4000 - 5"
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "10",
+                        "display_pos": [
+                            176,
+                            41
+                        ],
+                        "node_uid": 7,
+                        "components": {
+                            "Produkt 4000 - 5": 1
+                        },
+                        "capabilities": [
+                            "106001"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 93.08,
+                        "processing_time_unit": "min",
+                        "output_name": "Produkt 4000 - 10"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "10",
+                        "display_pos": [
+                            176,
+                            41
+                        ],
+                        "node_uid": 7,
+                        "components": {
+                            "Produkt 4000 - 5": 1
+                        },
+                        "capabilities": [
+                            "106001"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 93.08,
+                        "processing_time_unit": "min",
+                        "output_name": "Produkt 4000 - 10"
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "20",
+                        "display_pos": [
+                            339,
+                            43
+                        ],
+                        "node_uid": 8,
+                        "components": {
+                            "Produkt 4000 - 10": 1
+                        },
+                        "capabilities": [
+                            "106002"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 95.71,
+                        "processing_time_unit": "min",
+                        "output_name": "Produkt 4000 - 20"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "20",
+                        "display_pos": [
+                            339,
+                            43
+                        ],
+                        "node_uid": 8,
+                        "components": {
+                            "Produkt 4000 - 10": 1
+                        },
+                        "capabilities": [
+                            "106002"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 95.71,
+                        "processing_time_unit": "min",
+                        "output_name": "Produkt 4000 - 20"
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "30",
+                        "display_pos": [
+                            503,
+                            43
+                        ],
+                        "node_uid": 14,
+                        "components": {
+                            "Produkt 4000 - 20": 1
+                        },
+                        "capabilities": [
+                            "106003"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 80.86,
+                        "processing_time_unit": "min",
+                        "output_name": "Produkt 4000 - 30"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "30",
+                        "display_pos": [
+                            503,
+                            43
+                        ],
+                        "node_uid": 14,
+                        "components": {
+                            "Produkt 4000 - 20": 1
+                        },
+                        "capabilities": [
+                            "106003"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 80.86,
+                        "processing_time_unit": "min",
+                        "output_name": "Produkt 4000 - 30"
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "40+50",
+                        "display_pos": [
+                            764,
+                            48
+                        ],
+                        "node_uid": 15,
+                        "components": {
+                            "Produkt 4000 - 30": 1
+                        },
+                        "capabilities": [
+                            "106004"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 90.92,
+                        "processing_time_unit": "min",
+                        "output_name": "Produkt 4000 - 50"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "80+90",
+                        "display_pos": [
+                            989,
+                            45
+                        ],
+                        "node_uid": 17,
+                        "components": {
+                            "Produkt 4000 - 50": 1
+                        },
+                        "capabilities": [
+                            "106005"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 113.15,
+                        "processing_time_unit": "min",
+                        "output_name": "Produkt 4000 - 90"
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "100+110",
+                        "display_pos": [
+                            1151,
+                            44
+                        ],
+                        "node_uid": 18,
+                        "components": {
+                            "Produkt 4000 - 90": 1
+                        },
+                        "capabilities": [
+                            "106009"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 54.42,
+                        "processing_time_unit": "min",
+                        "output_name": "Produkt 4000"
+                    }
+                ],
+                [
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "40+50",
+                        "display_pos": [
+                            764,
+                            48
+                        ],
+                        "node_uid": 15,
+                        "components": {
+                            "Produkt 4000 - 30": 1
+                        },
+                        "capabilities": [
+                            "106004"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 90.92,
+                        "processing_time_unit": "min",
+                        "output_name": "Produkt 4000 - 50"
+                    },
+                    {
+                        "node_type": "Assembly",
+                        "operation_name": "80+90",
+                        "display_pos": [
+                            989,
+                            45
+                        ],
+                        "node_uid": 17,
+                        "components": {
+                            "Produkt 4000 - 50": 1
+                        },
+                        "capabilities": [
+                            "106005"
+                        ],
+                        "tools": {},
+                        "processing_time_value": 113.15,
+                        "processing_time_unit": "min",
+                        "output_name": "Produkt 4000 - 90"
+                    }
+                ]
+            ]
+        }
+    },
+    "supply_behaviours": {
+        "Produkt 4000 - Start": {
+            "component_id": "Produkt 4000 - Start",
+            "allocation_type": 2,
+            "time_unit": "s",
+            "immediate_probability": 1.0,
+            "min": 1,
+            "alpha": 1,
+            "beta": 0.5
+        },
+        "Produkt 6000 - Start": {
+            "component_id": "Produkt 6000 - Start",
+            "allocation_type": 2,
+            "time_unit": "s",
+            "immediate_probability": 1.0,
+            "min": 1,
+            "alpha": 1,
+            "beta": 0.5
+        }
+    },
+    "inventories": {
+        "Inventory 1": {
+            "inventory_id": "Inventory 1",
+            "diff_comp_comb": true,
+            "generation_type": 2,
+            "sequence_type": 3,
+            "comp_specific_sizes": {},
+            "identical_buffer": "Montage Baugr. : IN : 1"
+        }
+    },
+    "conveyors": {},
+    "distance_matrix": {},
+    "order_list": {
+        "order_list": {
+            "100781834": {
+                "order_id": "100781834",
+                "products": {
+                    "17060001 - Produkt 6000": 1
+                },
+                "release_time": "27.10.2025 07:36",
+                "deadline": "31.10.2025 08:17"
+            },
+            "100781830": {
+                "order_id": "100781830",
+                "products": {
+                    "17060001 - Produkt 6000": 1
+                },
+                "release_time": "27.10.2025 08:33",
+                "deadline": "31.10.2025 09:15"
+            },
+            "100781810": {
+                "order_id": "100781810",
+                "products": {
+                    "17060001 - Produkt 6000": 1
+                },
+                "release_time": "27.10.2025 09:09",
+                "deadline": "31.10.2025 09:51"
+            },
+            "100781797": {
+                "order_id": "100781797",
+                "products": {
+                    "17060001 - Produkt 6000": 1
+                },
+                "release_time": "27.10.2025 09:27",
+                "deadline": "31.10.2025 10:05"
+            },
+            "100781802,4,5,6": {
+                "order_id": "100781802,4,5,6",
+                "products": {
+                    "17060001 - Produkt 6000": 4
+                },
+                "release_time": "27.10.2025 10:12",
+                "deadline": "31.10.2025 10:50"
+            },
+            "100781822,3": {
+                "order_id": "100781822,3",
+                "products": {
+                    "17060001 - Produkt 6000": 2
+                },
+                "release_time": "27.10.2025 11:56",
+                "deadline": "31.10.2025 12:37"
+            },
+            "100781817": {
+                "order_id": "100781817",
+                "products": {
+                    "17040021 - Produkt 4000": 1
+                },
+                "release_time": "28.10.2025 06:39",
+                "deadline": "31.10.2025 15:00"
+            }
+        }
+    },
+    "start_timestamp": 1761546600,
+    "end_timestamp": 1761919200,
+    "walking_speed": 1.4,
+    "energy_costs": 20.0
+}

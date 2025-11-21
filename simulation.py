@@ -135,8 +135,8 @@ class ProductionSystemSimulation(AbstractGame):
         print('simulation.py ProductionSystemSimulation env type', type(self.env))
 
         # In the beginning, there is only -1 available in the legal actions
-        if self.legal_actions() == [-1]:
-            self.env.set_action(-1)
+        #if self.legal_actions() == [-1]:
+        #    self.env.set_action(-1)
 
         #if seed is not None:
         #    print('seed', seed)

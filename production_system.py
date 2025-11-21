@@ -2344,6 +2344,8 @@ class ProductionSystem():
                         prod_remaining_ops.append(n_remaining_ops)
                         break
 
+        print(f"Applying workstation sequencing heuristic: {heuristic}")
+
         if heuristic == 'FIFO':
             chosen_op_triple = op_triple_list[0]
 
@@ -2404,6 +2406,8 @@ class ProductionSystem():
                 op = self.find_operation_by_name(op_id, self.product_operations[prod_id])
                 queued_time += op.processing_time_value
             queued_times.append(queued_time)
+
+        print(f"Applying workstation routing heuristic: {heuristic}")
 
         if heuristic == 'Least queued operations (LQO)':
             chosen_workstation = eligible_workstations[numpy.argmin(queued_ops)]
@@ -4056,7 +4060,7 @@ class ProductionSystem():
                                                                       operation_progress=operation_progress)
                     # Delete the OrderReleaseEvent only once all of its initial operations are introduced into the system
                     if all_initial_ops_routed:
-                        print(f'All initial operations in order {order_id} has been routed, removing OrderReleaseEvent')
+                        print(f'All initial operations in order {order_id} have been routed, removing OrderReleaseEvent')
                         self.event_queue.remove(earliest_event)
 
                 elif isinstance(earliest_event, WorkerBreakStart):
