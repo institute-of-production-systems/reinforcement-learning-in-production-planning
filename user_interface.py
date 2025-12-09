@@ -1559,6 +1559,7 @@ class OrderDataTab(QWidget):
         edit_prod_list_button.setFixedWidth(self.prod_col_label_w)
         edit_prod_list_button.clicked.connect(self.buttonClicked)
         edit_prod_list_button.clicked.connect(self.show_order_details_dialog)
+        edit_prod_list_button.setToolTip("Define which and how many products are in this order.")
 
         release_time = QtCore.QDateTime.currentDateTime() if not provided_order else QtCore.QDateTime.fromString(provided_order.release_time, 'dd.MM.yyyy HH:mm')
         order_release_field = QDateTimeEdit(release_time)
@@ -2547,6 +2548,7 @@ class ProductionResourcesTab(QWidget):
 
         edit_availability_button = QPushButton("Availability")
         edit_availability_button.clicked.connect(edit_worker_availability)
+        edit_availability_button.setToolTip("Define the working hours and breaks of this worker.")
         worker_edit_layout.addWidget(edit_availability_button)
 
         prov_cap_label = QLabel("Provided capabilities:")
@@ -4307,16 +4309,19 @@ class SimulationTab(QWidget):
         # Supply and Storage Button
         self.supply_storage_btn = QPushButton("Supply and storage")
         self.supply_storage_btn.clicked.connect(self.open_supply_storage)
+        self.supply_storage_btn.setToolTip("Configure probabilistic material distribution and storage parameters.")
         system_layout.addWidget(self.supply_storage_btn)
 
         # Conveyors Button
         self.conveyors_btn = QPushButton("Conveyors")
         self.conveyors_btn.clicked.connect(self.open_conveyors)
+        self.conveyors_btn.setToolTip("Add conveyors between workstations and configure their parameters.")
         system_layout.addWidget(self.conveyors_btn)
 
-        # Distances Button
+        # Distances Button 
         self.distances_btn = QPushButton("Distances")
         self.distances_btn.clicked.connect(self.open_distances)
+        self.distances_btn.setToolTip("Define distances between workstations for more detailed simulations.")
         system_layout.addWidget(self.distances_btn)
 
         # Walking Speed Input Field
@@ -4342,25 +4347,54 @@ class SimulationTab(QWidget):
         display_layout = QVBoxLayout()
         display_layout.setSpacing(6)
 
+        # visual style for selected button 
+        _selected_style = """
+            QPushButton:checked {
+                background-color: #0078d7;
+                color: white;
+                border-radius: 6px;
+                padding: 4px 8px;
+            }
+        """
+
         self.rand_shortest_btn = QPushButton("Shortest lead time")
         self.rand_shortest_btn.setToolTip("Show trial with shortest mean order lead time")
+        self.rand_shortest_btn.setCheckable(True)
+        self.rand_shortest_btn.setStyleSheet(_selected_style)
         display_layout.addWidget(self.rand_shortest_btn)
 
         self.rand_smallest_deadline_btn = QPushButton("Smallest deadline dev.")
         self.rand_smallest_deadline_btn.setToolTip("Show trial with smallest order deadline deviation")
+        self.rand_smallest_deadline_btn.setCheckable(True)
+        self.rand_smallest_deadline_btn.setStyleSheet(_selected_style)
         display_layout.addWidget(self.rand_smallest_deadline_btn)
 
         self.rand_highest_ws_util_btn = QPushButton("Highest workstation util.")
         self.rand_highest_ws_util_btn.setToolTip("Show trial with highest mean workstation utilization")
+        self.rand_highest_ws_util_btn.setCheckable(True)
+        self.rand_highest_ws_util_btn.setStyleSheet(_selected_style)
         display_layout.addWidget(self.rand_highest_ws_util_btn)
 
         self.rand_highest_worker_util_btn = QPushButton("Highest worker util.")
         self.rand_highest_worker_util_btn.setToolTip("Show trial with highest mean worker utilization")
+        self.rand_highest_worker_util_btn.setCheckable(True)
+        self.rand_highest_worker_util_btn.setStyleSheet(_selected_style)
         display_layout.addWidget(self.rand_highest_worker_util_btn)
 
         self.rand_lowest_buffer_var_btn = QPushButton("Lowest buffer var.")
         self.rand_lowest_buffer_var_btn.setToolTip("Show trial with lowest buffer fill variability")
+        self.rand_lowest_buffer_var_btn.setCheckable(True)
+        self.rand_lowest_buffer_var_btn.setStyleSheet(_selected_style)
         display_layout.addWidget(self.rand_lowest_buffer_var_btn)
+
+        #Exclusive selection: only one of the checkable buttons can be checked at a time
+        self.rand_btn_group = QtWidgets.QButtonGroup(self)
+        self.rand_btn_group.setExclusive(True)
+        self.rand_btn_group.addButton(self.rand_shortest_btn)
+        self.rand_btn_group.addButton(self.rand_smallest_deadline_btn)
+        self.rand_btn_group.addButton(self.rand_highest_ws_util_btn)
+        self.rand_btn_group.addButton(self.rand_highest_worker_util_btn)
+        self.rand_btn_group.addButton(self.rand_lowest_buffer_var_btn)
 
         # Connect random-trial display buttons (will load produced HTMLs after simulations)
         self.rand_shortest_btn.clicked.connect(lambda: self._display_sim_trial_by_metric("mean_lead_time", min))
@@ -4423,6 +4457,14 @@ class SimulationTab(QWidget):
         start_btn.clicked.connect(self.start_simulation)
         start_btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         controls_layout.addWidget(start_btn)
+
+        # Button to clear previous simulated runs and results
+        clear_runs_btn = QPushButton("Clear previous runs")
+        clear_runs_btn.setToolTip("Delete previously executed simulation runs and clear displayed results")
+        clear_runs_btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        clear_runs_btn.setFixedWidth(120)
+        clear_runs_btn.clicked.connect(self.clear_previous_runs)
+        controls_layout.addWidget(clear_runs_btn)
 
         # Add the controls layout to the GroupBox
         controls_layout.setAlignment(QtCore.Qt.AlignLeft)
@@ -5096,6 +5138,87 @@ class SimulationTab(QWidget):
         conveyor_edit_layout.addWidget(buttonBox)
         conveyor_edit_dialog.setLayout(conveyor_edit_layout)
         conveyor_edit_dialog.exec_()
+
+    def clear_previous_runs(self):
+        """Remove stored simulation results, delete output folder and clear UI views."""
+        # if there are no runs, inform the user and do nothing
+        if not getattr(self, "_sim_results", None):
+            QMessageBox.information(self, "No simulation runs", "There are no simulation runs available.")
+            return
+
+        reply = QMessageBox.question(self, "Clear previous runs",
+                                     "Delete all previously executed simulation runs and clear displayed results?",
+                                     QMessageBox.Yes | QMessageBox.Cancel, QMessageBox.Cancel)
+        if reply != QMessageBox.Yes:
+            return
+        # clear in memory records
+        self._sim_results = []
+
+        # remove output directory if present
+        try:
+            if os.path.exists(self._sim_base_dir):
+                shutil.rmtree(self._sim_base_dir)
+                print(f"Deleted simulation output directory: {self._sim_base_dir}")
+        except Exception:
+            pass
+
+        # clear plan views (try both load/ setHtml)
+        try:
+            self.plan_schedule_view.setHtml("")
+            print("TEST1")
+        except Exception:
+            try:
+                self.plan_schedule_view.load(QUrl(""))
+                print("TEST2")
+            except Exception:
+                pass
+        try:
+            self.plan_utilization_view.setHtml("")
+        except Exception:
+            try:
+                self.plan_utilization_view.load(QUrl(""))
+            except Exception:
+                pass
+        try:
+            self.plan_buffers_view.setHtml("")
+        except Exception:
+            try:
+                self.plan_buffers_view.load(QUrl(""))
+            except Exception:
+                pass
+
+        # reset stats fields to zero
+        try:
+            for prop, fld in getattr(self, "stats_fields", {}).items():
+                fld["avg"].setText("0.0")
+                fld["min"].setText("0.0")
+                fld["max"].setText("0.0")
+        except Exception:
+            pass
+
+        try:    #uncheck buttons on the left
+            btn_group = getattr(self, "rand_btn_group", None)
+            if btn_group:
+                # temporarily disable exclusivity to uncheck all buttons
+                was_exclusive = btn_group.exclusive()
+                try:
+                    btn_group.setExclusive(False)
+                    for b in btn_group.buttons():
+                        try:
+                            b.setChecked(False)
+                        except Exception:
+                            pass
+                finally:
+                    btn_group.setExclusive(was_exclusive)
+            # clear remembered last selection (used by toggle logic)
+            try:
+                self._last_rand_btn = None
+            except Exception:
+                pass
+        except Exception:
+            pass
+
+        QMessageBox.information(self, "Cleared", "Previous simulation runs cleared.")
 
     def start_simulation(self):
         try:
@@ -7047,6 +7170,15 @@ class RewardFunctionConfigPage(QWizardPage):
         self.setTitle("Reward Function Configuration")
         self.setSubTitle("Configure KPIs to determine how the target variable is evaluated at the end of an episode.")
         
+        # Button under the headings that opens an explanation dialog
+        help_btn = QPushButton("Reward explanation")
+        help_btn.setToolTip("Show explanation how reward is calculated with an example")
+        help_btn.clicked.connect(self._show_reward_help)
+
+        header_layout = QHBoxLayout()
+        header_layout.addWidget(help_btn)
+        header_layout.addStretch()
+
         # Create a table with 5 rows and 4 columns
         self.table = QTableWidget(5, 4)
         self.table.setHorizontalHeaderLabels(["Goal", "KPI", "Scale to 1 point", "Unit"])
@@ -7092,9 +7224,84 @@ class RewardFunctionConfigPage(QWizardPage):
         self.table.resizeColumnsToContents()
 
         layout = QVBoxLayout()
+        layout.addLayout(header_layout)
         layout.addWidget(self.table)
         self.setLayout(layout) 
 
+    def _show_reward_help(self):
+        """Explanation of reward function"""
+        dlg = QDialog(self)
+        dlg.setWindowTitle("Reward explanation")
+        dlg.setMinimumSize(760, 480)
+        v = QVBoxLayout(dlg)
+
+        html = """
+        <h2>How the reward is calculated</h2>
+        <p>At the end of every training run a reward is computed from the selected KPIs. The reward
+        is used as the performance indicator the RL agent tries to maximize.</p>
+
+        <h3>How it works</h3>
+        <ul>
+          <li><b>Goal</b>: choose for each KPI one of <b>Ignore</b>, <b>Reward</b> or <b>Punish</b>.</li>
+          <li><b>Scale to 1 point</b>: a numeric value used to normalize the KPI.</li>
+          <li>For time KPIs pick the correct <b>Unit</b> (s / min / h / d).</li>
+          <li>The final reward is the sum of all KPI contributions.</li>
+        </ul>
+
+        <h3>Formula</h3>
+        <p><b>contribution = sign * KPI_value ÷ Scale</b></p>
+        <p><i>sign</i> is +1 for <b>Reward</b>, -1 for <b>Punish</b>, and 0 for <b>Ignore</b>.</p>
+
+        <h3>Notes</h3>
+        <ul>
+          <li>Lowering the scale increases the contribution magnitude (i.e. the KPI is weighted more).</li>
+          <li>We recommend using scale = 1 when using a single KPI to interprete the result easier.</li>
+          <li>Empty or invalid scale entries are treated as 0.0 (ignored) when saving.</li>
+        </ul>
+
+        
+        <h3>Example</h3>
+
+        <p><strong>Configured KPIs</strong></p>
+        <ul>
+        <li><strong>Mean order lead time</strong>: Goal = <em>Punish</em>, Scale = <code>1.0</code> (unit = h)</li>
+        <li><strong>Workstation utilization</strong>: Goal = <em>Punish</em>, Scale = <code>0.5</code> </li>
+        </ul>
+
+        <p><strong>Observations after one run</strong></p>
+        <ul>
+        <li>Mean order lead time = <code>2.6 h</code></li>
+        <li>Workstation utilization = <code>0.6</code></li>
+        </ul>
+
+        <p><strong>Calculation</strong></p>
+        <ul>
+        <li>Contribution (lead time): 
+            <code>contribution_lead_time = -(2.6 / 1.0) = -2.6</code>
+        </li>
+        <li>Contribution (workstation utilization): 
+            <code>contribution_ws_util = -(0.6 / 0.5) = -1.2</code>
+        </li>
+        </ul>
+
+        <p><strong>Final reward after first training run</strong></p>
+        <p>
+            <p>Reward <code>= -2.6 + (-1.2) = -3.8</code>
+        </p>
+        """
+
+        te = QtWidgets.QTextEdit()
+        te.setReadOnly(True)
+        te.setFrameStyle(QtWidgets.QFrame.NoFrame)
+        te.setHtml(html)
+        te.setMinimumHeight(360)
+        v.addWidget(te)
+
+        btns = QDialogButtonBox(QDialogButtonBox.Ok)
+        btns.accepted.connect(dlg.accept)
+        v.addWidget(btns)
+
+        dlg.exec_()
 
 class MainWindow(QMainWindow):
     def __init__(self):
