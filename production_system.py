@@ -1172,7 +1172,7 @@ class Workstation():
                 is_identical_buffer = True
                 identical_buffer_str_split = buffer.identical_buffer.split(' : ')
                 other_workstation_id = identical_buffer_str_split[0]
-                buffer_idx1 = identical_buffer_str_split[2]
+                buffer_idx1 = int(identical_buffer_str_split[2])
                 other_workstation = production_system.workstations[other_workstation_id]
                 buffer = other_workstation.physical_input_buffers[buffer_idx1]
             if buffer.accepts_objects(objects_to_move):
@@ -1920,7 +1920,7 @@ class ProductionSystem():
                 buffer_code_chunks = inventory.identical_buffer.split(" : ")
                 ws : Workstation = self.workstations[buffer_code_chunks[0]]
                 buff_loc = buffer_code_chunks[1]
-                buff_idx1 = buffer_code_chunks[2]
+                buff_idx1 = int(buffer_code_chunks[2])
                 buff_obj : Buffer = None
                 if buff_loc == 'IN':
                     buff_obj = ws.physical_input_buffers[buff_idx1]
@@ -2285,7 +2285,7 @@ class ProductionSystem():
             if phob.identical_buffer != '':
                 identical_buffer_str_split = phob.identical_buffer.split(' : ')
                 other_workstation_id = identical_buffer_str_split[0]
-                buffer_idx1 = identical_buffer_str_split[2]
+                buffer_idx1 = int(identical_buffer_str_split[2])
                 other_workstation = self.workstations[other_workstation_id]
                 phob = other_workstation.physical_input_buffers[buffer_idx1]
             if phob.accepts_objects(operation_product):

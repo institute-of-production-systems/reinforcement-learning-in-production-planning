@@ -18,7 +18,7 @@ from PyQt5.QtWidgets import QPushButton, QLineEdit, QTableWidget, QTableWidgetIt
 from PyQt5.QtWidgets import QInputDialog, QMenu, QMessageBox, QListWidgetItem, QGridLayout, QDateTimeEdit
 from PyQt5.QtWidgets import QStyledItemDelegate, QHeaderView, QCheckBox, QFrame, QScrollArea, QSlider, QGroupBox, QSizePolicy
 from PyQt5.QtWidgets import QWizard, QWizardPage, QTabWidget, QApplication, QMainWindow, QFileDialog, QStyle, QToolBar, QAction
-from PyQt5.QtWidgets import QStackedWidget, QFormLayout, QTreeView, QStackedLayout, QToolTip
+from PyQt5.QtWidgets import QStackedWidget, QFormLayout, QTreeView, QStackedLayout, QToolTip, QProgressDialog
 from PyQt5.QtCore import QUrl, QTimer, QItemSelectionModel, QObject, QEvent
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from product_instructions import ProductPalette
@@ -28,6 +28,13 @@ from simulation import ProductionSystemSimulation
 from plan_visualizer import SchedulePlotter, TimeSeriesPlotter
 from muzero.muzero import MuZero, CPUActor
 from file_utils import object_to_dict
+
+# Imports for simulation tab (06.11.2025):
+from copy import deepcopy
+import random
+import shutil
+import time
+import statistics
 
 import os
 os.environ["RAY_DEDUP_LOGS"] = "0"
@@ -154,22 +161,76 @@ class OperationDialog(QDialog):
         row_layout.addWidget(component_qty_field)
         self.components_layout.addLayout(row_layout)
 
-    # Method to add capability input fields
+    '''
+    # Method to add capability input fields         #old code where you have to type it in manually
     def add_capability_fields(self):
         capability_field = QLineEdit("Enter capability")
         self.capabilities_layout.addWidget(capability_field)
-        '''
-        # A Note for the user to pay attention to case sensitivity
-        # if the note is already there it will be deleted to make sure its only on the bottom one time
-        if hasattr(self, "capability_hint_label"):
-            self.capabilities_layout.removeWidget(self.capability_hint_label)
-            self.capability_hint_label.deleteLater()
-            self.capability_hint_label = None
+    '''
 
-        self.capability_hint_label = QLabel("⚠️ Pay attention to case sensitivity")
-        self.capability_hint_label.setStyleSheet("color: red; font-size: 9pt; margin-top: 5px;")
-        self.capabilities_layout.addWidget(self.capability_hint_label)
-        '''
+
+    def add_capability_fields(self, initial_value=None):
+        """New capabilities method to select capabilities from a drop down menu"""
+        # collect available capability strings from ProductionResourcesTab lists
+        items = []
+        try:
+            lw = main_window.production_resources_tab.resources_grid_layout.itemAtPosition(0,0).layout().itemAt(2).widget()
+            items += [lw.item(i).text() for i in range(lw.count())]
+        except Exception:
+            pass
+        try:
+            lw2 = main_window.production_resources_tab.resources_grid_layout.itemAtPosition(1,1).layout().itemAt(2).widget()
+            items += [lw2.item(i).text() for i in range(lw2.count())]
+        except Exception:
+            pass
+
+        # keep order and remove duplicates
+        seen = set()
+        unique_items = []
+        for it in items:
+            if it and it not in seen:
+                seen.add(it)
+                unique_items.append(it)
+
+        # build row: combo + delete button
+        row_layout = QHBoxLayout()
+        cap_combo = QComboBox()
+        cap_combo.addItem("")  # allow empty selection
+        cap_combo.addItems(unique_items)
+        cap_combo.setFixedHeight(22)
+        if initial_value:
+            if cap_combo.findText(initial_value) == -1:
+                cap_combo.addItem(initial_value)
+            cap_combo.setCurrentIndex(cap_combo.findText(initial_value))
+        row_layout.addWidget(cap_combo)
+
+        del_btn = QPushButton("Delete")
+        del_btn.setFixedSize(66, 22)
+
+        # clicked(bool) passes a boolean; accept it and ignore it, close over the layout object
+        def remove_row(checked=False, lay=row_layout):
+            # remove child widgets of the layout
+            for ii in reversed(range(lay.count())):
+                it = lay.takeAt(ii)
+                if it is None:
+                    continue
+                w = it.widget()
+                if w is not None:
+                    w.setParent(None)
+                    w.deleteLater()
+            # remove the layout object from the parent capabilities_layout
+            for ii in range(self.capabilities_layout.count()):
+                itp = self.capabilities_layout.itemAt(ii)
+                if itp is not None and itp.layout() is lay:
+                    self.capabilities_layout.takeAt(ii)
+                    break
+
+        del_btn.clicked.connect(remove_row)
+        row_layout.addWidget(del_btn)
+
+        # append the row layout to the capabilities column (index 0 = label, index 1 = Add button)
+        self.capabilities_layout.addLayout(row_layout)
+        return row_layout
 
     def edit_tool_requirements_effects(self, tool_sel_combo):
         # tool requirements and effects = tre
@@ -277,12 +338,54 @@ class OperationDialog(QDialog):
         self.operation.components = comp_data
         print(self.operation.components)
 
+    '''             # old version
     def save_capability_data(self):
         capa_data = []
         for i in range(2, self.capabilities_layout.count()):
             capability = self.capabilities_layout.itemAt(i).widget().text()
             capa_data.append(capability)
         self.operation.capabilities = capa_data
+        print(self.operation.capabilities)
+    '''
+
+    def save_capability_data(self):
+        """collect worker and machine capabilities and save"""
+        capa_data = []
+        # skip header and add-button widgets 
+        for i in range(2, self.capabilities_layout.count()):
+            it = self.capabilities_layout.itemAt(i)
+            if it is None:
+                continue
+            sub = it.layout()
+            # new style rows are layouts whose first widget is the QComboBox
+            if sub is not None and sub.count() > 0:
+                candidate = sub.itemAt(0).widget()
+                if isinstance(candidate, QComboBox):
+                    txt = candidate.currentText().strip()
+                    if txt:
+                        capa_data.append(txt)
+                    continue
+            # fallback: direct widget
+            w = it.widget()
+            if w is None:
+                continue
+            try:
+                txt = w.text().strip()
+            except Exception:
+                try:
+                    txt = w.currentText().strip()
+                except Exception:
+                    txt = ""
+            if txt:
+                capa_data.append(txt)
+        # remove duplicates while preserving order
+        seen = set()
+        final = []
+        for c in capa_data:
+            if c not in seen:
+                seen.add(c)
+                final.append(c)
+        self.operation.capabilities = final
         print(self.operation.capabilities)
 
     def save_tool_data(self):
@@ -316,10 +419,12 @@ class OperationDialog(QDialog):
                 row_layout.addWidget(component_name_field)
                 row_layout.addWidget(component_qty_field)
                 self.components_layout.addLayout(row_layout)
+
+        #  for each saved capability create a single-select combo row with delete button
         if self.operation.capabilities:
             for c in self.operation.capabilities:
-                capability_field = QLineEdit(c)
-                self.capabilities_layout.addWidget(capability_field)
+                self.add_capability_fields(initial_value=c)
+
         if self.operation.tools:
             self.temp_tool_req_dict = self.operation.tools  # ToDo: check if this works correctly
             for tool, req_eff in self.operation.tools.items():
@@ -342,13 +447,44 @@ class OperationDialog(QDialog):
                 tool_req_lt.addWidget(tool_sel_combo)
                 tool_req_lt.addWidget(tool_req_edit_btn)
                 self.tools_layout.addLayout(tool_req_lt)
+
+        # processing time
+        try:
+            if self.operation.processing_time_value is not None:
+                row = self.proc_time_layout.itemAt(1).layout()
+                if row is not None:
+                    row.itemAt(0).widget().setText(str(self.operation.processing_time_value))
+                    unit_widget = row.itemAt(1).widget()
+                    if unit_widget:
+                        idx = unit_widget.findText(self.operation.processing_time_unit)
+                        if idx != -1:
+                            unit_widget.setCurrentIndex(idx)
+        except Exception:
+            pass
+
+        # output name
+        try:
+            if getattr(self.operation, "output_name", ""):
+                self.output_layout.itemAt(1).widget().setText(self.operation.output_name)
+        except Exception:
+            pass
+
+
+        '''
+        if self.operation.capabilities:
+            for c in self.operation.capabilities:
+                capability_field = QLineEdit(c)
+                self.capabilities_layout.addWidget(capability_field)       
+
         if self.operation.processing_time_value > 0.0:
             self.proc_time_layout.itemAt(1).layout().itemAt(0).widget().setText(str(self.operation.processing_time_value))
             index = self.proc_time_layout.itemAt(1).layout().itemAt(1).widget().findText(self.operation.processing_time_unit)
             self.proc_time_layout.itemAt(1).layout().itemAt(1).widget().setCurrentIndex(index)
         if self.operation.output_name != "":
             self.output_layout.itemAt(1).widget().setText(self.operation.output_name)
+        '''
 
+            
 class OperationNode(QLabel):
     connect_to_signal = QtCore.pyqtSignal(object)  # Signal to initiate connection with self as the argument
     clicked_signal = QtCore.pyqtSignal(object)  # Signal emitted on node click
@@ -2133,9 +2269,6 @@ class ProductionResourcesTab(QWidget):
         container_layout.setContentsMargins(0, 0, 0, 0)
         machine_cap_label = QLabel("Machine capabilities")
         machine_cap_label.setFixedWidth(200)
-        machine_cap_label.setToolTip("Machine capabilities are specific machine skills, e.g., cutting or drilling and could \n"
-                                     "also include the machines specification level for that skill e.g. high-precision, \n"
-                                     "standard, etc.")
         icon_path = "images/Machine_capabilities_icon.png"
         icon_label = QtWidgets.QLabel()
         pixmap = QtGui.QPixmap(icon_path).scaled(32, 32, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
@@ -2162,10 +2295,6 @@ class ProductionResourcesTab(QWidget):
         container_layout.setContentsMargins(0, 0, 0, 0)
         machines_label = QLabel("Machines")
         machines_label.setFixedWidth(200)
-        machines_label.setToolTip("Each machine can have different capabilities and may  \n"
-                                  "be provided with different tools or sets of tools. \n"
-                                  "Machines can also be used to simulate transport times \n" 
-                                  "between different stations in the production process.")
         icon_path = "images/Machines_icon.png"
         icon_label = QtWidgets.QLabel()
         pixmap = QtGui.QPixmap(icon_path).scaled(32, 32, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
@@ -2193,10 +2322,6 @@ class ProductionResourcesTab(QWidget):
         container_layout.setContentsMargins(0, 0, 0, 0)
         workstation_label = QLabel("Workstations")
         workstation_label.setFixedWidth(200)
-        workstation_label.setToolTip("Workstations can be assigned with permanent tools or tool pools to work \n"
-                                     "with as well as permant workers or worker pools who will permanently work \n"
-                                     "on this workstation. They can also have different types of physical input \n"
-                                     "or output buffers configurated specifically with limits for each station.")
         icon_path = "images/Workstations_icon.png"
         icon_label = QtWidgets.QLabel()
         pixmap = QtGui.QPixmap(icon_path).scaled(32, 32, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
@@ -3420,21 +3545,21 @@ class ProductionResourcesTab(QWidget):
             ibs = dict()
             for idx, buf in provided_dict['physical_input_buffers'].items():
                 ib = Buffer(buffer_location=buf['buffer_location'],
-                            idx1=idx,
+                            idx1=int(idx),
                             diff_comp_comb=buf['diff_comp_comb'],
                             sequence_type=buf['sequence_type'],  # maybe Enum cast needed
                             comp_specific_sizes=buf['comp_specific_sizes'],
                             identical_buffer=buf['identical_buffer'])
-                ibs.update({idx: ib})
+                ibs.update({int(idx): ib})
             obs = dict()
             for idx, buf in provided_dict['physical_output_buffers'].items():
                 ob = Buffer(buffer_location=buf['buffer_location'],
-                            idx1=idx,
+                            idx1=int(idx),
                             diff_comp_comb=buf['diff_comp_comb'],
                             sequence_type=buf['sequence_type'],  # maybe Enum cast needed
                             comp_specific_sizes=buf['comp_specific_sizes'],
                             identical_buffer=buf['identical_buffer'])
-                obs.update({idx: ob})
+                obs.update({int(idx): ob})
             self.production_system.workstations.update({provided_dict['workstation_id']: Workstation(workstation_id=provided_dict['workstation_id'],
                                                                                                      machine=provided_dict['machine'],
                                                                                                      permanent_tools=provided_dict['permanent_tools'],
@@ -3486,6 +3611,13 @@ class ProductionResourcesTab(QWidget):
         w_assign_combo.addItems(workers)
         w_assign_lt.addWidget(perm_w_assign_cb)
         w_assign_lt.addWidget(w_assign_combo)
+
+        #border frame for worker assignment box
+        w_assign_frame = QFrame()
+        w_assign_frame.setLayout(w_assign_lt)
+        w_assign_frame.setStyleSheet("QFrame { border: 1px solid black; border-radius: 1px; padding: 6px; }")
+        w_assign_frame.setFrameShape(QFrame.Box)
+        w_assign_frame.setLineWidth(1)
 
         # Box for permanent tools assignment
         perm_tools_lt = QVBoxLayout()
@@ -3690,7 +3822,7 @@ class ProductionResourcesTab(QWidget):
         save_cancel_lt.addWidget(buttonBox)
         
         workstation_edit_layout.addLayout(m_sel_lt,0,0)
-        workstation_edit_layout.addLayout(w_assign_lt,0,1)
+        workstation_edit_layout.addWidget(w_assign_frame,0,1)
         workstation_edit_layout.addLayout(perm_tools_lt,1,0)
         workstation_edit_layout.addLayout(allowed_res_pools_lt,1,1)
         workstation_edit_layout.addLayout(input_buffer_lt,2,0)
@@ -4205,43 +4337,62 @@ class SimulationTab(QWidget):
         system_group.setLayout(system_layout)
         left_panel.addWidget(system_group)
 
+        # Display random trials
+        display_group = QGroupBox("Display random trial with...")
+        display_layout = QVBoxLayout()
+        display_layout.setSpacing(6)
+
+        self.rand_shortest_btn = QPushButton("Shortest lead time")
+        self.rand_shortest_btn.setToolTip("Show trial with shortest mean order lead time")
+        display_layout.addWidget(self.rand_shortest_btn)
+
+        self.rand_smallest_deadline_btn = QPushButton("Smallest deadline dev.")
+        self.rand_smallest_deadline_btn.setToolTip("Show trial with smallest order deadline deviation")
+        display_layout.addWidget(self.rand_smallest_deadline_btn)
+
+        self.rand_highest_ws_util_btn = QPushButton("Highest workstation util.")
+        self.rand_highest_ws_util_btn.setToolTip("Show trial with highest mean workstation utilization")
+        display_layout.addWidget(self.rand_highest_ws_util_btn)
+
+        self.rand_highest_worker_util_btn = QPushButton("Highest worker util.")
+        self.rand_highest_worker_util_btn.setToolTip("Show trial with highest mean worker utilization")
+        display_layout.addWidget(self.rand_highest_worker_util_btn)
+
+        self.rand_lowest_buffer_var_btn = QPushButton("Lowest buffer var.")
+        self.rand_lowest_buffer_var_btn.setToolTip("Show trial with lowest buffer fill variability")
+        display_layout.addWidget(self.rand_lowest_buffer_var_btn)
+
+        # Connect random-trial display buttons (will load produced HTMLs after simulations)
+        self.rand_shortest_btn.clicked.connect(lambda: self._display_sim_trial_by_metric("mean_lead_time", min))
+        self.rand_smallest_deadline_btn.clicked.connect(lambda: self._display_sim_trial_by_metric("mean_deadline_dev", min))
+        self.rand_highest_ws_util_btn.clicked.connect(lambda: self._display_sim_trial_by_metric("mean_ws_util", max))
+        self.rand_highest_worker_util_btn.clicked.connect(lambda: self._display_sim_trial_by_metric("mean_worker_util", max))
+        self.rand_lowest_buffer_var_btn.clicked.connect(lambda: self._display_sim_trial_by_metric("mean_buffer_var", min))
+
+        display_group.setLayout(display_layout)
+        left_panel.addWidget(display_group)
+
+        # Reinforcement learning
+        rl_group = QGroupBox("Reinforcement learning")
+        rl_layout = QVBoxLayout()
+        self.load_use_model_btn = QPushButton("Load and use model...")
+        self.load_use_model_btn.setToolTip("Load a trained RL model and use it for planning")
+        rl_layout.addWidget(self.load_use_model_btn)
+        rl_group.setLayout(rl_layout)
+        left_panel.addWidget(rl_group)
+
         # Add the left panel to the main layout (simulation_layout)
         left_panel.setAlignment(QtCore.Qt.AlignTop)
         left_widget.setLayout(left_panel)
         left_widget.setFixedWidth(200)
         simulation_layout.addWidget(left_widget)
 
-        # Right panel for Start, Stop, Pause, and Time Inputs (horizontal layout)
+        # Right panel for simulation settings (horizontal layout)
         right_panel = QVBoxLayout()
 
-        # GroupBox for Controls (Start, Stop, Pause, and time-related inputs)
+        # GroupBox for Controls
         controls_group = QGroupBox("Controls")
         controls_layout = QHBoxLayout()
-
-        # Start, Stop, Pause Buttons
-        start_btn = QPushButton("Start")
-        start_btn.clicked.connect(self.start_simulation)
-        start_btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        controls_layout.addWidget(start_btn)
-
-        stop_btn = QPushButton("Stop")
-        stop_btn.clicked.connect(self.stop_simulation)
-        stop_btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        controls_layout.addWidget(stop_btn)
-
-        pause_btn = QPushButton("Pause")
-        pause_btn.clicked.connect(self.pause_simulation)
-        pause_btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        controls_layout.addWidget(pause_btn)
-
-        # Add Time Factor, Start Time, End Time inputs
-        time_factor_lbl = QLabel("Time factor:")
-        time_factor_lbl.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        controls_layout.addWidget(time_factor_lbl)
-        self.time_factor_input = QLineEdit()
-        self.time_factor_input.setPlaceholderText("e.g., 1.0")
-        self.time_factor_input.setFixedWidth(50)
-        controls_layout.addWidget(self.time_factor_input)
 
         start_time_lbl = QLabel("Start time:")
         start_time_lbl.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
@@ -4261,10 +4412,128 @@ class SimulationTab(QWidget):
         self.end_time_input.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         controls_layout.addWidget(self.end_time_input)
 
+        # Number of simulation trials
+        controls_layout.addWidget(QLabel("Number of simulation trials:"))
+        self.num_sim_input = QLineEdit()
+        self.num_sim_input.setFixedWidth(50)
+        self.num_sim_input.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        controls_layout.addWidget(self.num_sim_input)
+
+        start_btn = QPushButton("Start")
+        start_btn.clicked.connect(self.start_simulation)
+        start_btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        controls_layout.addWidget(start_btn)
+
         # Add the controls layout to the GroupBox
         controls_layout.setAlignment(QtCore.Qt.AlignLeft)
         controls_group.setLayout(controls_layout)
         right_panel.addWidget(controls_group)
+
+        # Statistical properties group
+        stats_group = QGroupBox("Statistical properties of the use case under random strategy")
+        stats_vlt = QVBoxLayout()
+        stats_group.setLayout(stats_vlt)
+
+        # grid for 4 columns: Property | Average | Min | Max
+        stats_grid = QGridLayout()
+        stats_grid.setHorizontalSpacing(12)
+        stats_grid.setVerticalSpacing(6)
+
+        header_labels = ["Property", "Average", "Min", "Max"]
+        for c, h in enumerate(header_labels):
+            lbl = QLabel(h)
+            lbl.setStyleSheet("font-weight: bold")
+            stats_grid.addWidget(lbl, 0, c)
+
+        # list of properties (display text)
+        prop_rows = [
+            "Number of sequencing alternatives of workstations (WS)",
+            "Number of routing alternatives of workstations (WR)",
+            "Number of sequencing alternatives of transport machines (TS)",
+            "Number of routing alternatives of transport machines (TR)",
+            "Number of simulation steps per episode",
+            "Mean order lead time per episode (h)",
+            "Mean order deadline deviation per episode (h)",
+            "Mean workstation utilization per episode",
+            "Mean worker utilization per episode",
+            "Mean buffer fill level variability factor per episode",
+            "Simulation duration per episode (s)"
+        ]
+
+        # store references so other functions can update/read values later
+        self.stats_fields = {}
+
+        # keep a reference to the property names for use in start_simulation
+        self.prop_rows = prop_rows
+
+        # Connect buttons to stack indices
+
+
+        for r, prop in enumerate(prop_rows, start=1):
+            prop_lbl = QLabel(prop)
+            prop_lbl.setFixedWidth(400)
+            prop_lbl.setWordWrap(True)
+            stats_grid.addWidget(prop_lbl, r, 0)
+
+            avg_lbl = QLabel("0.0")
+            avg_lbl.setFixedWidth(100)
+            avg_lbl.setAlignment(Qt.AlignCenter)
+            stats_grid.addWidget(avg_lbl, r, 1)
+
+            min_lbl = QLabel("0.0")
+            min_lbl.setFixedWidth(100)
+            min_lbl.setAlignment(Qt.AlignCenter)
+            stats_grid.addWidget(min_lbl, r, 2)
+
+            max_lbl = QLabel("0.0")
+            max_lbl.setFixedWidth(100)
+            max_lbl.setAlignment(Qt.AlignCenter)
+            stats_grid.addWidget(max_lbl, r, 3)
+
+            # keep references
+            self.stats_fields[prop] = {"avg": avg_lbl, "min": min_lbl, "max": max_lbl}
+
+        stats_vlt.addLayout(stats_grid)
+        # make group not too wide so layout stays nice
+        stats_group.setMinimumWidth(700)
+        stats_group.setMaximumWidth(700)
+
+        # add stats group below controls in the right panel
+        right_panel.addWidget(stats_group)
+
+        # Plan visualization group (fill remaining area under stats, to the right of left_panel)
+        plan_group = QGroupBox("Plan visualization")
+        plan_group.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        plan_layout = QVBoxLayout()
+        plan_group.setLayout(plan_layout)
+
+        # Buttons to switch between plan diagrams
+        self.plan_buttons_layout = QHBoxLayout()
+        self.plan_schedule_btn = QPushButton("Schedule")
+        self.plan_utilization_btn = QPushButton("Utilization")
+        self.plan_buffers_btn = QPushButton("Buffers")
+        self.plan_buttons_layout.addWidget(self.plan_schedule_btn)
+        self.plan_buttons_layout.addWidget(self.plan_utilization_btn)
+        self.plan_buttons_layout.addWidget(self.plan_buffers_btn)
+        plan_layout.addLayout(self.plan_buttons_layout)
+
+        # Stack layout for Plotly / web views
+        self.plan_figures_stack = QStackedLayout()
+        self.plan_schedule_view = QWebEngineView()
+        self.plan_utilization_view = QWebEngineView()
+        self.plan_buffers_view = QWebEngineView()
+        self.plan_figures_stack.addWidget(self.plan_schedule_view)
+        self.plan_figures_stack.addWidget(self.plan_utilization_view)
+        self.plan_figures_stack.addWidget(self.plan_buffers_view)
+        plan_layout.addLayout(self.plan_figures_stack)
+
+        # Connect buttons to stack indices
+        self.plan_schedule_btn.clicked.connect(lambda: self.plan_figures_stack.setCurrentIndex(0))
+        self.plan_utilization_btn.clicked.connect(lambda: self.plan_figures_stack.setCurrentIndex(1))
+        self.plan_buffers_btn.clicked.connect(lambda: self.plan_figures_stack.setCurrentIndex(2))
+
+        # Add the plan visualization group to the right panel (it will expand to fill available space)
+        right_panel.addWidget(plan_group)
 
         # Add the right panel to the main layout (simulation_layout)
         simulation_layout.addLayout(right_panel)
@@ -4275,6 +4544,12 @@ class SimulationTab(QWidget):
 
         # Set the Main Layout for the widget
         self.setLayout(simulation_layout)
+
+        # Container for storing per-run results and generated file paths
+        self._sim_results = []  # list of dicts per run
+        self._sim_base_dir = os.path.join(os.getcwd(), "sim_tests")
+        # ensure directory exists (will be cleared/created when running simulations)
+        # (not removing here to avoid accidental data loss on startup)
 
     # Example methods for button clicks
     def open_supply_storage(self):
@@ -4633,8 +4908,6 @@ class SimulationTab(QWidget):
         distances_edit_dialog.setLayout(distances_edit_layout)
         distances_edit_dialog.exec_()
 
-
-
     def add_cc_row(self, cc_table=QTableWidget, row=None):
         # conveyor capacity
         row_position = cc_table.rowCount()
@@ -4825,13 +5098,303 @@ class SimulationTab(QWidget):
         conveyor_edit_dialog.exec_()
 
     def start_simulation(self):
-        print("Starting Simulation")
+        try:
+            n_sim = int(self.num_sim_input.text())
+            print(f"Starting {n_sim} simulations...")
+        except Exception:
+            QMessageBox.warning(self, "Input error", "Enter a valid integer for number of simulation trials.")
+            return
+        if n_sim <= 0:
+            QMessageBox.warning(self, "Input error", "Number of simulation trials must be positive.")
+            return
+        
+        # prepare sim output directory
+        if os.path.exists(self._sim_base_dir):
+            try:
+                shutil.rmtree(self._sim_base_dir)  # <-- This is actually very dangerous!
+            except Exception:
+                pass
+        os.makedirs(self._sim_base_dir, exist_ok=True)
 
-    def stop_simulation(self):
-        print("Stopping Simulation")
+        # reset results container
+        self._sim_results = []
 
-    def pause_simulation(self):
-        print("Pausing Simulation")
+        # Progress dialog
+        progress = QProgressDialog("Running simulations...", "Cancel", 0, n_sim, self)
+        progress.setWindowModality(Qt.WindowModal)
+        progress.setMinimumWidth(400)
+        progress.setWindowTitle("System simulation")
+        progress.show()                 #to show the dialog immediately
+
+        for run_idx in range(n_sim):
+            progress.setValue(run_idx)
+            QApplication.processEvents()  # <-- Hope it doesn't break anything else in the ManualPlanningDialog or so...
+            if progress.wasCanceled():
+                break
+
+            # Same as in init of AIOptimizationTab
+            main_window.read_out_unsaved_inputs()
+
+            # Deep copy production system from main window and make simulatable
+            base_ps = main_window.production_resources_tab.production_system
+            ps = deepcopy(base_ps)
+            # TODO: check whether reset is being done correctly here
+            ps.make_simulatable()
+            #ps.reset()
+            ps.event_queue.clear()
+
+            # Configure random strategy
+            ps.action_config = {
+                'Workstation sequencing': (False, 'Random'),
+                'Workstation routing': (False, 'Random'),
+                'Transport sequencing': (False, 'Random'),
+                'Transport routing': (False, 'Random')
+            }
+
+            # record containers for this run
+            run_record = {
+                "ws_seq_counts": [],
+                "ws_route_counts": [],
+                "tm_seq_counts": [],
+                "tm_route_counts": [],
+                "steps": 0,
+                "mean_lead_time": 0.0,            # TODO: compute properly if available in production_system
+                "mean_deadline_dev": 0.0,         # TODO: compute properly if available in production_system
+                "mean_ws_util": 0.0,
+                "mean_worker_util": 0.0,
+                "mean_buffer_var": 0.0,
+                "sim_duration_s": 0.0,
+                "output_paths": {}
+            }
+
+            # run headless random-policy simulation
+            start_time = time.time()
+            steps = 0
+            # Use ps.get_legal_actions(), ps.required_action_type, ps.set_action(action) loop
+            while not ps.is_done():
+                legal = ps.get_legal_actions()
+
+                # select action
+                if len(legal) == 1 and legal[0] == -1:
+                    ps.set_action(-1)
+                else:
+
+                    # record alternatives by required_action_type before selecting
+                    # req = ps.required_action_type
+                    # if req == ActionType.WORKSTATION_SEQUENCING:
+                    #     run_record["ws_seq_counts"].append(len(legal))
+                    # elif req == ActionType.WORKSTATION_ROUTING:
+                    #     run_record["ws_route_counts"].append(len(legal))
+                    # elif req == ActionType.TRANSPORT_SEQUENCING:
+                    #     run_record["tm_seq_counts"].append(len(legal))
+                    # elif req == ActionType.TRANSPORT_ROUTING:
+                    #     run_record["tm_route_counts"].append(len(legal))
+
+                    act = random.choice(legal)
+                    ps.set_action(act)
+                steps += 1
+
+            end_time = time.time()
+            elapsed = end_time - start_time
+            run_record["steps"] = steps
+            run_record["sim_duration_s"] = elapsed
+
+            run_record["ws_seq_counts"] = ps.req_stats["ws_seq_counts"]
+            run_record["ws_route_counts"] = ps.req_stats["ws_route_counts"]
+            run_record["tm_seq_counts"] = ps.req_stats["tm_seq_counts"]
+            run_record["tm_route_counts"] = ps.req_stats["tm_route_counts"]
+
+            # compute utilization metrics
+            # workstation utilization: take last registered utilization value per workstation if available
+            ws_utils = []
+            for ws in ps.workstations.values():
+                # GPT-5 generated a ton of fallback startegies, but I don't think they are necessary here!
+                # also "elapsed" was mistaken for simulated elapsed time - careful here!
+                ws_utils.append(ws.utilization_history[-1][1])
+            run_record["mean_ws_util"] = statistics.mean(ws_utils) if ws_utils else 0.0
+
+            # worker utilization: busy_time / elapsed averaged over workers
+            worker_utils = []
+            for worker in ps.workers.values():
+                worker_utils.append(worker.busy_time / (ps.end_timestamp-ps.start_timestamp))
+            run_record["mean_worker_util"] = statistics.mean(worker_utils) if worker_utils else 0.0
+
+            # buffer variability
+            buf_vars = []
+            for ws in ps.workstations.values():
+                for buf in list(ws.physical_input_buffers.values()) + list(ws.physical_output_buffers.values()):
+                    #try:
+                    buf_vars.append(buf.get_fill_level_variability())
+                    #except Exception:
+                    #    buf_vars.append(0.0)
+            run_record["mean_buffer_var"] = statistics.mean(buf_vars) if buf_vars else 0.0
+
+            # order lead times
+            # see ProductionSystem.calculate_reward() for original implementation
+            mean_order_lead_time = 0
+            N_ord = len(ps.order_list.order_list)
+
+            for order_id, order_info in ps.order_progress.items():
+                latest_instance_completion = 0
+                worst_delay_beyond_sim_end = 0
+                order_incomplete = False
+                for instance in order_info['product_progress']:
+                    if instance['production_end_time'] is not None:
+                        if instance['production_end_time'] > latest_instance_completion:
+                            latest_instance_completion = instance['production_end_time']
+                    else:
+                        order_incomplete = True
+                        worst_delay_beyond_sim_end += sum([instance['operation_progress'][oid]['remaining_work'] for oid in instance['operation_progress'].keys()])
+
+                if not order_incomplete:
+                    mean_order_lead_time += latest_instance_completion - order_info['release_time']
+                elif order_incomplete:
+                    mean_order_lead_time += ps.end_timestamp + worst_delay_beyond_sim_end - order_info['release_time']
+
+            mean_order_lead_time /= N_ord * 3600.0  # seconds to hours
+            run_record["mean_lead_time"] = mean_order_lead_time
+
+            # deadline deviations (mean absolute)
+            # see ProductionSystem.calculate_reward() for original implementation
+            ma_deadline_dev = 0
+
+            for order_id, order_info in ps.order_progress.items():
+                latest_instance_completion = 0
+                worst_delay_beyond_sim_end = 0
+                order_incomplete = False
+                for instance in order_info['product_progress']:
+                    if instance['production_end_time'] is not None:
+                        if instance['production_end_time'] > latest_instance_completion:
+                            latest_instance_completion = instance['production_end_time']
+                    else:
+                        order_incomplete = True
+                        worst_delay_beyond_sim_end += sum([instance['operation_progress'][oid]['remaining_work'] for oid in instance['operation_progress'].keys()])
+
+                if not order_incomplete:
+                    ma_deadline_dev += abs(latest_instance_completion - order_info['deadline'])
+                elif order_incomplete:
+                    ma_deadline_dev += ps.end_timestamp + worst_delay_beyond_sim_end - order_info['deadline']
+
+            ma_deadline_dev /= N_ord * 3600.0  # seconds to hours
+            run_record["mean_deadline_dev"] = ma_deadline_dev
+
+            # Save plots and HTMLs for this run to folder sim_tests/run_<idx+1>/
+            run_dir = os.path.join(self._sim_base_dir, f"run_{run_idx+1}")
+            os.makedirs(run_dir, exist_ok=True)
+            # Schedule (Gantt)
+            try:
+                html = SchedulePlotter.make_gantt_chart(production_system=ps)
+                path_gantt = os.path.join(run_dir, "gantt_chart.html")
+                with open(path_gantt, "w", encoding="utf-8") as f:
+                    f.write(html)
+                run_record["output_paths"]["gantt"] = path_gantt
+            except Exception:
+                run_record["output_paths"]["gantt"] = None
+
+            # Utilization time series
+            try:
+                util_series = {ws.workstation_id: ws.utilization_history for ws in ps.workstations.values()}
+                html = TimeSeriesPlotter.plot_time_series(series_dict=util_series, ylabel="Utilization", title="Workstation Utilization")
+                path_util = os.path.join(run_dir, "utilization.html")
+                with open(path_util, "w", encoding="utf-8") as f:
+                    f.write(html)
+                run_record["output_paths"]["utilization"] = path_util
+            except Exception:
+                run_record["output_paths"]["utilization"] = None
+
+            # Buffer fill levels
+            try:
+                series_dict = {}
+                for ws in ps.workstations.values():
+                    for buf_idx, buf in {**ws.physical_input_buffers, **ws.physical_output_buffers}.items():
+                        label = f"{ws.workstation_id} : {'IN' if buf.buffer_location==1 else 'OUT'} : {buf.idx1}"
+                        series_dict[label] = buf.fill_level_history
+                html = TimeSeriesPlotter.plot_time_series(series_dict=series_dict, ylabel="Relative Fill Level", title="Buffer Fill Levels")
+                path_buf = os.path.join(run_dir, "buffers.html")
+                with open(path_buf, "w", encoding="utf-8") as f:
+                    f.write(html)
+                run_record["output_paths"]["buffers"] = path_buf
+            except Exception:
+                run_record["output_paths"]["buffers"] = None
+
+            # store record
+            self._sim_results.append(run_record)
+
+            # finalize progress
+            progress.setValue(n_sim)
+
+        # gather lists for properties
+        ws_seq_all = [statistics.mean(r["ws_seq_counts"]) if r["ws_seq_counts"] else 0.0 for r in self._sim_results]
+        ws_route_all = [statistics.mean(r["ws_route_counts"]) if r["ws_route_counts"] else 0.0 for r in self._sim_results]
+        tm_seq_all = [statistics.mean(r["tm_seq_counts"]) if r["tm_seq_counts"] else 0.0 for r in self._sim_results]
+        tm_route_all = [statistics.mean(r["tm_route_counts"]) if r["tm_route_counts"] else 0.0 for r in self._sim_results]
+        steps_all = [r["steps"] for r in self._sim_results]
+        mean_lt_all = [r["mean_lead_time"] for r in self._sim_results]
+        mean_dead_dev_all = [r["mean_deadline_dev"] for r in self._sim_results]
+        mean_ws_util_all = [r["mean_ws_util"] for r in self._sim_results]
+        mean_worker_util_all = [r["mean_worker_util"] for r in self._sim_results]
+        mean_buf_var_all = [r["mean_buffer_var"] for r in self._sim_results]
+        sim_dur_all = [r["sim_duration_s"] for r in self._sim_results]
+
+        def _set_stat(prop_name, values, scale=1.0, fmt="{:.2f}"):
+            avg = statistics.mean(values) if values else 0.0
+            mn = min(values) if values else 0.0
+            mx = max(values) if values else 0.0
+            # scale values (e.g., seconds->s or hours etc.)
+            self.stats_fields[prop_name]["avg"].setText(fmt.format(avg * scale))
+            self.stats_fields[prop_name]["min"].setText(fmt.format(mn * scale))
+            self.stats_fields[prop_name]["max"].setText(fmt.format(mx * scale))
+
+        # Now update the UI fields in the same order as self.prop_rows
+        try:
+            _set_stat(self.prop_rows[0], ws_seq_all)
+            _set_stat(self.prop_rows[1], ws_route_all)
+            _set_stat(self.prop_rows[2], tm_seq_all)
+            _set_stat(self.prop_rows[3], tm_route_all)
+            _set_stat(self.prop_rows[4], steps_all, scale=1.0, fmt="{:.0f}")
+            _set_stat(self.prop_rows[5], mean_lt_all, scale=1.0, fmt="{:.2f}")
+            _set_stat(self.prop_rows[6], mean_dead_dev_all, scale=1.0, fmt="{:.2f}")
+            _set_stat(self.prop_rows[7], mean_ws_util_all, scale=1.0, fmt="{:.3f}")
+            _set_stat(self.prop_rows[8], mean_worker_util_all, scale=1.0, fmt="{:.3f}")
+            _set_stat(self.prop_rows[9], mean_buf_var_all, scale=1.0, fmt="{:.3f}")
+            _set_stat(self.prop_rows[10], sim_dur_all, scale=1.0, fmt="{:.1f}")
+        except Exception as e:
+            print("Error updating stats fields:", e)
+
+        QMessageBox.information(self, "Simulations finished", f"Completed {len(self._sim_results)} simulation runs.")
+
+    # helper to display saved run HTMLs based on metric
+    def _display_sim_trial_by_metric(self, metric_key, comparator):
+        """
+        metric_key: key in run_record (e.g. 'mean_lead_time')
+        comparator: min or max
+        """
+        if not self._sim_results:
+            QMessageBox.warning(self, "No simulations", "Run simulations first.")
+            return
+        # build list of metric values
+        vals = [r.get(metric_key, None) for r in self._sim_results]
+        # filter out None
+        valid = [(i, v) for i, v in enumerate(vals) if v is not None]
+        if not valid:
+            idx = 0
+        else:
+            # find index with min/max
+            best = comparator(valid, key=lambda t: t[1])
+            idx = best[0]
+        # load files for selected run
+        run = self._sim_results[idx]
+        out = run.get("output_paths", {})
+        # schedule
+        if out.get("gantt"):
+            self.plan_schedule_view.load(QUrl.fromLocalFile(os.path.abspath(out["gantt"])))
+        if out.get("utilization"):
+            self.plan_utilization_view.load(QUrl.fromLocalFile(os.path.abspath(out["utilization"])))
+        if out.get("buffers"):
+            self.plan_buffers_view.load(QUrl.fromLocalFile(os.path.abspath(out["buffers"])))
+        # show first tab (Schedule)
+        self.plan_figures_stack.setCurrentIndex(0)
+
 
 class UseCaseDialog(QDialog):
     def __init__(self):
@@ -6586,7 +7149,7 @@ class MainWindow(QMainWindow):
         # Production resources tab
         self.production_resources_tab = ProductionResourcesTab()
         idx = self.tabs.addTab(self.production_resources_tab, "Production resources")
-        self.tabs.setTabToolTip(idx, "Manage workers, machines, tools, workstations and pools")
+        self.tabs.setTabToolTip(idx, "Manage workers, machines, tools and workstations")
 
         # Production instructions tab
         self.product_instructions_tab = ProductInstructionsTab()
