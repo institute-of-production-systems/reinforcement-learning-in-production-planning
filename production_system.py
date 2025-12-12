@@ -2248,6 +2248,8 @@ class ProductionSystem():
 
         if workstation.seized_worker == '':
             worker_at_workstation = False
+        elif not self.workers[workstation.seized_worker].is_available(self.timestamp):
+            worker_at_workstation = False
         else:
             # There is some worker at the workstation, but we need to check their provided capabilities
             for capability in operation.capabilities:
@@ -2840,6 +2842,8 @@ class ProductionSystem():
                     workstation.status.append(WorkstationStatus.WAITING_FOR_WORKER)
                     print('    Added WAITING_FOR_WORKER to workstation status list.')
                     workstation.log_status_change(self.timestamp)
+            elif WorkstationStatus.WAITING_FOR_WORKER in workstation.status:
+                print(f'    Workstation {workstation.workstation_id} is WAITING_FOR_WORKER')
 
         # Execute any necessary and possible setup operations
         if all([all_tools_at_workstation,
@@ -3077,7 +3081,7 @@ class ProductionSystem():
                             pass
 
                         # Consider day-end gap: if worker shift "To" end before op_end, and worker has a next-day "From",
-                        # insert idle time until next day's "From"; if no next-day From, allo overtime (do nothing)
+                        # insert idle time until next day's "From"; if no next-day From, allow overtime
                         try:
                             to_time = today_sched.get('To', '').strip()
                             if to_time:
@@ -3090,6 +3094,7 @@ class ProductionSystem():
                                     next_sched = avail.get(next_name, {})
                                     next_from = next_sched.get('From', '').strip()
                                     if next_from:
+                                        # Next weekday's schedule of this worker has working time entries
                                         fh, fm = map(int, next_from.split(':'))
                                         next_from_dt = datetime(next_dt.year, next_dt.month, next_dt.day, fh, fm)
                                         # only add idle if next_from is strictly after today's 'To'
@@ -3109,13 +3114,40 @@ class ProductionSystem():
                                             self.event_queue.append(WorkerBreakStart(int(to_dt.timestamp()), worker, workstation))
                                             self.event_queue.append(WorkerBreakEnd(int(next_from_dt.timestamp()), worker, workstation))
                                     else:
-                                        # no next-day start -> allow overtime, do not add idle time
-                                        pass
+                                        # no next-day start
+                                        while next_dt.timestamp() < self.end_timestamp:
+                                            # Try next day
+                                            next_dt = next_dt + timedelta(days=1)
+                                            next_name = next_dt.strftime('%A')
+                                            next_sched = avail.get(next_name, {})
+                                            next_from = next_sched.get('From', '').strip()
+                                            if next_from:
+                                                # Next weekday's schedule of this worker has working time entries
+                                                fh, fm = map(int, next_from.split(':'))
+                                                next_from_dt = datetime(next_dt.year, next_dt.month, next_dt.day, fh, fm)
+                                                # Don't increase remaining_secs, but do increase idle time to create WBS and WBE
+                                                idle = next_from_dt.timestamp() - op_end_ts
+                                                # Log worker absence
+                                                worker.log_status_change(int(op_end_ts), override_status=WorkerStatus.IDLE)
+                                                worker.log_status_change(int(next_from_dt.timestamp()), override_status=WorkerStatus.IDLE)  # was BUSY
+                                                # Log workstation downtime
+                                                workstation.log_status_change(int(op_end_ts), override_status=WorkstationStatus.IDLE)
+                                                workstation.log_status_change(int(next_from_dt.timestamp()),
+                                                                            op_quadruple=(operation_id, product_id, order_id, product_instance),
+                                                                            override_status=WorkstationStatus.BUSY)
+                                                # Generate WorkerBreakStart/End events for proper utilization logging in run_until_decision_point()
+                                                self.event_queue.append(WorkerBreakStart(int(op_end_ts), worker, workstation))
+                                                self.event_queue.append(WorkerBreakEnd(int(next_from_dt.timestamp()), worker, workstation))
+                                                break
+                                            else:
+                                                # No availability the next day, try next day
+                                                pass
                         except Exception:
                             # ignore malformed times
                             pass
                 except KeyError:
                     # worker not found in model, fall back to default scheduling
+                    print(f'    Worker {worker.worker_id} not found in model, fall back to default scheduling')
                     pass
 
             finish_ts = self.timestamp + remaining_secs
@@ -4083,7 +4115,45 @@ class ProductionSystem():
                     worker.status_before_break = None
                     workstation.status = workstation.status_before_break
                     workstation.status_before_break = list()
+                    #workstation.seized_worker = worker.worker_id
                     earliest_event.handled = True
+                    # Find pending WorkerCapabilitiesRequests from the past and re-trigger their handling
+                    for _e in self.event_queue:
+                        if isinstance(_e, WorkerCapabilitiesRequest):
+                            # See what workers the target workstation or transport machine has access to
+                            accessible_wps = [self.worker_pools[wp] for wp in _e.target.allowed_worker_pools]
+                            accessible_worker_ids = []
+                            for wp in accessible_wps:
+                                for wid in wp:
+                                    accessible_worker_ids.append(wid)
+                            # If the released worker belongs to that set of accessible workers,
+                            # retry handling WorkerCapabilitiesRequest in the next iteration
+                            if all([set(_e.capability_list).issubset(set(worker.provided_capabilities)),
+                                    worker.worker_id in accessible_worker_ids]):
+                                print(f'    Found a pending WorkerCapabilitiesRequest that requests the same capabilities as the released worker.')
+                                _e.some_worker_released = True
+                                # TODO: validate on a schedule that worker capacity constraint influences how setup operations are executed.
+                                _e.timestamp = self.timestamp
+
+                                #break
+
+                    # Re-trigger working on operations
+                    # Get operation(s) with status COMMITTED in the workstation's O-WIP
+                    # for operation in workstation.wip_operations:
+                    #     operation_id, product_id, order_id, product_instance = operation  # tuple with 4 strings
+                    #     product_progress = self.order_progress[order_id]['product_progress']
+                    #     for instance_data in product_progress:
+                    #         if instance_data['product_id'] == product_id and instance_data['product_instance'] == product_instance:
+                    #             if instance_data['operation_progress'][operation_id]['status'] == OperationStatus.COMMITTED:
+                    #                 print(f'    Found an operation with status COMMITTED in the workstation WIP: {str(operation)}')
+                    #                 print('    Trying to work on operation...')
+                    #                 self.work_on_operation(operation_id,
+                    #                                        product_id,
+                    #                                        order_id,
+                    #                                        product_instance,
+                    #                                        instance_data['operation_progress'],
+                    #                                        workstation,
+                    #                                        auto_setup=False if worker else True)
 
                 elif isinstance(earliest_event, OperationFinishedEvent):
                     finished_op = earliest_event.operation_id
@@ -4598,7 +4668,7 @@ class ProductionSystem():
                     # If the worker is released during his/her absence, then they are doing overtime ->
                     # create WorkerBreakStart
                     if not worker.is_available(earliest_timestamp):
-                        self.event_queue.append(WorkerBreakStart(earliest_timestamp, worker, workstation))
+                        self.event_queue.appendleft(WorkerBreakStart(earliest_timestamp, worker, workstation))
 
                     if not workstation.permanent_worker_assignment:
                         wp_of_origin = [wp for wp in workstation.allowed_worker_pools if worker.worker_id in self.worker_pools[wp]][0]
@@ -5165,6 +5235,9 @@ class ProductionSystem():
                                     if (WorkerStatus.BUSY.name in stat_name_list or
                                         WorkerStatus.SETTING_UP.name in stat_name_list or
                                         WorkerStatus.WALKING.name in stat_name_list):
+                                        print(f'    BUSY: {WorkerStatus.BUSY.name in stat_name_list}')
+                                        print(f'    SETTING_UP: {WorkerStatus.SETTING_UP.name in stat_name_list}')
+                                        print(f'    WALKING: {WorkerStatus.WALKING.name in stat_name_list}')
                                         continue
 
                                     worker_found = True
