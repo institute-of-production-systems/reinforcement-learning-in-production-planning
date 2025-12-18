@@ -1,0 +1,22 @@
+{
+    "Workers: location (workstation)": [176, false],
+    "Workers: location (transport)": [66, false],
+    "Workers: destination (workstation)": [176, false],
+    "Workers: destination (transport)": [66, false],
+    "Workers: status": [44, true],
+    "Tools: location": [384, false],
+    "Tools: status": [72, false],
+    "Workstations: status": [176, true],
+    "Input buffers: fill level": [16, false],
+    "Output buffers: fill level": [16, false],
+    "Operations: location (workstation)": [8160, false],
+    "Operations: remaining work": [510, true],
+    "Orders: timeliness": [8, false],
+    "Buffers: average fill level": [32, false],
+    "Buffers: fill level variability": [32, false],
+    "Workstations: productive time ratio": [16, false],
+    "Workstations: setup time ratio": [16, true],
+    "Workers: productive time ratio": [11, false],
+    "Workers: setup time ratio": [11, true],
+    "Workers: walking time ratio": [11, false]
+}

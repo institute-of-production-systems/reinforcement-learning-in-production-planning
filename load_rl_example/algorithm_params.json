@@ -1,0 +1,11 @@
+{
+    "encoding_size": 100,
+    "fc_representation_layers": "[]",
+    "fc_dynamics_layers": "[64]",
+    "fc_reward_layers": "[64]",
+    "fc_value_layers": "[64]",
+    "fc_policy_layers": "[64]",
+    "training_steps": 100000,
+    "num_simulations": 10,
+    "lr_init": 0.01
+}

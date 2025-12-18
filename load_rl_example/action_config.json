@@ -1,0 +1,6 @@
+{
+    "Workstation routing": [true, null],
+    "Workstation sequencing": [true, null],
+    "Transport routing": [false, "LQTO"],
+    "Transport sequencing": [false, "FIFO"]
+}

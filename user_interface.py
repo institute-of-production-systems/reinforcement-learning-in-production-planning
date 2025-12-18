@@ -4282,6 +4282,56 @@ class ProbabilityDistributionWidget(QWidget):
             # Ignore errors if inputs are empty or invalid (like alpha being non-integer)
             pass
 
+
+class RLModelLoadDialog(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("PrOPPlan: load RL model")
+        self.setWindowIcon(QIcon("images/RIFLOGO.png")) 
+        self.selected_file = None
+
+        # Layout and widgets
+        layout = QVBoxLayout()
+        question_layout = QHBoxLayout()
+
+        # Standard question mark icon
+        question_icon = self.style().standardIcon(QStyle.SP_MessageBoxQuestion)
+        icon_label = QLabel()
+        icon_label.setPixmap(question_icon.pixmap(32, 32))
+        question_layout.addWidget(icon_label)
+
+        label = QLabel("Have you already trained an RL model on current production system configuration?")
+        question_layout.addWidget(label)
+        question_layout.addStretch()
+
+        layout.addLayout(question_layout)
+
+        # Buttons layout
+        buttons_layout = QHBoxLayout()
+
+        yes_button = QPushButton("Yes")
+        no_button = QPushButton("No")
+
+        # Connect buttons to actions
+        yes_button.clicked.connect(self.load_file)
+        no_button.clicked.connect(self.reject)
+
+        buttons_layout.addStretch()
+        buttons_layout.addWidget(yes_button)
+        buttons_layout.addWidget(no_button)
+
+        layout.addLayout(buttons_layout)
+        self.setLayout(layout)
+
+    def load_file(self):
+        """Opens a file dialog to select a file and stores the selected file path."""
+        file_path, _ = QFileDialog.getOpenFileName(self, "Select RL model", "", "CHECKPOINT (*.checkpoint);;All Files (*.*)")
+        if file_path:
+            self.selected_file = file_path
+            self.accept()
+            return self.selected_file
+
+
 class SimulationTab(QWidget):
     def __init__(self):
         super().__init__()
@@ -4411,6 +4461,7 @@ class SimulationTab(QWidget):
         rl_layout = QVBoxLayout()
         self.load_use_model_btn = QPushButton("Load and use model...")
         self.load_use_model_btn.setToolTip("Load a trained RL model and use it for planning")
+        self.load_use_model_btn.clicked.connect(self.open_rl_model_dialog)
         rl_layout.addWidget(self.load_use_model_btn)
         rl_group.setLayout(rl_layout)
         left_panel.addWidget(rl_group)
@@ -5485,6 +5536,370 @@ class SimulationTab(QWidget):
             print("Error updating stats fields:", e)
 
         QMessageBox.information(self, "Simulations finished", f"Completed {len(self._sim_results)} simulation runs.")
+
+    def open_rl_model_dialog(self):
+        """
+        Open the RL model load dialog and handle model loading.
+        """
+        dialog = RLModelLoadDialog()
+        if dialog.exec_() == QDialog.Accepted and dialog.selected_file:
+            self.use_rl_model(dialog.selected_file)
+
+    def use_rl_model(self, model_path):
+        """
+        Runs an episode with a trained RL model for analysis in SimulationTab.
+        Has similar logic as start_simulation() for random trials.
+        
+        :param model_path: Path to a previously saved trained RL model checkpoint
+        """
+        try:
+            print(f"Loading RL model from: {model_path}")
+            
+            # prepare sim output directory
+            if os.path.exists(self._sim_base_dir):
+                try:
+                    shutil.rmtree(self._sim_base_dir)
+                except Exception:
+                    pass
+            os.makedirs(self._sim_base_dir, exist_ok=True)
+
+            # reset results container
+            self._sim_results = []
+
+            # Progress dialog
+            progress = QProgressDialog("Running simulation with RL model...", "Cancel", 0, 1, self)
+            progress.setWindowModality(Qt.WindowModal)
+            progress.setMinimumWidth(400)
+            progress.setWindowTitle("RL Model Simulation")
+            progress.show()
+            QApplication.processEvents()
+
+            # Deep copy production system from main window and make simulatable
+            main_window.read_out_unsaved_inputs()
+            base_ps = main_window.production_resources_tab.production_system
+            ps = deepcopy(base_ps)
+            ps.make_simulatable()
+            ps.event_queue.clear()
+
+            # If an observation configuration JSON exists next to the checkpoint, load it
+            try:
+                obs_cfg_path = os.path.join(os.path.dirname(model_path), "observation_config.json")
+                if os.path.exists(obs_cfg_path):
+                    with open(obs_cfg_path, "r", encoding="utf-8") as _f:
+                        loaded_obs_cfg = json.load(_f)
+                    # Expecting a dict mapping observation variable name -> [index?, enabled_bool]
+                    # Apply to the production system copy so get_obs() will respect it
+                    try:
+                        ps.observation_config = loaded_obs_cfg
+                        # If the production system exposes a helper to (re)compute
+                        # observation vector sizes, call it if available
+                        if hasattr(ps, "prepare_observation_space_dimensions"):
+                            try:
+                                ps.prepare_observation_space_dimensions()
+                            except Exception:
+                                pass
+                        print(f"Loaded observation configuration from {obs_cfg_path}")
+                    except Exception as e:
+                        print(f"Failed to apply observation config: {e}")
+                else:
+                    print(f"No observation_config.json found next to model: {obs_cfg_path}")
+            except Exception as e:
+                print(f"Error reading observation config: {e}")
+
+            # Same for algorithm params
+            try:
+                algo_param_path = os.path.join(os.path.dirname(model_path), "algorithm_params.json")
+                if os.path.exists(algo_param_path):
+                    with open(algo_param_path, "r", encoding="utf-8") as _f:
+                        loaded_algo_param = json.load(_f)
+                        ps.algorithm_parameters = loaded_algo_param
+                        print(f"Loaded algorithm parameters from {algo_param_path}")
+                else:
+                    print(f"No algorithm_params.json found next to model: {algo_param_path}")
+            except Exception as e:
+                print(f"Error reading algorithm parameters: {e}")
+
+            # Same for action config
+            try:
+                action_config_path = os.path.join(os.path.dirname(model_path), "action_config.json")
+                if os.path.exists(action_config_path):
+                    with open(action_config_path, "r", encoding="utf-8") as _f:
+                        loaded_action_config = json.load(_f)
+                        ps.action_config = loaded_action_config
+                        print(f"Loaded action configuration from {action_config_path}")
+                else:
+                    print(f"No action_config.json found next to model: {action_config_path}")
+            except Exception as e:
+                print(f"Error reading action config: {e}")
+
+            # Initialize the model from checkpoint for inference
+            from muzero import models as mz_models
+            import torch
+
+            # Prepare muzero_config of the model itself,
+            # just like in AIOptimizationTab.run_optimization()
+            observation_dimension = sum([entry[0] for entry in ps.observation_config.values() if entry[1]])
+            action_dimension = ps.action_matrix_n_rows * ps.action_matrix_n_cols
+
+            print('observation_dimension', observation_dimension)
+            print('action_dimension', action_dimension)
+
+            muzero_config = {
+                'observation_shape': (1, 1, observation_dimension),
+                'action_space': list(range(action_dimension)),
+                'max_moves': 10000,
+                'encoding_size': int(ps.algorithm_parameters['encoding_size']),
+                'fc_representation_layers': eval(ps.algorithm_parameters['fc_representation_layers']),
+                'fc_dynamics_layers': eval(ps.algorithm_parameters['fc_dynamics_layers']),
+                'fc_reward_layers': eval(ps.algorithm_parameters['fc_reward_layers']),
+                'fc_value_layers': eval(ps.algorithm_parameters['fc_value_layers']),
+                'fc_policy_layers': eval(ps.algorithm_parameters['fc_policy_layers']),
+                'training_steps': int(ps.algorithm_parameters['training_steps']),
+                'num_simulations': int(ps.algorithm_parameters['num_simulations']),
+                'lr_init': float(ps.algorithm_parameters['lr_init'])
+            }
+
+            # Create MuZero instance and load model
+            muzero = MuZero(game_name='PrOPPlan', production_system=ps, config=muzero_config)
+            muzero.load_model(checkpoint_path=model_path, replay_buffer_path=None)
+
+            inference_model = mz_models.MuZeroNetwork(muzero.config)
+            inference_model.set_weights(muzero.checkpoint["weights"])
+            inference_model.to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+            #inference_model.eval()
+
+            # record container for this run
+            run_record = {
+                "ws_seq_counts": [],
+                "ws_route_counts": [],
+                "tm_seq_counts": [],
+                "tm_route_counts": [],
+                "steps": 0,
+                "mean_lead_time": 0.0,
+                "mean_deadline_dev": 0.0,
+                "mean_ws_util": 0.0,
+                "mean_worker_util": 0.0,
+                "mean_buffer_var": 0.0,
+                "sim_duration_s": 0.0,
+                "output_paths": {}
+            }
+
+            # Run simulation with RL model
+            start_time = time.time()
+            steps = 0
+            
+            # Import MCTS for model-based action selection
+            from muzero.self_play import MCTS, SelfPlay
+            
+            while not ps.is_done():
+                legal = ps.get_legal_actions()
+
+                # select action using RL model with MCTS
+                if len(legal) == 1 and legal[0] == -1:
+                    ps.set_action(-1)
+                else:
+                    try:
+                        # Get current observation from production system
+                        observation = ps.get_obs()
+                        
+                        # Run MCTS with the loaded model to select best action
+                        mcts = MCTS(muzero.config)
+                        root, mcts_info = mcts.run(
+                            model=inference_model,
+                            observation=observation,
+                            legal_actions=legal,
+                            to_play=0,
+                            add_exploration_noise=False  # No exploration during inference
+                        )
+                        
+                        # Select action with temperature 0 (deterministic, best action)
+                        act = SelfPlay.select_action(root, temperature=0)
+                        ps.set_action(act)
+                    except Exception as e:
+                        # Fallback: if model inference fails, use random action
+                        print(f"Warning: Model inference failed ({e}), using random action")
+                        import traceback
+                        traceback.print_exc()
+                        act = random.choice(legal) if legal else -1
+                        ps.set_action(act)
+                steps += 1
+
+            end_time = time.time()
+            elapsed = end_time - start_time
+            run_record["steps"] = steps
+            run_record["sim_duration_s"] = elapsed
+
+            run_record["ws_seq_counts"] = ps.req_stats["ws_seq_counts"]
+            run_record["ws_route_counts"] = ps.req_stats["ws_route_counts"]
+            run_record["tm_seq_counts"] = ps.req_stats["tm_seq_counts"]
+            run_record["tm_route_counts"] = ps.req_stats["tm_route_counts"]
+
+            # compute utilization metrics
+            ws_utils = []
+            for ws in ps.workstations.values():
+                ws_utils.append(ws.utilization_history[-1][1])
+            run_record["mean_ws_util"] = statistics.mean(ws_utils) if ws_utils else 0.0
+
+            worker_utils = []
+            for worker in ps.workers.values():
+                worker_utils.append(worker.busy_time / (ps.end_timestamp - ps.start_timestamp))
+            run_record["mean_worker_util"] = statistics.mean(worker_utils) if worker_utils else 0.0
+
+            buf_vars = []
+            for ws in ps.workstations.values():
+                for buf in list(ws.physical_input_buffers.values()) + list(ws.physical_output_buffers.values()):
+                    buf_vars.append(buf.get_fill_level_variability())
+            run_record["mean_buffer_var"] = statistics.mean(buf_vars) if buf_vars else 0.0
+
+            # order lead times
+            mean_order_lead_time = 0
+            N_ord = len(ps.order_list.order_list)
+
+            for order_id, order_info in ps.order_progress.items():
+                latest_instance_completion = 0
+                worst_delay_beyond_sim_end = 0
+                order_incomplete = False
+                for instance in order_info['product_progress']:
+                    if instance['production_end_time'] is not None:
+                        if instance['production_end_time'] > latest_instance_completion:
+                            latest_instance_completion = instance['production_end_time']
+                    else:
+                        order_incomplete = True
+                        worst_delay_beyond_sim_end += sum([instance['operation_progress'][oid]['remaining_work'] for oid in instance['operation_progress'].keys()])
+
+                if not order_incomplete:
+                    mean_order_lead_time += latest_instance_completion - order_info['release_time']
+                elif order_incomplete:
+                    mean_order_lead_time += ps.end_timestamp + worst_delay_beyond_sim_end - order_info['release_time']
+
+            mean_order_lead_time /= N_ord * 3600.0  # seconds to hours
+            run_record["mean_lead_time"] = mean_order_lead_time
+
+            # deadline deviations (mean absolute)
+            ma_deadline_dev = 0
+
+            for order_id, order_info in ps.order_progress.items():
+                latest_instance_completion = 0
+                worst_delay_beyond_sim_end = 0
+                order_incomplete = False
+                for instance in order_info['product_progress']:
+                    if instance['production_end_time'] is not None:
+                        if instance['production_end_time'] > latest_instance_completion:
+                            latest_instance_completion = instance['production_end_time']
+                    else:
+                        order_incomplete = True
+                        worst_delay_beyond_sim_end += sum([instance['operation_progress'][oid]['remaining_work'] for oid in instance['operation_progress'].keys()])
+
+                if not order_incomplete:
+                    ma_deadline_dev += abs(latest_instance_completion - order_info['deadline'])
+                elif order_incomplete:
+                    ma_deadline_dev += ps.end_timestamp + worst_delay_beyond_sim_end - order_info['deadline']
+
+            ma_deadline_dev /= N_ord * 3600.0  # seconds to hours
+            run_record["mean_deadline_dev"] = ma_deadline_dev
+
+            # Save plots and HTMLs to folder sim_tests/run_1/
+            run_dir = os.path.join(self._sim_base_dir, "run_1")
+            os.makedirs(run_dir, exist_ok=True)
+            
+            # Schedule (Gantt)
+            try:
+                html = SchedulePlotter.make_gantt_chart(production_system=ps)
+                path_gantt = os.path.join(run_dir, "gantt_chart.html")
+                with open(path_gantt, "w", encoding="utf-8") as f:
+                    f.write(html)
+                run_record["output_paths"]["gantt"] = path_gantt
+            except Exception:
+                run_record["output_paths"]["gantt"] = None
+
+            # Utilization time series
+            try:
+                util_series = {ws.workstation_id: ws.utilization_history for ws in ps.workstations.values()}
+                html = TimeSeriesPlotter.plot_time_series(series_dict=util_series, ylabel="Utilization", title="Workstation Utilization")
+                path_util = os.path.join(run_dir, "utilization.html")
+                with open(path_util, "w", encoding="utf-8") as f:
+                    f.write(html)
+                run_record["output_paths"]["utilization"] = path_util
+            except Exception:
+                run_record["output_paths"]["utilization"] = None
+
+            # Buffer fill levels
+            try:
+                series_dict = {}
+                for ws in ps.workstations.values():
+                    for buf_idx, buf in {**ws.physical_input_buffers, **ws.physical_output_buffers}.items():
+                        label = f"{ws.workstation_id} : {'IN' if buf.buffer_location==1 else 'OUT'} : {buf.idx1}"
+                        series_dict[label] = buf.fill_level_history
+                html = TimeSeriesPlotter.plot_time_series(series_dict=series_dict, ylabel="Relative Fill Level", title="Buffer Fill Levels")
+                path_buf = os.path.join(run_dir, "buffers.html")
+                with open(path_buf, "w", encoding="utf-8") as f:
+                    f.write(html)
+                run_record["output_paths"]["buffers"] = path_buf
+            except Exception:
+                run_record["output_paths"]["buffers"] = None
+
+            # store record
+            self._sim_results.append(run_record)
+
+            # finalize progress
+            progress.setValue(1)
+
+            # Update stats display
+            if self._sim_results:
+                run = self._sim_results[0]
+                
+                def _set_stat_value(prop_name, value, scale=1.0, fmt="{:.2f}"):
+                    if prop_name in self.stats_fields:
+                        self.stats_fields[prop_name]["avg"].setText(fmt.format(value * scale))
+                        self.stats_fields[prop_name]["min"].setText(fmt.format(value * scale))
+                        self.stats_fields[prop_name]["max"].setText(fmt.format(value * scale))
+
+                try:
+                    ws_seq_avg = statistics.mean(run["ws_seq_counts"]) if run["ws_seq_counts"] else 0.0
+                    _set_stat_value(self.prop_rows[0], ws_seq_avg)
+                    
+                    ws_route_avg = statistics.mean(run["ws_route_counts"]) if run["ws_route_counts"] else 0.0
+                    _set_stat_value(self.prop_rows[1], ws_route_avg)
+                    
+                    tm_seq_avg = statistics.mean(run["tm_seq_counts"]) if run["tm_seq_counts"] else 0.0
+                    _set_stat_value(self.prop_rows[2], tm_seq_avg)
+                    
+                    tm_route_avg = statistics.mean(run["tm_route_counts"]) if run["tm_route_counts"] else 0.0
+                    _set_stat_value(self.prop_rows[3], tm_route_avg)
+                    
+                    _set_stat_value(self.prop_rows[4], run["steps"], fmt="{:.0f}")
+                    _set_stat_value(self.prop_rows[5], run["mean_lead_time"])
+                    _set_stat_value(self.prop_rows[6], run["mean_deadline_dev"])
+                    _set_stat_value(self.prop_rows[7], run["mean_ws_util"], fmt="{:.3f}")
+                    _set_stat_value(self.prop_rows[8], run["mean_worker_util"], fmt="{:.3f}")
+                    _set_stat_value(self.prop_rows[9], run["mean_buffer_var"], fmt="{:.3f}")
+                    _set_stat_value(self.prop_rows[10], run["sim_duration_s"], fmt="{:.1f}")
+                except Exception as e:
+                    print("Error updating stats fields:", e)
+
+                # Load and display results
+                out = run.get("output_paths", {})
+                if out.get("gantt"):
+                    self.plan_schedule_view.load(QUrl.fromLocalFile(os.path.abspath(out["gantt"])))
+                if out.get("utilization"):
+                    self.plan_utilization_view.load(QUrl.fromLocalFile(os.path.abspath(out["utilization"])))
+                if out.get("buffers"):
+                    self.plan_buffers_view.load(QUrl.fromLocalFile(os.path.abspath(out["buffers"])))
+                # show first tab (Schedule)
+                self.plan_figures_stack.setCurrentIndex(0)
+
+            # Terminate MuZero workers
+            muzero.terminate_workers()
+
+            QMessageBox.information(self, "RL Model Simulation", "Simulation with RL model completed successfully.")
+
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Error running RL model simulation: {str(e)}")
+            print(f"Error: {e}")
+            import traceback
+            traceback.print_exc()
+        
+
 
     # helper to display saved run HTMLs based on metric
     def _display_sim_trial_by_metric(self, metric_key, comparator):
