@@ -1126,7 +1126,7 @@ class ProductInstructionsTab(QWidget):
         self._stop_blink_nodes()
 
         if box.clickedButton() is stay_btn:
-            # event verbauchen -> Selektion bleibt unverändert (kein Blauwechsel)
+            # event verbrauchen -> Selektion bleibt unverändert
             return True
         return False
 
@@ -3750,6 +3750,24 @@ class ProductionResourcesTab(QWidget):
                 bs_table = self.ib_scroll_layout.itemAt(i).widget().layout().itemAt(3).widget()
                 bs_dict = {}
                 for row in range(bs_table.rowCount()):
+                    name_item = bs_table.item(row, 0)
+                    max_item = bs_table.item(row, 1)
+                    step_item = bs_table.item(row, 2)
+                    group_item = bs_table.item(row, 3)
+                    comp_name = (name_item.text() if name_item else f"row {row+1}")
+                    #check if inputs from the user are integer and bigger than zero
+                    try:
+                        max_q = int(max_item.text())
+                        step_q = int(step_item.text())
+                    except Exception:
+                        QMessageBox.warning(edit_dialog, "Invalid buffer size",
+                                            f"For buffer '{comp_name}' the 'Max. quantity' or 'Quantity step' is not a valid number. Please enter a positive integer.")
+                        return False
+                    if max_q <= 0 or step_q <= 0:
+                        QMessageBox.warning(edit_dialog, "Invalid buffer size",
+                                            f"For buffer '{comp_name}' the 'Max. quantity' or 'Quantity step' is not a valid number. Please enter a positive integer.")
+                        return False
+                for row in range(bs_table.rowCount()):
                     dict_item = {bs_table.item(row,0).text(): {'Max. quantity': int(bs_table.item(row,1).text()),
                                                                 'Quantity step': int(bs_table.item(row,2).text()),
                                                                 'Group': bs_table.item(row,3).text()}}
@@ -3777,6 +3795,24 @@ class ProductionResourcesTab(QWidget):
                 bs_table = self.ob_scroll_layout.itemAt(i).widget().layout().itemAt(4).widget()
                 bs_dict = {}
                 for row in range(bs_table.rowCount()):
+                    name_item = bs_table.item(row, 0)
+                    max_item = bs_table.item(row, 1)
+                    step_item = bs_table.item(row, 2)
+                    group_item = bs_table.item(row, 3)
+                    comp_name = (name_item.text() if name_item else f"row {row+1}")
+                    #check if inputs from the user are integer and bigger than zero (same check as above)
+                    try:
+                        max_q = int(max_item.text())
+                        step_q = int(step_item.text())
+                    except Exception:
+                        QMessageBox.warning(edit_dialog, "Invalid buffer size",
+                                            f"For component '{comp_name}' the 'Max. quantity' or 'Quantity step' is not a valid number. Please enter a positive integer.")
+                        return False
+                    if max_q <= 0 or step_q <= 0:
+                        QMessageBox.warning(edit_dialog, "Invalid buffer size",
+                                            f"For component '{comp_name}' the 'Max. quantity' or 'Quantity step' is not a valid number. Please enter a positive integer.")
+                        return False
+                for row in range(bs_table.rowCount()):
                     dict_item = {bs_table.item(row,0).text(): {'Max. quantity': int(bs_table.item(row,1).text()),
                                                                 'Quantity step': int(bs_table.item(row,2).text()),
                                                                 'Group': bs_table.item(row,3).text()}}
@@ -3789,6 +3825,8 @@ class ProductionResourcesTab(QWidget):
                                         allowed_worker_pools=allowed_wps, allowed_tool_pools=allowed_tps, physical_input_buffers=input_buffers, physical_output_buffers=output_buffers)
 
             self.production_system.workstations.update({item.text(): workstation})
+
+            return True            
 
             print("--> Saved workstation in working memory:")
             print("workstation_id:", self.production_system.workstations[item.text()].workstation_id)
@@ -3809,17 +3847,29 @@ class ProductionResourcesTab(QWidget):
                 print("diff_comp_comb:", v.diff_comp_comb)
                 print("comp_specific_sizes:", v.comp_specific_sizes)
                 
-
+        #was used before the check
         def accept():
             save_workstation()
+
+        # New accept handler: only close dialog when save_workstation returns True
+        #otherwise the window would be closed while while the message pops up because of parent 
+        def _on_save_button_clicked():
+            ok = save_workstation()
+            if ok:
+                edit_dialog.accept()
+            else:
+                # save failed, warning already shown in save_workstation -> keep dialog open
+                return
 
 
         # Dialog buttons
         save_cancel_lt = QVBoxLayout()
         QBtn = QDialogButtonBox.Save | QDialogButtonBox.Cancel
         buttonBox = QDialogButtonBox(QBtn)
-        buttonBox.accepted.connect(edit_dialog.accept)
-        buttonBox.accepted.connect(accept)
+        #buttonBox.accepted.connect(edit_dialog.accept)
+        #buttonBox.accepted.connect(accept)
+        # connect only our handler so dialog is accepted only on successful validation
+        buttonBox.accepted.connect(_on_save_button_clicked)
         buttonBox.rejected.connect(edit_dialog.reject)
         save_cancel_lt.addWidget(buttonBox)
         
@@ -3921,6 +3971,9 @@ class ProductionResourcesTab(QWidget):
         # Add a button to add rows to the table
         add_comp_buffer_btn = QPushButton("Add component buffer size")
         add_comp_buffer_btn.clicked.connect(lambda:self.add_cs_row(cs_table))
+        add_comp_buffer_btn.setToolTip("Add input buffers for each component and define its max. quantity and \n" 
+                                        "quantity step. Use '*' as a wildcard in the component name to match multiple \n"
+                                        "components (e.g. 'blank_*' covers 'blank_A', 'blank_B', ...).")
         section_layout.addWidget(add_comp_buffer_btn)
 
         # Wrap the section layout in a QWidget and add it to the scroll layout
@@ -4010,6 +4063,10 @@ class ProductionResourcesTab(QWidget):
         # Add a button to add rows to the table
         add_comp_buffer_btn = QPushButton("Add component buffer size")
         add_comp_buffer_btn.clicked.connect(lambda:self.add_cs_row(cs_table))
+        add_comp_buffer_btn.setToolTip("Add output buffers for each component and define its max. quantity and \n" 
+                                        "quantity step. Use '*' as a wildcard in the component name to match multiple \n" 
+                                        "components (e.g. 'blank_*' covers 'blank_A', 'blank_B', ...). Every output buffer \n" 
+                                        "can to be used a input buffer for another workstation.")
         section_layout.addWidget(add_comp_buffer_btn)
 
         # Wrap the section layout in a QWidget and add it to the scroll layout
@@ -5659,9 +5716,12 @@ class SimulationTab(QWidget):
                 'lr_init': float(ps.algorithm_parameters['lr_init'])
             }
 
+            # Replay buffer
+            replay_buffer_path = os.path.join(os.path.dirname(model_path), "replay_buffer.pkl")
+
             # Create MuZero instance and load model
             muzero = MuZero(game_name='PrOPPlan', production_system=ps, config=muzero_config)
-            muzero.load_model(checkpoint_path=model_path, replay_buffer_path=None)
+            muzero.load_model(checkpoint_path=model_path, replay_buffer_path=replay_buffer_path) # replay_buffer_path=None
 
             inference_model = mz_models.MuZeroNetwork(muzero.config)
             inference_model.set_weights(muzero.checkpoint["weights"])
